@@ -58,6 +58,11 @@
   font-size: 18px;
 }
 
+.lord-setup__choice-sub {
+  font-size: 18px;
+  color: var(--parchment-dim);
+}
+
 .lord-setup__done {
   font-size: 24px;
   color: var(--parchment);

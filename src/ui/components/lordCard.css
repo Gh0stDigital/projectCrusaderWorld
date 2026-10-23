@@ -53,6 +53,13 @@
   line-height: 1.15;
 }
 
+.lord-card__class {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
 .lord-card__captains {
   font-family: var(--font-body);
   font-size: 15px;

@@ -46,6 +46,13 @@
   color: var(--parchment-dim);
 }
 
+.lord-row__class {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--parchment-dim);
+}
+
 .lord-row__militia {
   margin: -4px 0 0;
   font-size: 16px;

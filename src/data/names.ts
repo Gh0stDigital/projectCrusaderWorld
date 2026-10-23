@@ -1,5 +1,6 @@
 // Display names. Placeholder wording until factions and the Muster screen exist.
 import type { LordClass, PlayerId, RegionIndex, Tactic } from '../engine/state';
+import type { ArtId } from './artCatalog';
 
 export const PLAYER_NAMES: Record<PlayerId, string> = {
   p1: 'Player 1',
@@ -11,6 +12,18 @@ export const LORD_NAMES: Record<LordClass, string> = {
   garrison: 'Garrison',
   raiders: 'Raiders',
 };
+
+/** Who leads each Lord class, and their card art. */
+export const LORD_PERSONAS: Record<LordClass, { name: string; art: ArtId }> = {
+  army: { name: 'Aubrey', art: 'aubrey' },
+  garrison: { name: 'Nevadius', art: 'nevadius' },
+  raiders: { name: 'Jermaine', art: 'jermaine' },
+};
+
+/** "Aubrey, Lord of the Army" */
+export function lordFullName(lord: LordClass): string {
+  return `${LORD_PERSONAS[lord].name}, ${LORD_TITLES[lord]}`;
+}
 
 export const LORD_TITLES: Record<LordClass, string> = {
   army: 'Lord of the Army',

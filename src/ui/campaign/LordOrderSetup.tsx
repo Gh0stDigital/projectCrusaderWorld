@@ -29,7 +29,7 @@ export function LordOrderSetup({ player, draft, onAdd, onConfirm, onReset }: Lor
         {remaining.map((lord) => (
           <button key={lord} className="lord-setup__choice" onClick={() => onAdd(lord)}>
             <LordCard lord={lord} owner={player} />
-            <span className="lord-setup__choice-title">{LORD_TITLES[lord]}</span>
+            <span className="lord-setup__choice-sub">{LORD_TITLES[lord]}</span>
           </button>
         ))}
         {complete && <p className="lord-setup__done">All three Lords are in position.</p>}
