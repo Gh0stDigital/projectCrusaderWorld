@@ -44,8 +44,17 @@ export function PhaseWindow({
     <footer className="phase-window">
       <ol className="phase-list">
         {PHASES.map((phase) => (
-          <li key={phase.id} className={`phase-list__item${current === phase.id ? ' phase-list__item--current' : ''}`}>
-            {phase.label}
+          <li
+            key={phase.id}
+            className={`phase-list__item phase-list__item--${phase.id}${current === phase.id ? ' phase-list__item--current' : ''}`}
+          >
+            {phase.id === 'end' && turn && !busy && !battleOpen ? (
+              <button className="phase-list__end" onClick={onEndTurn} title="End turn">
+                {phase.label}
+              </button>
+            ) : (
+              phase.label
+            )}
           </li>
         ))}
       </ol>

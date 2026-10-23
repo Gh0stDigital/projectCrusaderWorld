@@ -479,7 +479,7 @@
   grid-column: 3;
   justify-self: end;
 }
-.phase-window__orders { top: 70px; }
+.phase-window__orders { top: 74px; }
 
 /* Captain block: card in the portrait frame, name and Lord on the two plaques. */
 .player-panel--company .company__captain {
@@ -502,4 +502,74 @@
 /* Token text centered on the art's two token bars. */
 .player-panel--company .knight-token {
   padding-top: 14px;
+}
+
+/* ================= Bottom bar fitted to the art's plaques =================
+ * Positions are measured from the art (phase window starts at y 920).
+ */
+.phase-list {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.phase-list__item {
+  position: absolute;
+  top: 58px;
+  height: 47px !important;
+}
+
+.phase-list__item--command { left: 49px; width: 143px !important; }
+.phase-list__item--placement { left: 206px; width: 150px !important; }
+.phase-list__item--attack { left: 369px; width: 110px !important; }
+.phase-list__item--battle { left: 491px; width: 105px !important; }
+.phase-list__item--end { left: 607px; width: 79px !important; }
+
+/* The End tab also ends the turn. */
+.phase-list__end {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.phase-list__item--end:has(.phase-list__end):hover {
+  border-color: var(--gold) !important;
+  color: var(--parchment);
+}
+
+/* End turn: centered on its plaque, no frame of its own unless pressed. */
+.phase-window__end-turn {
+  position: absolute;
+  left: 1645px;
+  top: 50px;
+  width: 224px;
+  height: 64px;
+  padding: 0 !important;
+  display: grid;
+  place-items: center;
+  border: 2px solid transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-align: center;
+}
+
+.phase-window__end-turn.btn--primary {
+  color: var(--gold);
+  text-shadow: 0 0 8px rgba(217, 169, 58, 0.6), 0 2px 0 #000;
+}
+
+.phase-window__end-turn:active,
+.phase-window__end-turn:focus-visible {
+  border-color: var(--gold) !important;
+  background: rgba(217, 169, 58, 0.15) !important;
+}
+
+/* Other buttons (Enter / Return) sit left of the End turn plaque. */
+.phase-window__buttons {
+  margin-right: 250px;
 }
