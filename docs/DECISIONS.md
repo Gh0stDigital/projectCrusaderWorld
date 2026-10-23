@@ -48,7 +48,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 ## Region board skin — Settled
 
 - The match screen uses the owner's 16:9 artwork `src/assets/ui/region-board-skin.webp` (built over the layout wireframe in `design/templates`). Each area (top bar, side panels, Region board, phase window) shows its own slice of it, so the game's boxes sit on the art's frames; the Region board slice zooms with the camera.
-- When zoomed into a Region, the frame, side panels and board switch to the Region view artwork `src/assets/ui/region-view-skin.webp`; its board slice zooms in from the tile. Its board squares are 172×222, so Knight cards there are 148×222. The Captain panel's Region name line is dropped (the name is shown above the board), and its stats show militia and reserve.
+- When zoomed into a Region, the frame, side panels and board switch to the Region view artwork `src/assets/ui/region-view-skin.webp`; its board slice zooms in from the tile. Its board squares are 175×250. The Captain panel shows "In <Region>" on the third header bar, the Captain's name and Lord on the plaques beside the portrait, and militia and reserve on the stats plaque.
 - Battles take place on the field artwork `src/assets/ui/battle-field.webp` (sky, mountains and grass), scaled to cover the battle area.
 - Styles live in `src/ui/screens/skin.css`. Any new skin must keep the wireframe's zone positions and sizes.
 

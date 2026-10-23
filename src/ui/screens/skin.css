@@ -339,9 +339,13 @@
   line-height: 22px;
 }
 
-/* The Region's name is shown above the board, so the panel skips it. */
+/* "In <Region>" sits on the third header bar of the art. */
 .player-panel--company .company__where {
-  display: none;
+  display: block;
+  margin: -4px 0 0;
+  font-size: 9px;
+  line-height: 16px;
+  text-shadow: 0 1px 0 #000;
 }
 
 .player-panel--company .company {
@@ -486,4 +490,27 @@
   grid-area: auto;
   grid-column: 1 / -1;
   grid-row: 2;
+}
+
+/* Captain block: card in the portrait frame, name and Lord on the two plaques. */
+.player-panel--company .company__captain {
+  margin-top: 14px;
+  height: 312px;
+}
+
+.player-panel--company .company__captain-info {
+  padding-top: 18px;
+}
+
+.player-panel--company .company__captain-lord {
+  margin-top: 22px;
+}
+
+.player-panel--company .company__knights {
+  margin-top: 16px;
+}
+
+/* Token text centered on the art's two token bars. */
+.player-panel--company .knight-token {
+  padding-top: 14px;
 }
