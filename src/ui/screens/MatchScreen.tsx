@@ -15,6 +15,7 @@ import { OrdersNotice } from '../overlays/OrdersNotice';
 import { AttackPreview } from '../battle/AttackPreview';
 import { BattleView } from '../battle/BattleView';
 import regionBoardSkin from '../../assets/ui/region-board-skin.webp';
+import regionViewSkin from '../../assets/ui/region-view-skin.webp';
 import './match.css';
 import './skin.css';
 
@@ -107,7 +108,10 @@ export function MatchScreen() {
     previewTarget && previewAttacker ? { attacker: previewAttacker, defender: previewTarget } : null;
 
   return (
-    <div className="match" style={{ '--skin': `url(${regionBoardSkin})` } as CSSProperties}>
+    <div
+      className={`match${focusedRegion !== null ? ' match--zoomed' : ''}`}
+      style={{ '--skin': `url(${regionBoardSkin})`, '--skin-zoomed': `url(${regionViewSkin})` } as CSSProperties}
+    >
       <header className="match__top-bar">
         <button className="top-bar__button" onClick={leave}>
           Menu

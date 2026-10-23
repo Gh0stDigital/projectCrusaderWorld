@@ -1,40 +1,48 @@
-/* The Region's own board fills the board stage while zoomed in. */
+/*
+ * The Region's own board while zoomed in. Squares are placed to sit in the
+ * frames of the Region view artwork (positions relative to the board stage).
+ */
 .region-view {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  position: relative;
+  width: 1120px;
+  height: 856px;
 }
 
 .region-view__title {
-  margin: 0 0 4px;
-  line-height: 1.2;
+  position: absolute;
+  left: 459px;
+  top: 12px;
+  width: 198px;
+  margin: 0;
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 20px;
+  line-height: 26px;
   color: var(--gold);
   letter-spacing: 0.06em;
+  text-align: center;
   white-space: nowrap;
+  text-shadow: 0 2px 0 #000, 0 0 6px #000;
 }
 
 .inner-board {
+  position: absolute;
+  left: 275px;
+  top: 65px;
   display: grid;
-  grid-template-columns: repeat(3, 168px);
-  grid-template-rows: repeat(3, 252px);
-  gap: 12px 28px;
-  padding: 12px 24px;
-  background:
-    radial-gradient(ellipse at center, rgba(120, 140, 70, 0.25) 0%, transparent 80%),
-    #2b2a1d;
-  border: 2px solid #4b4630;
-  border-radius: 10px;
+  grid-template-columns: repeat(3, 172px);
+  grid-template-rows: repeat(3, 222px);
+  gap: 28px;
 }
 
 .inner-board__square {
-  width: 168px;
-  height: 252px;
+  width: 172px;
+  height: 222px;
+  display: grid;
+  place-items: center;
   padding: 0;
-  border: 2px dashed rgba(233, 220, 192, 0.18);
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.12);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: transparent;
   cursor: default;
 }
 
@@ -48,7 +56,8 @@
 
 .inner-board__square--legal {
   cursor: pointer;
-  border-color: var(--gold-dim);
+  border: 2px dashed var(--gold-dim);
+  background: rgba(217, 169, 58, 0.06);
 }
 
 .inner-board__square--legal:hover,

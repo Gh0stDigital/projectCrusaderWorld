@@ -11,6 +11,7 @@ export const CARD_SIZES = {
   panel: { width: 80, height: 120 },
   company: { width: 96, height: 144 },
   roster: { width: 144, height: 216 },
+  slot: { width: 148, height: 222 },
   board: { width: 160, height: 240 },
   field: { width: 168, height: 252 },
   detail: { width: 200, height: 300 },

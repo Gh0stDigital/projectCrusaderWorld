@@ -1,4 +1,4 @@
-import { captainInRegion, captainMilitia, knightsOf, reserveKnights } from '../../engine/queries';
+import { captainInRegion, captainMilitia, knightsOf } from '../../engine/queries';
 import type { Knight, MatchState, PlayerId, RegionIndex } from '../../engine/state';
 import {
   REGION_NAMES,
@@ -47,7 +47,6 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
 
   const acting = turn?.captainId === captain.id;
   const picking = acting && turn?.step === 'placement';
-  const waiting = reserveKnights(match, captain.id).length;
 
   return (
     <div className="company">
@@ -64,8 +63,6 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
             <dd>{formatMilitia(captainMilitia(match, captain.id))}</dd>
             <dt>Reserve</dt>
             <dd>{formatMilitia(captain.reserve)}</dd>
-            <dt>Knights waiting</dt>
-            <dd>{waiting}</dd>
           </dl>
         </div>
       </div>

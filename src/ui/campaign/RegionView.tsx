@@ -55,7 +55,7 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
               aria-label={label}
             >
               {knight && (
-                <Card art={knightArt(knight.owner)} size="field" owner={knight.owner}>
+                <Card art={knightArt(knight.owner)} size="slot" owner={knight.owner}>
                   <span className="hp-badge">{knight.hp}</span>
                   <span className="knight-plate">{knightPersonalName(knight)}</span>
                   {isTarget && <span className="attack-marker">Attack</span>}
