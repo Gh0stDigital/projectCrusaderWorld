@@ -44,26 +44,14 @@
   letter-spacing: 0.06em;
 }
 
-.top-bar__turn {
+.top-bar__right {
   justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.top-bar__turn {
   color: var(--parchment-dim);
 }
 
-/* Board stage: Lord columns flank the Region board. */
-.match__board-stage {
-  grid-area: board;
-  position: relative;
-  overflow: clip;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: radial-gradient(ellipse at center, #3a2e22 0%, var(--wood-dark) 75%);
-}
-
-.match__board-center {
-  width: 808px;
-  height: 808px;
-  display: grid;
-  place-items: center;
-}

@@ -1,4 +1,4 @@
-import { captainsOf, deployableCaptains } from '../../engine/queries';
+import { actionableCaptains, captainsOf, reserveKnights } from '../../engine/queries';
 import type { LordClass, MatchState, PlayerId } from '../../engine/state';
 import { LORD_TITLES, PLAYER_NAMES, REGION_NAMES } from '../../data/names';
 import { LordCard } from '../components/LordCard';
@@ -21,7 +21,7 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
   const order = draft ? draft.order : (match.players[player].lordOrder ?? []);
   const turn = match.turn;
   const isTheirTurn = turn?.player === player;
-  const selectable = new Set(isTheirTurn ? deployableCaptains(match).map((c) => c.id) : []);
+  const selectable = new Set(isTheirTurn ? actionableCaptains(match).map((c) => c.id) : []);
 
   return (
     <aside className={`player-panel player-panel--${player}${isTheirTurn ? ' player-panel--active' : ''}`}>
@@ -64,7 +64,11 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
                   <ul className="lord-row__captains">
                     {captainsOf(match, player, lord).map((captain) => {
                       const label = `Captain ${captain.rank === 1 ? 'I' : 'II'}`;
-                      const where = captain.region === null ? 'Ready' : REGION_NAMES[captain.region];
+                      const waiting = reserveKnights(match, captain.id).length;
+                      const where =
+                        captain.region === null
+                          ? 'Ready'
+                          : `${REGION_NAMES[captain.region]} · ${waiting} Knight${waiting === 1 ? '' : 's'} waiting`;
                       const content = (
                         <>
                           <span>{label}</span>

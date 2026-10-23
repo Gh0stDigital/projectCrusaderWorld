@@ -6,6 +6,7 @@
 }
 
 .region {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -17,14 +18,14 @@
   border-radius: 8px;
   color: var(--parchment);
   cursor: default;
-  transition: border-color 120ms, box-shadow 120ms;
+  transition: border-color 120ms, box-shadow 120ms, filter 120ms;
 }
 
 .region:disabled {
   opacity: 1;
 }
 
-/* While choosing where to deploy, Regions you can't pick step back. */
+/* While choosing a Region, the ones you can't pick step back. */
 .region-board--choosing .region:not(.region--open) {
   filter: brightness(0.6) saturate(0.6);
 }
@@ -32,6 +33,11 @@
 .region--open {
   cursor: pointer;
   border-color: var(--gold-dim);
+}
+
+.region--active {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold), 0 0 24px rgba(217, 169, 58, 0.4);
 }
 
 .region--open:hover,
@@ -43,16 +49,16 @@
 
 .region__name {
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: 20px;
   letter-spacing: 0.04em;
   margin-bottom: 6px;
 }
 
-.region__captains {
+.region__body {
   flex: 1;
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr auto 1fr;
   gap: 6px;
 }
 
@@ -65,11 +71,55 @@
   border-radius: 6px;
 }
 
-.region__slot--p1 { background: color-mix(in srgb, var(--p1) 10%, transparent); }
-.region__slot--p2 { background: color-mix(in srgb, var(--p2) 10%, transparent); }
+.region__slot--p1 { order: 0; background: color-mix(in srgb, var(--p1) 10%, transparent); }
+.region__mini { order: 1; }
+.region__slot--p2 { order: 2; background: color-mix(in srgb, var(--p2) 10%, transparent); }
 
 .region__captain-name {
   font-size: 15px;
   line-height: 1.1;
   text-align: center;
+}
+
+/* Small 3×3 map of the Region's own board. */
+.region__mini {
+  align-self: center;
+  display: grid;
+  grid-template-columns: repeat(3, 16px);
+  gap: 3px;
+}
+
+.region__mini-square {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  background: rgba(233, 220, 192, 0.12);
+}
+
+.region__mini-square--p1 { background: var(--p1); }
+.region__mini-square--p2 { background: var(--p2); }
+
+.region__action {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  padding: 3px 12px;
+  border-radius: 4px;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+/* With many Regions to choose from, show the label only on the one being pointed at. */
+.region-board--choosing .region__action {
+  opacity: 0;
+  transition: opacity 120ms;
+}
+
+.region-board--choosing .region--open:hover .region__action,
+.region-board--choosing .region--open:focus-visible .region__action {
+  opacity: 1;
 }

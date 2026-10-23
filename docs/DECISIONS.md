@@ -24,11 +24,20 @@ Lord classes: Army, Garrison, Raiders. Each player has one Lord of each.
 - At the start, each player places their three Lords beside the Region board in the order their turns will go. This replaces the fixed Army → Garrison → Raiders rotation. Player 1 orders first, then Player 2.
 - Player 1 takes the first turn. Players then alternate.
 - Each player's next Lord comes from their own chosen order, and only advances when that player's turn comes back.
-- Each Lord has 2 Captains. On a turn, the current Lord deploys one of their Captains to a Region. A player may have only one Captain per Region; the opponent may share it.
-- One Captain deployment per turn. End Turn is manual and is refused while a Captain could still be deployed.
-- If the current Lord has no Captains left to deploy, the turn can be ended right away (temporary until Knights exist).
-- Until routing exists, a Captain may deploy to any Region open to that player.
+- Each Lord has 2 Captains; each Captain has 6 Knights.
+- A turn: the current Lord chooses one of their Captains. A Ready Captain deploys to a Region; a Captain already stationed is given new orders (resumed). Then that Captain places one of their Knights on an empty square of their Region's 3×3 board. Then the player presses End Turn.
+- A player may have only one Captain per Region; the opponent may share it. A Region whose board is full takes no new Captains.
+- One Captain choice and one Knight placement per turn. Knights never move once placed.
+- End Turn is manual and is refused until a Knight is placed, unless the current Lord has no Captain who can act (then it can be ended right away).
+- Until routing exists, a Ready Captain may deploy to any Region open to that player, and a Lord may resume any of their stationed Captains. **Provisional**: routing will restrict this.
 - For now both sides are controlled by the person at the computer (pass-and-play). The computer opponent comes later.
+
+## Region view and turn flow on screen — Settled
+
+- After choosing a Captain, the player is prompted to enter that Captain's Region (button and tile). Entering zooms smoothly from the Region's tile into its 3×3 board.
+- In the Region view, Player 1's Captain stands on the left and Player 2's on the right (sides never swap), each with their 6 Knights below in two columns of three. Knights already on the field are greyed.
+- The player can zoom out to view the Region board at any time without changing orders, and return to their Region.
+- After End Turn: about 1 second of "orders complete" confirmation, zoom out to the Region board, about 1 second pause, then the next turn's announcement.
 
 ## Project and platform — Settled
 

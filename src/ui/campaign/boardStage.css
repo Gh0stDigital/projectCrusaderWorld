@@ -1,0 +1,41 @@
+.board-stage {
+  grid-area: board;
+  position: relative;
+  overflow: clip;
+  background: radial-gradient(ellipse at center, #3a2e22 0%, var(--wood-dark) 75%);
+}
+
+/* Duration matches ZOOM_MS in the match store. */
+.board-stage__layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transform-origin: var(--zoom-origin);
+  transition:
+    transform 600ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 600ms ease;
+}
+
+.board-stage__regions {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.board-stage__region {
+  transform: scale(0.3);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.board-stage--zoomed .board-stage__regions {
+  transform: scale(3.2);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.board-stage--zoomed .board-stage__region {
+  transform: scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}

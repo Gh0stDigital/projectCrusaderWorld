@@ -1,0 +1,39 @@
+.orders-notice {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.orders-notice__banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 22px 56px;
+  background: rgba(20, 15, 11, 0.95);
+  border: 2px solid var(--gold);
+  border-radius: 10px;
+  animation: orders-notice-in 220ms ease-out both;
+}
+
+.orders-notice__banner--p1 { border-top: 6px solid var(--p1); }
+.orders-notice__banner--p2 { border-top: 6px solid var(--p2); }
+
+.orders-notice__title {
+  font-family: var(--font-display);
+  font-size: 34px;
+  color: var(--gold);
+}
+
+.orders-notice__detail {
+  font-size: 22px;
+  color: var(--parchment-dim);
+}
+
+@keyframes orders-notice-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}

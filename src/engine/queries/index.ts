@@ -2,11 +2,14 @@
 // to know what is legal; the rules use them to validate actions.
 import {
   REGIONS,
+  SQUARES,
   type Captain,
+  type Knight,
   type LordClass,
   type MatchState,
   type PlayerId,
   type RegionIndex,
+  type SquareIndex,
 } from '../state';
 
 /** The Lord a player will use on their next turn. Only advances when that player finishes a turn. */
@@ -27,23 +30,77 @@ export function captainsInRegion(state: MatchState, region: RegionIndex): Captai
   return Object.values(state.captains).filter((c) => c.region === region);
 }
 
-/** A player may have only one Captain in a Region. The opponent may share it. */
-export function regionsOpenTo(state: MatchState, player: PlayerId): RegionIndex[] {
-  return REGIONS.filter(
-    (region) => !captainsInRegion(state, region).some((c) => c.owner === player),
+export function captainInRegion(state: MatchState, region: RegionIndex, player: PlayerId): Captain | null {
+  return captainsInRegion(state, region).find((c) => c.owner === player) ?? null;
+}
+
+export function knightsOf(state: MatchState, captainId: string): Knight[] {
+  return Object.values(state.knights)
+    .filter((k) => k.captainId === captainId)
+    .sort((a, b) => a.number - b.number);
+}
+
+/** Knights still waiting with their Captain. */
+export function reserveKnights(state: MatchState, captainId: string): Knight[] {
+  return knightsOf(state, captainId).filter((k) => k.position === null);
+}
+
+export function knightAt(state: MatchState, region: RegionIndex, square: SquareIndex): Knight | null {
+  return (
+    Object.values(state.knights).find(
+      (k) => k.position?.region === region && k.position.square === square,
+    ) ?? null
   );
 }
 
-/** Captains the current Lord can still deploy this turn. Empty when nothing can be deployed. */
-export function deployableCaptains(state: MatchState): Captain[] {
+export function emptySquares(state: MatchState, region: RegionIndex): SquareIndex[] {
+  return SQUARES.filter((square) => knightAt(state, region, square) === null);
+}
+
+/**
+ * Regions a player can send a new Captain to: none of their own Captains
+ * there yet (the opponent may share it) and room left on its board.
+ */
+export function regionsOpenTo(state: MatchState, player: PlayerId): RegionIndex[] {
+  return REGIONS.filter(
+    (region) => captainInRegion(state, region, player) === null && emptySquares(state, region).length > 0,
+  );
+}
+
+/**
+ * Whether a Captain could act this turn: deploy (if Ready) or resume (if stationed),
+ * and then actually place a Knight.
+ */
+export function captainCanAct(state: MatchState, captain: Captain): boolean {
+  if (reserveKnights(state, captain.id).length === 0) return false;
+  if (captain.region === null) return regionsOpenTo(state, captain.owner).length > 0;
+  return emptySquares(state, captain.region).length > 0;
+}
+
+/** Captains of the current Lord that can be chosen this turn. Empty when nothing can be done. */
+export function actionableCaptains(state: MatchState): Captain[] {
   const turn = state.turn;
   if (!turn || turn.step !== 'command') return [];
-  if (regionsOpenTo(state, turn.player).length === 0) return [];
-  return captainsOf(state, turn.player, turn.lord).filter((c) => c.region === null);
+  return captainsOf(state, turn.player, turn.lord).filter((c) => captainCanAct(state, c));
+}
+
+/** The Captain acting this turn, once chosen. */
+export function actingCaptain(state: MatchState): Captain | null {
+  const id = state.turn?.captainId;
+  return id ? (state.captains[id] ?? null) : null;
+}
+
+/** Squares the acting Captain may place a Knight on right now. */
+export function legalSquares(state: MatchState): SquareIndex[] {
+  const turn = state.turn;
+  const captain = actingCaptain(state);
+  if (!turn || turn.step !== 'placement' || !captain || captain.region === null) return [];
+  return emptySquares(state, captain.region);
 }
 
 export function canEndTurn(state: MatchState): boolean {
   const turn = state.turn;
   if (!turn) return false;
-  return turn.step === 'end' || deployableCaptains(state).length === 0;
+  if (turn.step === 'end') return true;
+  return turn.step === 'command' && actionableCaptains(state).length === 0;
 }
