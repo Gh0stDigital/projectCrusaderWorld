@@ -1,0 +1,164 @@
+/* Zones from docs/DECISIONS.md: top bar 64, panels 400, board stage 1120x856, phase window 160. */
+.match {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 400px 1120px 400px;
+  grid-template-rows: 64px 856px 160px;
+  grid-template-areas:
+    'top   top   top'
+    'p1    board p2'
+    'phase phase phase';
+}
+
+.match__top-bar {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: var(--ink);
+  border-bottom: 2px solid var(--gold-dim);
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.top-bar__button {
+  background: none;
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius);
+  padding: 6px 18px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 18px;
+}
+
+.top-bar__button:hover {
+  border-color: var(--gold);
+}
+
+.top-bar__title {
+  color: var(--gold);
+  letter-spacing: 0.08em;
+}
+
+.top-bar__turn {
+  color: var(--parchment-dim);
+}
+
+/* Player panels */
+.player-panel {
+  padding: 28px 24px;
+  background: var(--wood);
+  border-top: 6px solid;
+}
+
+.player-panel--p1 {
+  grid-area: p1;
+  border-color: var(--p1);
+  border-right: 2px solid var(--ink);
+}
+
+.player-panel--p2 {
+  grid-area: p2;
+  border-color: var(--p2);
+  border-left: 2px solid var(--ink);
+}
+
+.player-panel__name {
+  font-family: var(--font-display);
+  font-size: 32px;
+  margin: 0;
+}
+
+.player-panel__king {
+  font-size: 20px;
+  color: var(--parchment-dim);
+  margin: 4px 0 28px;
+}
+
+.player-panel__generals {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.general-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 14px 16px;
+  background: var(--wood-dark);
+  border: 1px solid var(--wood-light);
+  border-radius: var(--radius);
+  font-size: 22px;
+}
+
+.general-row__name {
+  font-family: var(--font-display);
+}
+
+.general-row__militia {
+  color: var(--parchment-dim);
+}
+
+/* Board stage */
+.match__board-stage {
+  grid-area: board;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at center, #3a2e22 0%, var(--wood-dark) 75%);
+  position: relative;
+}
+
+.territory-board {
+  display: grid;
+  grid-template-columns: repeat(3, 160px);
+  grid-template-rows: repeat(3, 240px);
+  gap: 15px;
+}
+
+.territory-board__cell {
+  width: 160px;
+  height: 240px;
+  border: 2px dashed rgba(233, 220, 192, 0.18);
+  border-radius: 8px;
+}
+
+/* Phase window */
+.match__phase-window {
+  grid-area: phase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  background: var(--ink);
+  border-top: 2px solid var(--gold-dim);
+}
+
+.phase-list {
+  display: flex;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.phase-list__item {
+  font-family: var(--font-display);
+  font-size: 22px;
+  padding: 10px 22px;
+  border: 1px solid var(--wood-light);
+  border-radius: var(--radius);
+  color: var(--parchment-dim);
+}
+
+.phase-window__end-turn {
+  font-size: 28px;
+  padding: 18px 48px;
+}

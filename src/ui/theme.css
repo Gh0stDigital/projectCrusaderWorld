@@ -1,0 +1,80 @@
+/* Shared look for the whole game. All sizes are in 1920x1080 canvas pixels. */
+:root {
+  --ink: #1a1410;
+  --wood-dark: #1f1813;
+  --wood: #2e241c;
+  --wood-light: #4a3a2c;
+  --parchment: #e9dcc0;
+  --parchment-dim: #bfae8c;
+  --gold: #d9a93a;
+  --gold-dim: #8f6d24;
+
+  --p1: #3f7fd1; /* Player 1, always on the left */
+  --p2: #c4473a; /* Player 2, always on the right */
+
+  --font-display: 'Cinzel', Georgia, serif;
+  --font-body: 'Crimson Text', Georgia, serif;
+
+  --text-min: 18px;
+  --radius: 6px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: #0d0a08;
+  color: var(--parchment);
+  font-family: var(--font-body);
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.btn {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 0.06em;
+  color: var(--parchment);
+  background: var(--wood);
+  border: 2px solid var(--gold-dim);
+  border-radius: var(--radius);
+  padding: 14px 40px;
+  cursor: pointer;
+  transition: border-color 120ms, background 120ms;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  border-color: var(--gold);
+  background: var(--wood-light);
+  outline: none;
+}
+
+.btn--primary {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
