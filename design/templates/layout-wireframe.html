@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  /* Blank layout wireframe of Crusader World at its exact 1920x1080 dimensions. */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #15110d; }
+  .screen { position: relative; width: 1920px; height: 1080px; display: none; }
+  body[data-view="board"] #board, body[data-view="region"] #region { display: block; }
+
+  .z { position: absolute; }
+  .zone { background: #241d16; border: 2px solid #3a3026; }
+  .bar { background: #1c1712; border: 2px solid #3a3026; }
+  .slot { background: #2e261d; border: 2px solid #4a3d2f; border-radius: 8px; }
+  .card { background: #3a3026; border: 2px solid #5a4a38; border-radius: 8px; }
+  .line { background: #3a3026; border-radius: 4px; }
+  .tile { background: #26261a; border: 2px solid #46412c; border-radius: 8px; }
+  .sq { background: #33331f; border-radius: 4px; }
+  .face { background: #3a3026; border: 2px solid #5a4a38; border-radius: 4px; }
+  .pill { background: #2a231b; border: 2px solid #4a3d2f; border-radius: 6px; }
+  .btn { background: #2e261d; border: 2px solid #6b5636; border-radius: 6px; }
+  .p1 { border-top: 6px solid #2f4a6e; }
+  .p2 { border-top: 6px solid #6e2f2a; }
+</style>
+</head>
+<body data-view="board">
+
+<!-- ============ Region board (main view) ============ -->
+<div class="screen" id="board"></div>
+
+<!-- ============ Zoomed-in Region view ============ -->
+<div class="screen" id="region"></div>
+
+<script>
+  const add = (parent, cls, x, y, w, h) => {
+    const el = document.createElement('div');
+    el.className = 'z ' + cls;
+    Object.assign(el.style, { left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px' });
+    parent.appendChild(el);
+    return el;
+  };
+
+  // Shared frame: top bar, two side panels, center stage, phase window.
+  function frame(root) {
+    add(root, 'bar', 0, 0, 1920, 64);
+    add(root, 'btn', 24, 12, 90, 40);          // menu button
+    add(root, 'line', 760, 22, 400, 20);       // title
+    add(root, 'line', 1800, 22, 96, 20);       // turn counter
+    add(root, 'zone p1', 0, 64, 400, 856);
+    add(root, 'zone p2', 1520, 64, 400, 856);
+    add(root, 'zone', 400, 64, 1120, 856);     // center board stage
+    add(root, 'bar', 0, 920, 1920, 160);       // phase window
+    const pillWidths = [146, 154, 112, 106, 80];
+    let x = 48;
+    for (const w of pillWidths) { add(root, 'pill', x, 977, w, 48); x += w + 10; }
+    add(root, 'line', 730, 990, 520, 22);      // instructions
+    add(root, 'btn', 1643, 968, 228, 66);      // End turn
+  }
+
+  // Panel header: player name and militia total.
+  function panelHeader(root, left) {
+    add(root, 'line', left + 18, 92, 150, 28);
+    add(root, 'line', left + 18, 128, 110, 16);
+    add(root, 'line', left + 260, 100, 120, 16);
+  }
+
+  // ---------- Region board ----------
+  const board = document.getElementById('board');
+  frame(board);
+  for (const left of [0, 1520]) {
+    panelHeader(board, left);
+    // Three Lord rows: card on the left, info on the right.
+    for (let i = 0; i < 3; i++) {
+      const top = 162 + i * 253;
+      add(board, 'slot', left + 18, top, 362, 236);
+      add(board, 'card', left + 28, top + 10, 144, 216);
+      add(board, 'line', left + 186, top + 16, 120, 20);
+      add(board, 'line', left + 186, top + 42, 160, 14);
+      add(board, 'line', left + 186, top + 64, 175, 14);
+      add(board, 'pill', left + 186, top + 92, 182, 50);
+      add(board, 'pill', left + 186, top + 150, 182, 50);
+    }
+  }
+  // 3x3 Region board: 260px tiles, 14px gaps, centered in the stage.
+  const bx = 400 + (1120 - 808) / 2, by = 64 + (856 - 808) / 2;
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      const tx = bx + c * 274, ty = by + r * 274;
+      add(board, 'tile', tx, ty, 260, 260);
+      add(board, 'face', tx + 12, ty + 12, 38, 38);          // Player 1 Captain
+      add(board, 'face', tx + 210, ty + 12, 38, 38);         // Player 2 Captain
+      add(board, 'line', tx + 80, ty + 22, 100, 18);         // Region name
+      // Mini 3x3 map of the Region's own board.
+      const mx = tx + (260 - 174) / 2, my = ty + 62;
+      add(board, 'zone', mx, my, 174, 174).style.borderRadius = '6px';
+      for (let i = 0; i < 9; i++) add(board, 'sq', mx + 6 + (i % 3) * 56, my + 6 + Math.floor(i / 3) * 56, 50, 50);
+    }
+  }
+
+  // ---------- Zoomed-in Region view ----------
+  const region = document.getElementById('region');
+  frame(region);
+  for (const left of [0, 1520]) {
+    panelHeader(region, left);
+    add(region, 'line', left + 18, 166, 150, 18);           // "In <Region>"
+    // Captain: card with info beside it.
+    add(region, 'slot', left + 18, 200, 362, 238);
+    add(region, 'card', left + 28, 210, 144, 216);
+    add(region, 'line', left + 186, 218, 150, 22);
+    add(region, 'line', left + 186, 270, 120, 14);
+    add(region, 'line', left + 186, 360, 110, 16);
+    add(region, 'line', left + 186, 386, 120, 14);
+    add(region, 'line', left + 186, 410, 130, 14);
+    // Six Knights: two columns of three.
+    for (let i = 0; i < 6; i++) {
+      const col = Math.floor(i / 3), row = i % 3;
+      add(region, 'card', left + 82 + col * 136, 450 + row * 156, 96, 144);
+    }
+  }
+  // Inner 3x3 board: card-shaped squares (168x252), centered in the stage.
+  add(region, 'line', 880, 76, 160, 26);                     // Region name
+  const ix = 400 + (1120 - 612) / 2, iy = 108;
+  add(region, 'tile', ix, iy, 612, 808);
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      add(region, 'slot', ix + 26 + c * 196, iy + 14 + r * 264, 168, 252).style.borderStyle = 'dashed';
+    }
+  }
+</script>
+</body>
+</html>
