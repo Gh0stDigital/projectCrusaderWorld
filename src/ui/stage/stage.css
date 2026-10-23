@@ -2,7 +2,7 @@
 .stage-frame {
   position: fixed;
   inset: 0;
-  overflow: hidden;
+  overflow: clip;
   background:
     radial-gradient(ellipse at center, #1a1410 0%, #0a0806 70%),
     repeating-linear-gradient(45deg, #0e0b09 0 6px, #110d0a 6px 12px);
@@ -13,7 +13,7 @@
   left: 50%;
   top: 50%;
   transform-origin: center center;
-  overflow: hidden;
+  overflow: clip;
   background: var(--wood-dark);
   box-shadow: 0 0 0 2px #000, 0 0 60px rgba(0, 0, 0, 0.8);
 }

@@ -1,71 +1,99 @@
+import { useState } from 'react';
 import { useAppStore } from '../../store/appStore';
-import { Card, type CardOwner } from '../components/Card';
+import { useMatchStore } from '../../store/matchStore';
+import { deployableCaptains } from '../../engine/queries';
+import type { LordClass, RegionIndex } from '../../engine/state';
+import { LORD_NAMES, PLAYER_NAMES } from '../../data/names';
+import { PlayerPanel } from '../campaign/PlayerPanel';
+import { LordColumn } from '../campaign/LordColumn';
+import { RegionBoard } from '../campaign/RegionBoard';
+import { LordOrderSetup } from '../campaign/LordOrderSetup';
+import { PhaseWindow } from '../campaign/PhaseWindow';
+import { TurnAnnouncement } from '../overlays/TurnAnnouncement';
 import './match.css';
 
-const GENERALS = ['Army', 'Garrison', 'Raiders'] as const;
-const PHASES = ['Command', 'Placement', 'Attack', 'Battle', 'End'] as const;
-
-/** Sample squares to check card sizing on the board. Not real game state. */
-const SAMPLE_BOARD: (CardOwner | null)[] = ['p1', null, 'p2', null, 'p1', null, 'p2', null, null];
-
 /**
- * Layout preview of the match screen: the zones are final, the contents are
- * placeholders until the rules engine exists.
+ * Pass-and-play for now: you control both players. The computer opponent
+ * comes in a later step.
  */
 export function MatchScreen() {
   const goTo = useAppStore((s) => s.goTo);
+  const { match, selectedCaptainId, error, announcement, dispatch, selectCaptain, dismissAnnouncement, newMatch } =
+    useMatchStore();
+  const [draft, setDraft] = useState<LordClass[]>([]);
+
+  const ordering = match.phase === 'lordOrder' ? match.orderingPlayer : null;
+  const turn = match.turn;
+
+  const confirmOrder = () => {
+    if (ordering && dispatch({ type: 'setLordOrder', player: ordering, order: draft })) setDraft([]);
+  };
+
+  const canDeploy = turn !== null && deployableCaptains(match).length > 0 && selectedCaptainId !== null;
+  const chooseRegion = canDeploy
+    ? (region: RegionIndex) =>
+        dispatch({ type: 'deployCaptain', player: turn.player, captainId: selectedCaptainId, region })
+    : null;
+
+  const leave = () => {
+    newMatch();
+    setDraft([]);
+    goTo('mainMenu');
+  };
 
   return (
     <div className="match">
       <header className="match__top-bar">
-        <button className="top-bar__button" onClick={() => goTo('mainMenu')}>
+        <button className="top-bar__button" onClick={leave}>
           Menu
         </button>
-        <span className="top-bar__title">Exhibition · layout preview</span>
-        <span className="top-bar__turn">Turn —</span>
+        <span className="top-bar__title">
+          {turn
+            ? `${PLAYER_NAMES[turn.player]} · ${LORD_NAMES[turn.lord]}`
+            : ordering
+              ? `${PLAYER_NAMES[ordering]} is ordering their Lords`
+              : 'Exhibition'}
+        </span>
+        <span className="top-bar__turn">{match.turnNumber > 0 ? `Turn ${match.turnNumber}` : 'Setup'}</span>
       </header>
 
-      <PlayerPanel side="p1" name="Player" />
+      <PlayerPanel match={match} player="p1" selectedCaptainId={selectedCaptainId} onSelectCaptain={selectCaptain} />
 
       <main className="match__board-stage">
-        <div className="territory-board">
-          {SAMPLE_BOARD.map((owner, i) => (
-            <div className="territory-board__cell" key={i}>
-              {owner && <Card art="militia" size="board" owner={owner} alt="Knight" />}
-            </div>
-          ))}
+        <LordColumn
+          match={match}
+          player="p1"
+          draft={ordering === 'p1' ? { order: draft, remove: (l) => setDraft(draft.filter((d) => d !== l)) } : undefined}
+        />
+        <div className="match__board-center">
+          {ordering ? (
+            <LordOrderSetup
+              player={ordering}
+              draft={draft}
+              onAdd={(lord) => setDraft([...draft, lord])}
+              onReset={() => setDraft([])}
+              onConfirm={confirmOrder}
+            />
+          ) : (
+            <RegionBoard match={match} onChooseRegion={chooseRegion} />
+          )}
         </div>
+        <LordColumn
+          match={match}
+          player="p2"
+          draft={ordering === 'p2' ? { order: draft, remove: (l) => setDraft(draft.filter((d) => d !== l)) } : undefined}
+        />
+        {announcement && <TurnAnnouncement announcement={announcement} onDone={dismissAnnouncement} />}
       </main>
 
-      <PlayerPanel side="p2" name="Computer" />
+      <PlayerPanel match={match} player="p2" selectedCaptainId={selectedCaptainId} onSelectCaptain={selectCaptain} />
 
-      <footer className="match__phase-window">
-        <ol className="phase-list">
-          {PHASES.map((phase) => (
-            <li key={phase} className="phase-list__item">
-              {phase}
-            </li>
-          ))}
-        </ol>
-        <button className="btn btn--primary phase-window__end-turn">End turn</button>
-      </footer>
+      <PhaseWindow
+        match={match}
+        selectedCaptainId={selectedCaptainId}
+        error={error}
+        onEndTurn={() => turn && dispatch({ type: 'endTurn', player: turn.player })}
+      />
     </div>
-  );
-}
-
-function PlayerPanel({ side, name }: { side: CardOwner; name: string }) {
-  return (
-    <aside className={`player-panel player-panel--${side}`}>
-      <h2 className="player-panel__name">{name}</h2>
-      <p className="player-panel__king">The King's forces</p>
-      <ul className="player-panel__generals">
-        {GENERALS.map((general) => (
-          <li key={general} className="general-row">
-            <span className="general-row__name">{general}</span>
-            <span className="general-row__militia">— militia</span>
-          </li>
-        ))}
-      </ul>
-    </aside>
   );
 }

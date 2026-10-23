@@ -1,0 +1,60 @@
+.lord-card {
+  position: relative;
+  border-radius: 8px;
+  transition: transform 160ms ease-out;
+}
+
+.lord-card--active {
+  transform: scale(1.04);
+}
+
+.lord-card--active::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 3px solid var(--gold);
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.lord-card__position {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 2px solid var(--gold);
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.lord-card__plate {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 6px;
+  background: rgba(20, 15, 11, 0.88);
+  border: 1px solid var(--gold-dim);
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--parchment);
+  text-align: center;
+  line-height: 1.15;
+}
+
+.lord-card__captains {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--parchment-dim);
+}

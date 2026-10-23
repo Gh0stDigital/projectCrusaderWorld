@@ -4,6 +4,32 @@ Choices made on top of [SPEC.md](SPEC.md). Where they disagree, this file wins.
 
 Status: **Settled** = agreed. **Proposed** = suggested, waiting for approval. Proposed rules are not to be implemented as final.
 
+## Names — Settled
+
+The game uses these names; SPEC.md uses the older ones.
+
+| Game | SPEC.md |
+|---|---|
+| Lord | General |
+| Captain | Commander |
+| Region board | Campaign map / macro board |
+| Region | Territory |
+
+Lord classes: Army, Garrison, Raiders. Each player has one Lord of each.
+
+"Campaign" in scope notes means a story mode across several matches. The Region board itself (with Ultimate Tic-Tac-Toe routing) is the core of every match.
+
+## Match start and turns — Settled
+
+- At the start, each player places their three Lords beside the Region board in the order their turns will go. This replaces the fixed Army → Garrison → Raiders rotation. Player 1 orders first, then Player 2.
+- Player 1 takes the first turn. Players then alternate.
+- Each player's next Lord comes from their own chosen order, and only advances when that player's turn comes back.
+- Each Lord has 2 Captains. On a turn, the current Lord deploys one of their Captains to a Region. A player may have only one Captain per Region; the opponent may share it.
+- One Captain deployment per turn. End Turn is manual and is refused while a Captain could still be deployed.
+- If the current Lord has no Captains left to deploy, the turn can be ended right away (temporary until Knights exist).
+- Until routing exists, a Captain may deploy to any Region open to that player.
+- For now both sides are controlled by the person at the computer (pass-and-play). The computer opponent comes later.
+
 ## Project and platform — Settled
 
 - No prototype exists. Built from scratch, step by step.

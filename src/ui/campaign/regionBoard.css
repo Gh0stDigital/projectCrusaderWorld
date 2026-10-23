@@ -1,0 +1,75 @@
+.region-board {
+  display: grid;
+  grid-template-columns: repeat(3, 224px);
+  grid-template-rows: repeat(3, 224px);
+  gap: 12px;
+}
+
+.region {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 6px 6px;
+  background:
+    radial-gradient(ellipse at center, rgba(120, 140, 70, 0.22) 0%, transparent 75%),
+    #2b2a1d;
+  border: 2px solid #4b4630;
+  border-radius: 8px;
+  color: var(--parchment);
+  cursor: default;
+  transition: border-color 120ms, box-shadow 120ms;
+}
+
+.region:disabled {
+  opacity: 1;
+}
+
+/* While choosing where to deploy, Regions you can't pick step back. */
+.region-board--choosing .region:not(.region--open) {
+  filter: brightness(0.6) saturate(0.6);
+}
+
+.region--open {
+  cursor: pointer;
+  border-color: var(--gold-dim);
+}
+
+.region--open:hover,
+.region--open:focus-visible {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold), 0 0 20px rgba(217, 169, 58, 0.35);
+  outline: none;
+}
+
+.region__name {
+  font-family: var(--font-display);
+  font-size: 19px;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.region__captains {
+  flex: 1;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.region__slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-top: 4px;
+  border-radius: 6px;
+}
+
+.region__slot--p1 { background: color-mix(in srgb, var(--p1) 10%, transparent); }
+.region__slot--p2 { background: color-mix(in srgb, var(--p2) 10%, transparent); }
+
+.region__captain-name {
+  font-size: 15px;
+  line-height: 1.1;
+  text-align: center;
+}

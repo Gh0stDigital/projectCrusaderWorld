@@ -1,0 +1,126 @@
+.player-panel {
+  padding: 24px 22px;
+  background: var(--wood);
+  border-top: 6px solid;
+  transition: background 200ms;
+}
+
+.player-panel--p1 {
+  grid-area: p1;
+  border-top-color: var(--p1);
+  border-right: 2px solid var(--ink);
+}
+
+.player-panel--p2 {
+  grid-area: p2;
+  border-top-color: var(--p2);
+  border-left: 2px solid var(--ink);
+}
+
+.player-panel--active {
+  background: var(--wood-light);
+}
+
+.player-panel__name {
+  font-family: var(--font-display);
+  font-size: 32px;
+  margin: 0;
+}
+
+.player-panel--active .player-panel__name {
+  color: var(--gold);
+}
+
+.player-panel__status {
+  font-size: 20px;
+  color: var(--parchment-dim);
+  margin: 2px 0 22px;
+}
+
+.player-panel__lords {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lord-row {
+  padding: 12px 14px;
+  background: var(--wood-dark);
+  border: 1px solid var(--wood-light);
+  border-radius: var(--radius);
+}
+
+.lord-row--active {
+  border: 2px solid var(--gold);
+}
+
+.lord-row__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.lord-row__position {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--gold-dim);
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--gold);
+}
+
+.lord-row__name {
+  font-family: var(--font-display);
+  font-size: 22px;
+}
+
+.lord-row__captains {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.captain-chip {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px;
+  font-size: 18px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: rgba(233, 220, 192, 0.05);
+}
+
+.captain-chip__where {
+  color: var(--parchment-dim);
+}
+
+.captain-chip--deployed .captain-chip__where {
+  color: var(--parchment);
+}
+
+.captain-chip--pickable {
+  cursor: pointer;
+  border-color: var(--gold-dim);
+  background: rgba(217, 169, 58, 0.08);
+}
+
+.captain-chip--pickable:hover {
+  border-color: var(--gold);
+}
+
+.captain-chip--selected {
+  border-color: var(--gold);
+  background: rgba(217, 169, 58, 0.25);
+  box-shadow: 0 0 0 1px var(--gold);
+}
