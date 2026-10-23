@@ -35,7 +35,8 @@ Lord classes: Army, Garrison, Raiders. Each player has one Lord of each.
 ## Region view and turn flow on screen — Settled
 
 - After choosing a Captain, the player is prompted to enter that Captain's Region (button and tile). Entering zooms smoothly from the Region's tile into its 3×3 board.
-- In the Region view, Player 1's Captain stands on the left and Player 2's on the right (sides never swap), each with their 6 Knights below in two columns of three. Knights already on the field are greyed.
+- In the Region view, the Region's 3×3 board fills the center. Each player's side panel switches from their Lords to their Captain stationed in that Region, with the Captain's 6 Knights below in two columns of three (Player 1 left, Player 2 right; sides never swap). Knights already on the field are greyed.
+- On the Region board, each tile shows the stationed Captains as small square face portraits (Player 1 left of the name, Player 2 right) and a large 3×3 map where each occupied square shows that Knight's face ringed in the owner's color.
 - The player can zoom out to view the Region board at any time without changing orders, and return to their Region.
 - After End Turn: about 1 second of "orders complete" confirmation, zoom out to the Region board, about 1 second pause, then the next turn's announcement.
 

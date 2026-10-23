@@ -1,0 +1,149 @@
+.company {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.company__where {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--gold);
+}
+
+.company__vacant {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  border: 2px dashed rgba(233, 220, 192, 0.2);
+  border-radius: 8px;
+  font-size: 20px;
+  color: var(--parchment-dim);
+}
+
+.company__vacant--p1 { border-color: color-mix(in srgb, var(--p1) 45%, transparent); }
+.company__vacant--p2 { border-color: color-mix(in srgb, var(--p2) 45%, transparent); }
+
+.company__captain {
+  display: grid;
+  grid-template-columns: 144px 1fr;
+  gap: 14px;
+  padding: 10px;
+  background: var(--wood-dark);
+  border: 1px solid var(--wood-light);
+  border-radius: var(--radius);
+}
+
+.company__captain--acting {
+  border: 2px solid var(--gold);
+  padding: 9px;
+}
+
+.company__captain-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.company__captain-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.company__captain-lord {
+  margin: 0;
+  font-size: 18px;
+  color: var(--parchment-dim);
+}
+
+.company__badge {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 14px;
+}
+
+.company__count {
+  margin: auto 0 0;
+  font-size: 18px;
+}
+
+/* Six Knights: two columns of three, filled top to bottom. */
+.company__knights {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  align-self: center;
+  display: grid;
+  grid-template-columns: repeat(2, 96px);
+  grid-template-rows: repeat(3, auto);
+  grid-auto-flow: column;
+  gap: 12px 40px;
+}
+
+.knight-slot {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  cursor: default;
+}
+
+.knight-slot:disabled {
+  opacity: 1;
+}
+
+.knight-slot__label {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 6px;
+  padding: 1px 2px;
+  background: rgba(20, 15, 11, 0.88);
+  border: 1px solid var(--gold-dim);
+  border-radius: 3px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.knight-slot--fielded .card {
+  filter: grayscale(0.85) brightness(0.55);
+}
+
+.knight-slot--fielded .knight-slot__label {
+  color: var(--parchment-dim);
+  border-color: var(--wood-light);
+}
+
+.knight-slot--pickable {
+  cursor: pointer;
+}
+
+.knight-slot--pickable:hover .card,
+.knight-slot--pickable:focus-visible .card {
+  outline: 2px solid var(--gold-dim);
+  outline-offset: 3px;
+}
+
+.knight-slot--selected .card {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.knight-slot--selected .knight-slot__label {
+  color: var(--gold);
+}

@@ -1,7 +1,7 @@
-import { captainsInRegion, knightAt } from '../../engine/queries';
-import { PLAYERS, REGIONS, SQUARES, type MatchState, type RegionIndex } from '../../engine/state';
-import { REGION_NAMES, captainName } from '../../data/names';
-import { Card } from '../components/Card';
+import { captainInRegion, knightAt } from '../../engine/queries';
+import { REGIONS, SQUARES, type MatchState, type PlayerId, type RegionIndex } from '../../engine/state';
+import { PLAYER_NAMES, REGION_NAMES, captainName } from '../../data/names';
+import { Portrait } from '../components/Portrait';
 import './regionBoard.css';
 
 export const REGION_TILE = 260;
@@ -20,12 +20,15 @@ interface RegionBoardProps {
   labelFor: (region: RegionIndex) => string;
 }
 
-/** The 3×3 Region board. Each Region holds at most one Captain per player and its own 3×3 board. */
+/**
+ * The 3×3 Region board. Each tile shows the Captains stationed there as small
+ * portraits, and a large map of its own 3×3 board so occupied squares read
+ * at a glance.
+ */
 export function RegionBoard({ match, clickable, active, choosing, onClickRegion, labelFor }: RegionBoardProps) {
   return (
     <div className={`region-board${choosing ? ' region-board--choosing' : ''}`}>
       {REGIONS.map((region) => {
-        const captains = captainsInRegion(match, region);
         const isClickable = clickable.has(region);
         const classes = ['region', isClickable && 'region--open', active === region && 'region--active']
           .filter(Boolean)
@@ -38,32 +41,40 @@ export function RegionBoard({ match, clickable, active, choosing, onClickRegion,
             onClick={() => onClickRegion(region)}
             aria-label={`${REGION_NAMES[region]}${isClickable ? `, ${labelFor(region)}` : ''}`}
           >
-            <span className="region__name">{REGION_NAMES[region]}</span>
-            <span className="region__body">
-              {PLAYERS.map((player) => {
-                const captain = captains.find((c) => c.owner === player);
-                return (
-                  <span key={player} className={`region__slot region__slot--${player}`}>
-                    {captain && (
-                      <>
-                        <Card art="militia" size="panel" owner={player} alt={captainName(captain.lord, captain.rank)} />
-                        <span className="region__captain-name">{captainName(captain.lord, captain.rank)}</span>
-                      </>
-                    )}
-                  </span>
+            <span className="region__header">
+              <CaptainMarker match={match} region={region} player="p1" />
+              <span className="region__name">{REGION_NAMES[region]}</span>
+              <CaptainMarker match={match} region={region} player="p2" />
+            </span>
+
+            <span className="region__map" aria-hidden="true">
+              {SQUARES.map((square) => {
+                const knight = knightAt(match, region, square);
+                return knight ? (
+                  <Portrait key={square} art="militia" size={50} owner={knight.owner} />
+                ) : (
+                  <span key={square} className="region__map-square" />
                 );
               })}
-              <span className="region__mini" aria-hidden="true">
-                {SQUARES.map((square) => {
-                  const knight = knightAt(match, region, square);
-                  return <span key={square} className={`region__mini-square${knight ? ` region__mini-square--${knight.owner}` : ''}`} />;
-                })}
-              </span>
             </span>
+
             {isClickable && <span className="region__action">{labelFor(region)}</span>}
           </button>
         );
       })}
     </div>
+  );
+}
+
+function CaptainMarker({ match, region, player }: { match: MatchState; region: RegionIndex; player: PlayerId }) {
+  const captain = captainInRegion(match, region, player);
+  if (!captain) return <span className={`region__captain-empty region__captain-empty--${player}`} />;
+  return (
+    <Portrait
+      art="militia"
+      size={38}
+      owner={player}
+      title={`${PLAYER_NAMES[player]}: ${captainName(captain.lord, captain.rank)}`}
+    />
   );
 }

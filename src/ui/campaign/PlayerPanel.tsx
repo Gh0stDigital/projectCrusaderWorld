@@ -1,7 +1,8 @@
 import { actionableCaptains, captainsOf, reserveKnights } from '../../engine/queries';
-import type { LordClass, MatchState, PlayerId } from '../../engine/state';
+import type { LordClass, MatchState, PlayerId, RegionIndex } from '../../engine/state';
 import { LORD_TITLES, PLAYER_NAMES, REGION_NAMES } from '../../data/names';
 import { LordCard } from '../components/LordCard';
+import { CompanyView } from './CompanyView';
 import './playerPanel.css';
 
 interface PlayerPanelProps {
@@ -11,13 +12,15 @@ interface PlayerPanelProps {
   onSelectCaptain: (id: string) => void;
   /** While this player is ordering their Lords: their unconfirmed order, and how to take a Lord back. */
   draft?: { order: LordClass[]; remove: (lord: LordClass) => void };
+  /** While zoomed into a Region: show this player's Captain and Knights there instead of their Lords. */
+  company?: { region: RegionIndex; selectedKnightId: string | null; onSelectKnight: (id: string) => void };
 }
 
 /**
  * One player's side: their three Lords in turn order, each card on the left
  * with that Lord's Captains and where they are stationed on the right.
  */
-export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain, draft }: PlayerPanelProps) {
+export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain, draft, company }: PlayerPanelProps) {
   const order = draft ? draft.order : (match.players[player].lordOrder ?? []);
   const turn = match.turn;
   const isTheirTurn = turn?.player === player;
@@ -30,6 +33,15 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
         <p className="player-panel__status">{statusFor(match, player)}</p>
       </header>
 
+      {company ? (
+        <CompanyView
+          match={match}
+          player={player}
+          region={company.region}
+          selectedKnightId={company.selectedKnightId}
+          onSelectKnight={company.onSelectKnight}
+        />
+      ) : (
       <ol className="player-panel__lords">
         {[0, 1, 2].map((i) => {
           const lord = order[i];
@@ -101,6 +113,7 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
           );
         })}
       </ol>
+      )}
     </aside>
   );
 }

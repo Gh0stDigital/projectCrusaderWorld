@@ -8,8 +8,10 @@ import './card.css';
  */
 export const CARD_SIZES = {
   panel: { width: 80, height: 120 },
+  company: { width: 96, height: 144 },
   roster: { width: 144, height: 216 },
   board: { width: 160, height: 240 },
+  field: { width: 168, height: 252 },
   detail: { width: 200, height: 300 },
   battle: { width: 320, height: 480 },
   inspect: { width: 400, height: 600 },
@@ -38,7 +40,7 @@ export function Card({ art, size, owner, children, alt = '' }: CardProps) {
 
   return (
     <div className={classes} style={{ width, height }}>
-      <img className="card__art" src={artCatalog[art]} alt={alt} draggable={false} />
+      <img className="card__art" src={artCatalog[art].src} alt={alt} draggable={false} />
       {owner && <span className="card__pin" aria-hidden="true" />}
       {children && <div className="card__overlay">{children}</div>}
     </div>

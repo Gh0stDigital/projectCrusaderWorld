@@ -66,6 +66,12 @@ export function MatchScreen() {
     }
   };
 
+  // While zoomed into a Region, the side panels show each player's Captain and Knights there.
+  const companyControls =
+    focusedRegion !== null
+      ? { region: focusedRegion, selectedKnightId, onSelectKnight: (id: string) => !busy && store.selectKnight(id) }
+      : undefined;
+
   const leave = () => {
     store.newMatch();
     setDraft([]);
@@ -109,6 +115,7 @@ export function MatchScreen() {
         selectedCaptainId={selectedCaptainId}
         onSelectCaptain={(id) => !busy && store.selectCaptain(id)}
         draft={ordering === 'p1' ? draftControls : undefined}
+        company={companyControls}
       />
 
       <BoardStage
@@ -138,7 +145,6 @@ export function MatchScreen() {
             match={match}
             region={region}
             selectedKnightId={selectedKnightId}
-            onSelectKnight={(id) => !busy && store.selectKnight(id)}
             onPlaceKnight={(square) =>
               turn &&
               !busy &&
@@ -161,6 +167,7 @@ export function MatchScreen() {
         selectedCaptainId={selectedCaptainId}
         onSelectCaptain={(id) => !busy && store.selectCaptain(id)}
         draft={ordering === 'p2' ? draftControls : undefined}
+        company={companyControls}
       />
 
       <PhaseWindow
