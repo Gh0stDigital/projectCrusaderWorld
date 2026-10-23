@@ -25,9 +25,10 @@
 .company__vacant--p1 { border-color: color-mix(in srgb, var(--p1) 45%, transparent); }
 .company__vacant--p2 { border-color: color-mix(in srgb, var(--p2) 45%, transparent); }
 
+/* The Captain: a large portrait with their details beside it. */
 .company__captain {
   display: grid;
-  grid-template-columns: 144px 1fr;
+  grid-template-columns: 200px 1fr;
   gap: 14px;
   padding: 10px;
   background: var(--wood-dark);
@@ -44,6 +45,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 
 .company__captain-name {
@@ -56,7 +58,7 @@
 
 .company__captain-lord {
   margin: 0;
-  font-size: 18px;
+  font-size: 17px;
   color: var(--parchment-dim);
 }
 
@@ -70,113 +72,171 @@
   font-size: 14px;
 }
 
-.company__count {
+.company__stats {
   margin: auto 0 0;
-  font-size: 18px;
-  line-height: 1.3;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  font-size: 17px;
 }
 
-.company__dim {
-  font-size: 16px;
+.company__stats dt {
   color: var(--parchment-dim);
 }
 
-/* Six Knights: two columns of three, filled top to bottom. */
+.company__stats dd {
+  margin: 0;
+  text-align: right;
+}
+
+/* Six Knights as simple tokens: two columns of three. */
 .company__knights {
   list-style: none;
   padding: 0;
   margin: 0;
-  align-self: center;
   display: grid;
-  grid-template-columns: repeat(2, 96px);
+  grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(3, auto);
   grid-auto-flow: column;
-  gap: 12px 40px;
+  gap: 8px;
 }
 
-.knight-slot {
+.knight-token {
+  position: relative;
   width: 100%;
+  height: 62px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 3px;
-  padding: 0;
-  border: none;
-  border-radius: 8px;
-  background: none;
+  gap: 10px;
+  padding: 6px 10px;
+  background: var(--wood-dark);
+  border: 2px solid var(--wood-light);
+  border-radius: 6px;
+  color: var(--parchment);
+  text-align: left;
   cursor: default;
 }
 
-.knight-slot:disabled {
+.knight-token:disabled {
   opacity: 1;
 }
 
-.knight-slot__label {
+.knight-token__shield {
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+}
+
+.knight-token__shield svg {
   position: absolute;
-  left: 4px;
-  right: 4px;
-  bottom: 6px;
-  padding: 1px 2px;
-  background: rgba(20, 15, 11, 0.88);
-  border: 1px solid var(--gold-dim);
-  border-radius: 3px;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  stroke: var(--gold);
+  stroke-width: 1.5;
+}
+
+.knight-token--p1 .knight-token__shield svg { fill: #2c4f80; }
+.knight-token--p2 .knight-token__shield svg { fill: #803029; }
+
+.knight-token__number {
+  position: relative;
+  margin-top: -3px;
   font-family: var(--font-display);
-  font-size: 14px;
-  text-align: center;
+  font-size: 17px;
+  font-weight: 700;
+  color: #f4ead2;
+}
+
+.knight-token__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.knight-token__name {
+  font-family: var(--font-display);
+  font-size: 17px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.knight-slot--fielded .card__art {
-  filter: grayscale(0.85) brightness(0.55);
-}
-
-.knight-slot--fielded .knight-slot__label {
+.knight-token__detail {
+  font-size: 15px;
   color: var(--parchment-dim);
-  border-color: var(--wood-light);
 }
 
-/* Empty slot: no men assigned yet. */
-.knight-slot--unmanned .card {
-  box-shadow: none;
-  outline: 2px dashed rgba(233, 220, 192, 0.25);
-  outline-offset: -2px;
-}
-
-.knight-slot--unmanned .card__art,
-.knight-slot--unmanned .card__pin {
-  opacity: 0.12;
-  filter: grayscale(1);
-}
-
-.knight-slot--unmanned .knight-slot__label {
-  color: var(--parchment-dim);
-  border-color: var(--wood-light);
-}
-
-.knight-slot--dead .card__art {
-  filter: grayscale(1) sepia(0.6) hue-rotate(-30deg) brightness(0.4);
-}
-
-.knight-slot--dead .knight-slot__label {
-  color: #e0715f;
-  border-color: #7a2f26;
-}
-
-.knight-slot--pickable {
-  cursor: pointer;
-}
-
-.knight-slot--pickable:hover .card,
-.knight-slot--pickable:focus-visible .card {
-  outline: 2px solid var(--gold-dim);
-  outline-offset: 3px;
-}
-
-.knight-slot--selected .card {
-  outline: 3px solid var(--gold);
-  outline-offset: 3px;
-}
-
-.knight-slot--selected .knight-slot__label {
+.knight-token__flag {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
   color: var(--gold);
+}
+
+/* States */
+.knight-token--fielded {
+  background: rgba(20, 15, 11, 0.5);
+}
+
+.knight-token--fielded .knight-token__name {
+  color: var(--parchment-dim);
+}
+
+.knight-token--unmanned {
+  background: transparent;
+  border-style: dashed;
+  border-color: rgba(233, 220, 192, 0.18);
+}
+
+.knight-token--unmanned .knight-token__shield svg {
+  fill: transparent;
+  stroke: rgba(233, 220, 192, 0.25);
+  stroke-dasharray: 3 2;
+}
+
+.knight-token--unmanned .knight-token__number,
+.knight-token--unmanned .knight-token__name {
+  color: rgba(233, 220, 192, 0.35);
+}
+
+.knight-token--dead {
+  border-color: #5a2620;
+}
+
+.knight-token--dead .knight-token__shield svg {
+  fill: #2a1a17;
+  stroke: #7a2f26;
+}
+
+.knight-token--dead .knight-token__name {
+  color: #b9776c;
+  text-decoration: line-through;
+}
+
+.knight-token--dead .knight-token__detail {
+  color: #e0715f;
+}
+
+.knight-token--pickable {
+  cursor: pointer;
+  border-color: var(--gold-dim);
+}
+
+.knight-token--pickable:hover,
+.knight-token--pickable:focus-visible {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.knight-token--selected {
+  border-color: var(--gold);
+  background: rgba(217, 169, 58, 0.18);
+  box-shadow: 0 0 0 1px var(--gold);
 }

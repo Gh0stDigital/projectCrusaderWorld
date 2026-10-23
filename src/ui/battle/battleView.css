@@ -48,7 +48,7 @@
   font-size: 24px;
 }
 
-/* --- Combatants: the enemy (red) top-left, you (blue) bottom-right --- */
+/* --- Combatants: you (blue) bottom-left, the enemy (red) top-right --- */
 .combatant {
   position: absolute;
   display: flex;
@@ -58,14 +58,14 @@
 
 .combatant--top {
   top: 66px;
-  left: 40px;
-  align-items: flex-start;
+  right: 40px;
+  align-items: flex-end;
 }
 
 .combatant--bottom {
-  right: 40px;
+  left: 40px;
   bottom: 16px;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .combatant__sergeants {
@@ -85,14 +85,15 @@
   gap: 18px;
 }
 
-/* Enemy: info box to the right of the card, level with its top. */
+/* Enemy: info box to the left of the card, level with its top. */
 .combatant--top .combatant__body {
+  flex-direction: row-reverse;
   align-items: flex-start;
 }
 
-/* You: info box to the left of the card, level with its bottom. */
+/* You: info box to the right of the card, level with its bottom. */
 .combatant--bottom .combatant__body {
-  flex-direction: row-reverse;
+  align-items: flex-end;
 }
 
 .combatant__card {
@@ -168,9 +169,9 @@
 .battle__center {
   position: absolute;
   left: 300px;
-  top: 300px;
+  top: 308px;
   width: 520px;
-  height: 200px;
+  height: 194px;
   display: grid;
   place-items: center;
   pointer-events: none;
@@ -234,7 +235,7 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 6px 6px 8px;
+  padding: 4px 6px 6px;
   border-radius: 8px;
   border: 2px solid var(--wood-light);
   animation: reveal-flip 420ms ease-out both;

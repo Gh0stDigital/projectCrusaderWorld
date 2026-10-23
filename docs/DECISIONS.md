@@ -41,7 +41,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 ## Region view and turn flow on screen — Settled
 
 - After choosing a Captain, the player is prompted to enter that Captain's Region (button and tile). Entering zooms smoothly from the Region's tile into its 3×3 board.
-- In the Region view, the Region's 3×3 board fills the center. Each player's side panel switches from their Lords to their Captain stationed in that Region, with the Captain's 6 Knights below in two columns of three (Player 1 left, Player 2 right; sides never swap). Knights already on the field are greyed.
+- In the Region view, the Region's 3×3 board fills the center. Each player's side panel switches from their Lords to their Captain stationed in that Region: a large Captain portrait with their details, and the Captain's 6 Knights below as simple shield tokens in two columns of three (number, name, HP and Sergeants; distinct looks for ready, in the field, unmanned and fallen). Player 1 left, Player 2 right; sides never swap. Knight cards appear only on the Region's own board.
 - On the Region board, each tile shows the stationed Captains as small square face portraits (Player 1 left of the name, Player 2 right) and a large 3×3 map where occupied squares show a blue X (Player 1) or a red O (Player 2).
 - The player can zoom out to view the Region board at any time without changing orders, and return to their Region.
 - After End Turn: about 1 second of "orders complete" confirmation, zoom out to the Region board, about 1 second pause, then the next turn's announcement.
@@ -99,7 +99,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 
 - Sergeant tactics are **Rush, Flank and Counter**. Each Knight's five Sergeants mix them two, two and one, varying by Knight.
 - Before attacking, a window shows both Knights (HP, Sergeants, tactics) with Cancel or Commence attack.
-- Commencing zooms into a battlefield: your blue Knight bottom-right facing left, the red enemy top-left facing right, whichever side attacked, each with their Sergeants as boxes (tactic icon and men) above them. Clash results show in the middle of the field, labeled You and Enemy.
+- Commencing zooms into a battlefield: your blue Knight bottom-left facing right, the red enemy top-right facing left, whichever side attacked, each with their Sergeants as boxes (tactic icon and men) above them. Clash results show in the middle of the field, labeled You and Enemy.
 - Each clash, both sides secretly choose a Sergeant; the winning tactic deals that Sergeant's men as damage to the other Knight's HP.
 - The Knight with less HP at the end loses and is removed from the board. The winner stays on its square and the square becomes empty.
 - Clashes are revealed one at a time with pauses (intro, reveal, result) so the information is easy to follow. After the result the player returns to the Region and ends the turn manually.

@@ -26,8 +26,8 @@ interface BattleViewProps {
 }
 
 /**
- * The battlefield. Your blue Knight stands bottom-right facing left; the red
- * enemy stands top-left facing right, whichever side attacked. Each has their
+ * The battlefield. Your blue Knight stands bottom-left facing right; the red
+ * enemy stands top-right facing left, whichever side attacked. Each has their
  * Sergeants above them. Clashes are revealed one at a time with pauses, even
  * though the rules resolve them instantly.
  */
@@ -116,7 +116,7 @@ interface CombatantProps {
   match: MatchState;
   duel: Duel;
   role: DuelRole;
-  /** Top: the enemy, facing right. Bottom: you, facing left. */
+  /** Top: the enemy, on the right facing left. Bottom: you, on the left facing right. */
   position: 'top' | 'bottom';
   upTo: number;
   current: Clash | undefined;
@@ -162,7 +162,7 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
 
       <div className="combatant__body">
         <div className={`combatant__card${hp <= 0 ? ' combatant__card--fallen' : ''}`}>
-          <Card art={knightArtFacing(side.player, position === 'bottom' ? 'left' : 'right')} size="board" owner={side.player} />
+          <Card art={knightArtFacing(side.player, position === 'bottom' ? 'right' : 'left')} size="board" owner={side.player} />
         </div>
         <div className="combatant__info">
           <span className="combatant__name">{knightName(knight)}</span>
@@ -278,7 +278,7 @@ function RevealedPick({ label, pick, winner }: { label: string; pick: Clash['att
   return (
     <span className={`revealed revealed--${pick.tactic}${winner ? ' revealed--winner' : ''}`}>
       <span className="revealed__who">{label}</span>
-      <TacticIcon tactic={pick.tactic} size={40} />
+      <TacticIcon tactic={pick.tactic} size={34} />
       <span className="revealed__name">{TACTIC_NAMES[pick.tactic]}</span>
       <span className="revealed__men">{pick.militia} men</span>
     </span>

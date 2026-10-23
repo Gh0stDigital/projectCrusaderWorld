@@ -5,7 +5,6 @@ import {
   captainArt,
   captainName,
   formatMilitia,
-  knightArt,
   knightName,
   knightPersonalName,
   lordPersona,
@@ -21,16 +20,17 @@ interface CompanyViewProps {
   onSelectKnight: (id: string) => void;
 }
 
-const SLOT_LABEL: Record<Knight['status'], (k: Knight) => string> = {
-  ready: (k) => knightPersonalName(k),
-  fielded: () => 'Fielded',
-  unmanned: () => 'Unmanned',
-  dead: () => 'Fallen',
+const STATUS_LABEL: Record<Knight['status'], string> = {
+  ready: 'Ready',
+  fielded: 'In the field',
+  unmanned: 'Unmanned',
+  dead: 'Fallen',
 };
 
 /**
  * Shown in a player's side panel while zoomed into a Region: their Captain
- * stationed there, with that Captain's six Knights underneath in two columns.
+ * stationed there as a large portrait, and their six Knights as simple tokens.
+ * Knight cards only appear on the Region's board itself.
  */
 export function CompanyView({ match, player, region, selectedKnightId, onSelectKnight }: CompanyViewProps) {
   const captain = captainInRegion(match, region, player);
@@ -54,45 +54,58 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
       <p className="company__where">In {REGION_NAMES[region]}</p>
 
       <div className={`company__captain${acting ? ' company__captain--acting' : ''}`}>
-        <Card art={captainArt(player)} size="roster" owner={player} alt={captainName(captain)} />
+        <Card art={captainArt(player)} size="detail" owner={player} alt={captainName(captain)} />
         <div className="company__captain-info">
           <h3 className="company__captain-name">{captainName(captain)}</h3>
           <p className="company__captain-lord">Serves {lordPersona(player, captain.lord).name}</p>
           {acting && <span className="company__badge">{picking ? 'Choose a Knight' : 'Orders given'}</span>}
-          <p className="company__count">
-            {formatMilitia(captainMilitia(match, captain.id))} militia
-            <br />
-            <span className="company__dim">{formatMilitia(captain.reserve)} in reserve</span>
-            <br />
-            <span className="company__dim">{waiting} Knights waiting</span>
-          </p>
+          <dl className="company__stats">
+            <dt>Militia</dt>
+            <dd>{formatMilitia(captainMilitia(match, captain.id))}</dd>
+            <dt>Reserve</dt>
+            <dd>{formatMilitia(captain.reserve)}</dd>
+            <dt>Knights waiting</dt>
+            <dd>{waiting}</dd>
+          </dl>
         </div>
       </div>
 
       <ul className="company__knights">
         {knightsOf(match, captain.id).map((knight) => {
           const pickable = picking && knight.status === 'ready';
+          const alive = knight.status === 'ready' || knight.status === 'fielded';
           const classes = [
-            'knight-slot',
-            `knight-slot--${knight.status}`,
-            pickable && 'knight-slot--pickable',
-            selectedKnightId === knight.id && 'knight-slot--selected',
+            'knight-token',
+            `knight-token--${knight.status}`,
+            `knight-token--${player}`,
+            pickable && 'knight-token--pickable',
+            selectedKnightId === knight.id && 'knight-token--selected',
           ]
             .filter(Boolean)
             .join(' ');
-          const alive = knight.status === 'ready' || knight.status === 'fielded';
           return (
             <li key={knight.id}>
               <button
                 className={classes}
                 disabled={!pickable}
                 onClick={() => onSelectKnight(knight.id)}
-                aria-label={`${knightName(knight)}: ${SLOT_LABEL[knight.status](knight)}${alive ? `, ${knight.hp} HP` : ''}`}
+                aria-label={`${knightName(knight)}: ${STATUS_LABEL[knight.status]}${alive ? `, ${knight.hp} HP` : ''}`}
               >
-                <Card art={knightArt(player)} size="company" owner={player}>
-                  {alive && <span className="hp-badge">{knight.hp}</span>}
-                  <span className="knight-slot__label">{SLOT_LABEL[knight.status](knight)}</span>
-                </Card>
+                <span className="knight-token__shield" aria-hidden="true">
+                  <svg viewBox="0 0 24 28">
+                    <path d="M12 1.5 22 5v8c0 6.6-4.2 11.2-10 13.5C6.2 24.2 2 19.6 2 13V5z" />
+                  </svg>
+                  <span className="knight-token__number">{knight.number}</span>
+                </span>
+                <span className="knight-token__text">
+                  <span className="knight-token__name">
+                    {knight.status === 'unmanned' ? 'Empty slot' : knightPersonalName(knight)}
+                  </span>
+                  <span className="knight-token__detail">
+                    {alive ? `${knight.hp} HP · ${knight.sergeants.length} Sgt` : STATUS_LABEL[knight.status]}
+                  </span>
+                </span>
+                {knight.status === 'fielded' && <span className="knight-token__flag">Field</span>}
               </button>
             </li>
           );
