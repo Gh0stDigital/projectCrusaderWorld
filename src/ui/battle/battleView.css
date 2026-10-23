@@ -4,8 +4,13 @@
   inset: 0;
   z-index: 15;
   overflow: clip;
-  /* Grassy field under a blue sky; the horizon sits behind the enemy's Sergeants. */
-  background: #2f7a2a url('../../assets/ui/battle-field.webp') center 30% / cover no-repeat;
+  /*
+   * Grassy field under a blue sky, toned down with a dark wash so it sits
+   * behind the Knights instead of competing with them.
+   */
+  background:
+    linear-gradient(180deg, rgba(10, 14, 18, 0.5) 0%, rgba(10, 14, 18, 0.62) 100%),
+    #1d3a1b url('../../assets/ui/battle-field.webp') center 30% / cover no-repeat;
   animation: battle-in 500ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
