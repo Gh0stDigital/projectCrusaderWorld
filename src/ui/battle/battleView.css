@@ -4,8 +4,8 @@
   inset: 0;
   z-index: 15;
   overflow: clip;
-  background:
-    linear-gradient(180deg, #3b4a5a 0%, #6b6a55 38%, #4f5a33 39%, #39421f 100%);
+  /* Grassy field under a blue sky; the horizon sits behind the enemy's Sergeants. */
+  background: #2f7a2a url('../../assets/ui/battle-field.webp') center 30% / cover no-repeat;
   animation: battle-in 500ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 

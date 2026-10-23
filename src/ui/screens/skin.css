@@ -8,8 +8,8 @@
  */
 
 .match {
-  --skin-ink: #14120f;
-  --skin-stone: #24211b;
+  --skin-ink: #13171b;
+  --skin-stone: #232a2f;
 }
 
 .match__top-bar,
@@ -67,7 +67,7 @@
 /* The art shows Lord rows; while showing the Captain view the panel goes plain. */
 .player-panel--company {
   background-image: none;
-  background: linear-gradient(180deg, #221f1a 0%, var(--skin-ink) 100%);
+  background: linear-gradient(180deg, #20272c 0%, var(--skin-ink) 100%);
 }
 
 .player-panel--company.player-panel--p1 { box-shadow: inset 0 6px 0 #2a54b8; }
@@ -125,7 +125,7 @@
 
 /* --- Region board --- */
 .board-stage {
-  background: radial-gradient(ellipse at center, #2c2922 0%, var(--skin-ink) 80%);
+  background: radial-gradient(ellipse at center, #26302f 0%, var(--skin-ink) 80%);
 }
 
 .board-stage__regions {
@@ -148,7 +148,7 @@
   position: absolute;
   inset: 0;
   border-radius: 8px;
-  background: rgba(8, 7, 5, 0.55);
+  background: rgba(6, 9, 11, 0.55);
   pointer-events: none;
 }
 
@@ -202,7 +202,7 @@
 }
 
 .phase-window .btn {
-  background: rgba(18, 16, 12, 0.55);
+  background: rgba(14, 18, 22, 0.55);
 }
 
 .phase-window__end-turn {
