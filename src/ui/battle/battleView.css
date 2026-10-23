@@ -289,10 +289,31 @@
 .combatant__card {
   position: absolute;
   z-index: 1;
+  transform: translateX(-50%);
 }
 
-.combatant--bottom .combatant__card { left: 36px; top: 300px; }
-.combatant--top .combatant__card { right: 36px; top: 380px; }
+/*
+ * Each side is a column 500px wide: Sergeants on top, the Knight in the
+ * middle, its info box underneath. Blue on the left; red on the right, lower.
+ */
+.combatant--bottom { --col: 280px; --top: 66px; }
+.combatant--top { --col: 840px; --top: 300px; }
+
+.combatant__sergeants,
+.combatant__info,
+.combatant__card {
+  left: var(--col);
+}
+
+.combatant__sergeants,
+.combatant__info {
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.combatant__sergeants { top: var(--top); }
+.combatant__card { top: calc(var(--top) + 66px); }
+.combatant__info { top: calc(var(--top) + 410px); width: 420px; }
 
 .combatant__sprite {
   display: block;
@@ -306,30 +327,16 @@
   filter: grayscale(1) brightness(0.45) drop-shadow(0 10px 6px rgba(0, 0, 0, 0.55));
 }
 
-.combatant__sergeants,
-.combatant__info {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.combatant--top .combatant__sergeants { top: 66px; }
-.combatant--top .combatant__info { top: 150px; }
-.combatant--bottom .combatant__sergeants { bottom: 132px; }
-.combatant--bottom .combatant__info { bottom: 14px; }
-
-.combatant__info { width: 420px; }
-
-/* Clash results between the two sides. */
+/* Clash results in the open ground above the red Knight. */
 .battle__center {
-  left: calc(50% - 270px);
-  top: 300px;
-  width: 540px;
-  height: 260px;
+  left: 590px;
+  top: 70px;
+  width: 500px;
+  height: 220px;
 }
 
 .battle-msg {
-  max-width: 540px;
+  max-width: 500px;
 }
 
 /* ---- Hit: a slash sweeps across the Knight and it shakes ---- */
