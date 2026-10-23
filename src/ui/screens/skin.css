@@ -1,0 +1,215 @@
+/*
+ * Region board skin: one 1920x1080 artwork (set as --skin on .match). Each
+ * screen area shows its own slice of it by offsetting the background by that
+ * area's position on the canvas, so the pieces line up into the full picture.
+ * The game's own boxes go transparent over the art; text and highlights sit on top.
+ * Views the art doesn't cover (zoomed-in Region, Captain panel) use plain colors
+ * taken from the art.
+ */
+
+.match {
+  --skin-ink: #120c16;
+  --skin-stone: #231633;
+}
+
+.match__top-bar,
+.player-panel,
+.board-stage__regions,
+.phase-window {
+  background-image: var(--skin);
+  background-size: 1920px 1080px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* --- Frame --- */
+.match__top-bar {
+  background-position: 0 0;
+  border: none;
+}
+
+.top-bar__title,
+.top-bar__turn {
+  text-shadow: 0 2px 0 #000, 0 0 6px #000;
+}
+
+/* Keep the title inside the art's title bar. */
+.top-bar__title {
+  max-width: 380px;
+  font-size: 22px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.top-bar__button {
+  border-color: transparent;
+}
+
+.top-bar__button:hover {
+  border-color: var(--gold);
+}
+
+.phase-window {
+  background-position: 0 -920px;
+  border: none;
+}
+
+/* --- Side panels --- */
+.player-panel {
+  border: none;
+  background-color: var(--skin-ink);
+}
+
+.player-panel--p1 { background-position: 0 -64px; }
+.player-panel--p2 { background-position: -1520px -64px; }
+
+/* The art shows Lord rows; while showing the Captain view the panel goes plain. */
+.player-panel--company {
+  background-image: none;
+  background: linear-gradient(180deg, #1c1229 0%, var(--skin-ink) 100%);
+}
+
+.player-panel--company.player-panel--p1 { box-shadow: inset 0 6px 0 #2a54b8; }
+.player-panel--company.player-panel--p2 { box-shadow: inset 0 6px 0 #b8433a; }
+
+.player-panel--active {
+  background-color: var(--skin-ink);
+}
+
+.player-panel__name,
+.player-panel__militia,
+.player-panel__status {
+  text-shadow: 0 2px 0 #000, 0 0 6px #000;
+}
+
+.lord-row {
+  background: transparent;
+  border-color: transparent;
+}
+
+/* Float the "Taking this turn" badge so the Captain buttons stay on the art's boxes. */
+.lord-row {
+  position: relative;
+}
+
+.lord-row__badge {
+  position: absolute;
+  top: -11px;
+  right: 14px;
+  z-index: 1;
+}
+
+.lord-row--active {
+  border-color: var(--gold);
+  box-shadow: 0 0 14px rgba(217, 169, 58, 0.35);
+}
+
+.lord-row__title,
+.lord-row__militia,
+.lord-row__empty-hint {
+  text-shadow: 0 1px 0 #000, 0 0 4px #000;
+}
+
+.captain-chip {
+  background: transparent;
+}
+
+.captain-chip--pickable {
+  background: rgba(217, 169, 58, 0.12);
+}
+
+.captain-chip--selected {
+  background: rgba(217, 169, 58, 0.28);
+}
+
+/* --- Region board --- */
+.board-stage {
+  background: radial-gradient(ellipse at center, #2a1b3c 0%, var(--skin-ink) 80%);
+}
+
+.board-stage__regions {
+  background-position: -400px -64px;
+}
+
+.region,
+.region:disabled {
+  background: transparent;
+  border-color: transparent;
+}
+
+/* Regions you can't pick step back under a shade, so the art itself stays untouched. */
+.region-board--choosing .region:not(.region--open) {
+  filter: none;
+}
+
+.region-board--choosing .region:not(.region--open)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background: rgba(8, 5, 12, 0.5);
+  pointer-events: none;
+}
+
+.region--open {
+  border-color: transparent;
+}
+
+.region__name {
+  font-size: 18px;
+  text-shadow: 0 2px 0 #000, 0 0 6px #000;
+}
+
+.region__captain-empty {
+  border-color: transparent;
+}
+
+.region__map,
+.region__map-square {
+  background: transparent;
+  box-shadow: none;
+}
+
+.region__mark {
+  filter: drop-shadow(0 2px 0 #000);
+}
+
+/* --- Phase window --- */
+.phase-list__item {
+  border-color: transparent;
+  color: rgba(233, 220, 192, 0.55);
+  text-shadow: 0 2px 0 #000;
+}
+
+.phase-list__item--current {
+  background: rgba(217, 169, 58, 0.85);
+  color: var(--ink);
+  text-shadow: none;
+}
+
+/* Keep the instruction on the art's scroll bar. */
+.phase-window__orders {
+  max-width: 500px;
+}
+
+.phase-window__instruction {
+  font-size: 21px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 0 #000, 0 0 6px #000;
+}
+
+.phase-window .btn {
+  background: rgba(18, 12, 22, 0.55);
+}
+
+.phase-window__end-turn {
+  background: transparent;
+}
+
+.phase-window__end-turn.btn--primary {
+  box-shadow: 0 0 18px rgba(217, 169, 58, 0.45);
+}

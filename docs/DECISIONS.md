@@ -38,6 +38,12 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - Until routing exists, a Ready Captain may deploy to any Region open to that player, and a Lord may resume any of their stationed Captains. **Provisional**: routing will restrict this.
 - For now both sides are controlled by the person at the computer (pass-and-play). The computer opponent comes later.
 
+## Region board skin — Settled
+
+- The match screen uses the owner's 16:9 artwork `src/assets/ui/region-board-skin.png` (built over the layout wireframe in `design/templates`). Each area (top bar, side panels, Region board, phase window) shows its own slice of it, so the game's boxes sit on the art's frames; the Region board slice zooms with the camera.
+- The art covers the Region board view only. The zoomed-in Region view and the Captain panel use plain colors from the art until they get their own skins.
+- Styles live in `src/ui/screens/skin.css`. Any new skin must keep the wireframe's zone positions and sizes.
+
 ## Region view and turn flow on screen — Settled
 
 - After choosing a Captain, the player is prompted to enter that Captain's Region (button and tile). Entering zooms smoothly from the Region's tile into its 3×3 board.

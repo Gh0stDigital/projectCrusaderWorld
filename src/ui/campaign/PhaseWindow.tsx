@@ -108,7 +108,7 @@ function instructionFor(match: MatchState, selectedCaptainId: string | null, foc
     const placed = turn.placedKnightId ? match.knights[turn.placedKnightId] : undefined;
     const n = attackTargets(match).length;
     return focusedRegion === captain?.region
-      ? `${placed ? knightName(placed) : 'Your Knight'} can attack ${n === 1 ? 'the enemy Knight' : 'an enemy Knight'} next to it, or press End turn.`
+      ? `${placed ? knightName(placed) : 'Your Knight'} can attack ${n === 1 ? 'the adjacent enemy' : 'an adjacent enemy'}, or End turn.`
       : `Enter ${where} to attack, or End turn.`;
   }
   if (match.duel?.outcome) return 'Battle fought. Press End turn when ready.';

@@ -27,7 +27,11 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
   const selectable = new Set(isTheirTurn ? actionableCaptains(match).map((c) => c.id) : []);
 
   return (
-    <aside className={`player-panel player-panel--${player}${isTheirTurn ? ' player-panel--active' : ''}`}>
+    <aside
+      className={`player-panel player-panel--${player}${isTheirTurn ? ' player-panel--active' : ''}${
+        company ? ' player-panel--company' : ''
+      }`}
+    >
       <header className="player-panel__header">
         <div>
           <h2 className="player-panel__name">{PLAYER_NAMES[player]}</h2>

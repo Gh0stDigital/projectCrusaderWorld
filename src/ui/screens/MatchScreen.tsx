@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { useAppStore } from '../../store/appStore';
 import { useMatchStore } from '../../store/matchStore';
 import { actingCaptain, regionsOpenTo } from '../../engine/queries';
@@ -14,7 +14,9 @@ import { TurnAnnouncement } from '../overlays/TurnAnnouncement';
 import { OrdersNotice } from '../overlays/OrdersNotice';
 import { AttackPreview } from '../battle/AttackPreview';
 import { BattleView } from '../battle/BattleView';
+import regionBoardSkin from '../../assets/ui/region-board-skin.png';
 import './match.css';
+import './skin.css';
 
 /**
  * Pass-and-play for now: you control both players. The computer opponent
@@ -105,7 +107,7 @@ export function MatchScreen() {
     previewTarget && previewAttacker ? { attacker: previewAttacker, defender: previewTarget } : null;
 
   return (
-    <div className="match">
+    <div className="match" style={{ '--skin': `url(${regionBoardSkin})` } as CSSProperties}>
       <header className="match__top-bar">
         <button className="top-bar__button" onClick={leave}>
           Menu
@@ -114,7 +116,7 @@ export function MatchScreen() {
           {turn
             ? `${PLAYER_NAMES[turn.player]} · ${LORD_NAMES[turn.lord]}`
             : ordering
-              ? `${PLAYER_NAMES[ordering]} is ordering their Lords`
+              ? `${PLAYER_NAMES[ordering]} · Lord order`
               : 'Exhibition'}
         </span>
         <span className="top-bar__right">
