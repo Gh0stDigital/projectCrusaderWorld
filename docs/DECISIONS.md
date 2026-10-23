@@ -38,6 +38,12 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - Until routing exists, a Ready Captain may deploy to any Region open to that player, and a Lord may resume any of their stationed Captains. **Provisional**: routing will restrict this.
 - For now both sides are controlled by the person at the computer (pass-and-play). The computer opponent comes later.
 
+## Knight sprite — Settled
+
+- Knights on a Region's 3×3 board are a pixel-art Knight sprite (`src/assets/sprites`), not cards: blue for Player 1, red and mirrored for the enemy. It idles between its two frames at 1 frame per second (off with reduced motion).
+- The Captain panel's Knight tokens use the same sprite, still and slightly greyed out (darker when in the field, faint when unmanned, sepia when fallen).
+- Knight cards are still used in the attack preview and the battle screen.
+
 ## Region board skin — Settled
 
 - The match screen uses the owner's 16:9 artwork `src/assets/ui/region-board-skin.webp` (built over the layout wireframe in `design/templates`). Each area (top bar, side panels, Region board, phase window) shows its own slice of it, so the game's boxes sit on the art's frames; the Region board slice zooms with the camera.

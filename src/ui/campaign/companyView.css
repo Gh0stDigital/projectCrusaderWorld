@@ -240,3 +240,42 @@
   background: rgba(217, 169, 58, 0.18);
   box-shadow: 0 0 0 1px var(--gold);
 }
+
+/* Knight token icon: the still pixel Knight, slightly greyed. */
+.knight-token__icon {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 41px;
+}
+
+.knight-token__icon .knight-sprite {
+  filter: grayscale(0.45) brightness(0.8);
+}
+
+.knight-token__icon .knight-token__number {
+  position: absolute;
+  right: -6px;
+  bottom: -4px;
+  margin: 0;
+  min-width: 16px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: var(--ink);
+  border: 1px solid var(--gold-dim);
+  font-size: 8px;
+  text-align: center;
+}
+
+.knight-token--fielded .knight-token__icon .knight-sprite {
+  filter: grayscale(0.8) brightness(0.55);
+}
+
+.knight-token--unmanned .knight-token__icon .knight-sprite {
+  filter: grayscale(1) brightness(0.4);
+  opacity: 0.3;
+}
+
+.knight-token--dead .knight-token__icon .knight-sprite {
+  filter: grayscale(1) sepia(0.7) hue-rotate(-30deg) brightness(0.45);
+}

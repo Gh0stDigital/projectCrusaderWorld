@@ -11,6 +11,7 @@ import {
   lordPersona,
 } from '../../data/names';
 import { Card } from '../components/Card';
+import { KnightSprite } from '../components/KnightSprite';
 import './companyView.css';
 
 interface CompanyViewProps {
@@ -89,10 +90,8 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
                 onClick={() => onSelectKnight(knight.id)}
                 aria-label={`${knightName(knight)}: ${STATUS_LABEL[knight.status]}${alive ? `, ${knight.hp} HP` : ''}`}
               >
-                <span className="knight-token__shield" aria-hidden="true">
-                  <svg viewBox="0 0 24 28">
-                    <path d="M12 1.5 22 5v8c0 6.6-4.2 11.2-10 13.5C6.2 24.2 2 19.6 2 13V5z" />
-                  </svg>
+                <span className="knight-token__icon">
+                  <KnightSprite owner={player} width={44} />
                   <span className="knight-token__number">{knight.number}</span>
                 </span>
                 <span className="knight-token__text">
@@ -100,9 +99,7 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
                     {knight.status === 'unmanned' ? 'Empty slot' : knightPersonalName(knight)}
                   </span>
                   <span className="knight-token__detail">
-                    {alive
-                      ? `${knight.hp} HP${knight.status === 'fielded' ? ' · field' : ` · ${knight.sergeants.length} Sgt`}`
-                      : STATUS_LABEL[knight.status]}
+                    {alive ? `${knight.hp} HP${knight.status === 'fielded' ? ' · fld' : ''}` : STATUS_LABEL[knight.status]}
                   </span>
                 </span>
               </button>

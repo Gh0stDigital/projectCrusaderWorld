@@ -50,7 +50,7 @@
   opacity: 1;
 }
 
-.inner-board__square:has(.card) {
+.inner-board__square:has(.board-piece) {
   border-color: transparent;
 }
 
@@ -68,7 +68,7 @@
 }
 
 /* The Knight placed this turn, ready to attack. */
-.inner-board__square--attacker .card {
+.inner-board__square--attacker .board-piece {
   outline: 3px solid var(--gold);
   outline-offset: 3px;
 }
@@ -78,14 +78,14 @@
   cursor: pointer;
 }
 
-.inner-board__square--target .card {
+.inner-board__square--target .board-piece {
   outline: 3px solid #d9583f;
   outline-offset: 3px;
   animation: target-pulse 1.6s ease-in-out infinite;
 }
 
-.inner-board__square--target:hover .card,
-.inner-board__square--target:focus-visible .card {
+.inner-board__square--target:hover .board-piece,
+.inner-board__square--target:focus-visible .board-piece {
   outline-width: 4px;
   filter: brightness(1.1);
 }
@@ -126,4 +126,39 @@
   font-size: 10px;
   text-align: center;
   line-height: 1.15;
+}
+
+/* A Knight standing on a square: the pixel sprite on a team-colored base. */
+.board-piece {
+  position: relative;
+  width: 160px;
+  height: 210px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.board-piece--p1 {
+  background: radial-gradient(ellipse at 50% 72%, rgba(63, 127, 209, 0.35) 0%, transparent 62%);
+  box-shadow: inset 0 0 0 2px rgba(63, 127, 209, 0.55);
+}
+
+.board-piece--p2 {
+  background: radial-gradient(ellipse at 50% 72%, rgba(196, 71, 58, 0.35) 0%, transparent 62%);
+  box-shadow: inset 0 0 0 2px rgba(196, 71, 58, 0.55);
+}
+
+.board-piece .knight-sprite {
+  margin-top: -8px;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.5));
+}
+
+/* Keep the Attack label clear of the Knight's face. */
+.board-piece .attack-marker {
+  top: auto;
+  bottom: 34px;
+  transform: translateX(-50%);
+  font-size: 10px;
 }

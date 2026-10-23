@@ -1,0 +1,24 @@
+.knight-sprite {
+  display: block;
+  flex: none;
+  background-repeat: no-repeat;
+  background-size: calc(var(--sprite-w) * 2) 100%;
+  background-position: 0 0;
+  image-rendering: pixelated;
+}
+
+/* Two frames at 1 frame per second: each pose holds for a full second. */
+.knight-sprite--animate {
+  animation: knight-idle 2s steps(2, end) infinite;
+}
+
+@keyframes knight-idle {
+  from { background-position: 0 0; }
+  to { background-position: calc(var(--sprite-w) * -2) 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knight-sprite--animate {
+    animation: none;
+  }
+}

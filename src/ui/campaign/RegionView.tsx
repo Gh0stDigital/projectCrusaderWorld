@@ -1,7 +1,7 @@
 import { attackTargets, knightAt, legalSquares } from '../../engine/queries';
 import { SQUARES, type MatchState, type RegionIndex, type SquareIndex } from '../../engine/state';
-import { PLAYER_NAMES, REGION_NAMES, knightArt, knightName, knightPersonalName } from '../../data/names';
-import { Card } from '../components/Card';
+import { PLAYER_NAMES, REGION_NAMES, knightName, knightPersonalName } from '../../data/names';
+import { KnightSprite } from '../components/KnightSprite';
 import './regionView.css';
 
 interface RegionViewProps {
@@ -55,11 +55,12 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
               aria-label={label}
             >
               {knight && (
-                <Card art={knightArt(knight.owner)} size="slot" owner={knight.owner}>
+                <span className={`board-piece board-piece--${knight.owner}`}>
+                  <KnightSprite owner={knight.owner} width={128} animate title={knightName(knight)} />
                   <span className="hp-badge">{knight.hp}</span>
                   <span className="knight-plate">{knightPersonalName(knight)}</span>
                   {isTarget && <span className="attack-marker">Attack</span>}
-                </Card>
+                </span>
               )}
             </button>
           );
