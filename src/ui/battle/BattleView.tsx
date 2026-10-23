@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { availableSergeants, duelRoleOf } from '../../engine/queries';
 import { KNIGHT_HP, type Clash, type Duel, type DuelRole, type MatchState, type PlayerId, type Sergeant } from '../../engine/state';
-import { PLAYER_NAMES, REGION_NAMES, TACTIC_NAMES, captainName, knightArtFacing, knightName } from '../../data/names';
-import { Card } from '../components/Card';
+import { PLAYER_NAMES, REGION_NAMES, TACTIC_NAMES, captainName, knightName } from '../../data/names';
+import knightBattle from '../../assets/sprites/knight-battle.png';
+import enemyKnightBattle from '../../assets/sprites/enemy-knight-battle.png';
 import { SergeantBox, TacticLegend, type SergeantBoxState } from '../components/SergeantBox';
 import { TacticIcon } from '../components/TacticIcon';
 import './battleView.css';
@@ -162,7 +163,12 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
 
       <div className="combatant__body">
         <div className={`combatant__card${hp <= 0 ? ' combatant__card--fallen' : ''}`}>
-          <Card art={knightArtFacing(side.player, position === 'bottom' ? 'right' : 'left')} size="board" owner={side.player} />
+          <img
+            className="combatant__sprite"
+            src={side.player === 'p1' ? knightBattle : enemyKnightBattle}
+            alt={knightName(knight)}
+            draggable={false}
+          />
         </div>
         <div className="combatant__info">
           <span className="combatant__name">{knightName(knight)}</span>

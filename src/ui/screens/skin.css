@@ -476,3 +476,14 @@
   justify-self: end;
 }
 .phase-window__orders { top: 70px; }
+
+/* During a battle the side panels step aside and the battlefield fills the width. */
+.match--battle .player-panel {
+  display: none;
+}
+
+.match--battle .board-stage {
+  grid-area: auto;
+  grid-column: 1 / -1;
+  grid-row: 2;
+}

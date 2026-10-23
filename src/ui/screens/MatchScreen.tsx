@@ -109,7 +109,7 @@ export function MatchScreen() {
 
   return (
     <div
-      className={`match${focusedRegion !== null ? ' match--zoomed' : ''}`}
+      className={`match${focusedRegion !== null ? ' match--zoomed' : ''}${battleOpen ? ' match--battle' : ''}`}
       style={{ '--skin': `url(${regionBoardSkin})`, '--skin-zoomed': `url(${regionViewSkin})` } as CSSProperties}
     >
       <header className="match__top-bar">

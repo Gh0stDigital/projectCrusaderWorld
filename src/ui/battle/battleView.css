@@ -276,3 +276,72 @@
   from { transform: rotateY(90deg); opacity: 0; }
   to { transform: rotateY(0); opacity: 1; }
 }
+
+/* ================= Full-width battlefield =================
+ * The full-body Knights stand on the field: you bottom-left facing right,
+ * the enemy top-right facing left. Info and Sergeants sit beside them.
+ */
+.combatant--top {
+  top: 70px;
+  right: 70px;
+}
+
+.combatant--bottom {
+  left: 70px;
+  bottom: 14px;
+}
+
+.combatant {
+  display: grid;
+  gap: 14px 22px;
+  align-items: end;
+}
+
+/* Sprite in its own column; Sergeants and info stacked beside it. */
+.combatant--bottom {
+  grid-template-columns: auto auto;
+  grid-template-areas:
+    'sprite sergeants'
+    'sprite info';
+}
+
+.combatant--top {
+  grid-template-columns: auto auto;
+  grid-template-areas:
+    'sergeants sprite'
+    'info sprite';
+  align-items: start;
+}
+
+.combatant__sergeants { grid-area: sergeants; }
+.combatant__body { display: contents; }
+.combatant__card { grid-area: sprite; }
+.combatant__info { grid-area: info; }
+
+.combatant__sprite {
+  display: block;
+  height: 420px;
+  width: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 10px 6px rgba(0, 0, 0, 0.55));
+}
+
+.combatant__card--fallen .combatant__sprite {
+  filter: grayscale(1) brightness(0.45) drop-shadow(0 10px 6px rgba(0, 0, 0, 0.55));
+}
+
+.combatant__info {
+  width: 460px;
+}
+
+/* Clash results in the open ground between the two Knights. */
+.battle__center {
+  left: 860px;
+  top: 470px;
+  width: 560px;
+  height: 200px;
+}
+
+.battle-msg {
+  max-width: 560px;
+}
