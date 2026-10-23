@@ -86,12 +86,12 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
       return false;
     }
     set({ match: result.state, error: null, ...screenUpdatesFor(result.state, result.events) });
-    // The computer answers for the defending side in a duel. It commits before the
-    // human picks and never sees the human's choice.
+    // The computer picks Player 2's Sergeants in a duel, whether attacking or
+    // defending. It commits before the human picks and never sees their choice.
     if (result.events.some((e) => e.type === 'duelStarted' || e.type === 'clashResolved')) {
       const duel = result.state.duel;
       if (duel && !duel.outcome) {
-        const reply = chooseSergeant(result.state, duel.defender.player);
+        const reply = chooseSergeant(result.state, 'p2');
         if (reply) get().dispatch(reply);
       }
     }

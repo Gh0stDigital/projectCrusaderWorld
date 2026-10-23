@@ -48,7 +48,7 @@
   font-size: 24px;
 }
 
-/* --- Combatants: defender top-right, attacker bottom-left --- */
+/* --- Combatants: the enemy (red) top-left, you (blue) bottom-right --- */
 .combatant {
   position: absolute;
   display: flex;
@@ -56,16 +56,16 @@
   gap: 12px;
 }
 
-.combatant--defender {
-  top: 70px;
-  right: 40px;
-  align-items: flex-end;
+.combatant--top {
+  top: 66px;
+  left: 40px;
+  align-items: flex-start;
 }
 
-.combatant--attacker {
-  left: 40px;
-  bottom: 24px;
-  align-items: flex-start;
+.combatant--bottom {
+  right: 40px;
+  bottom: 16px;
+  align-items: flex-end;
 }
 
 .combatant__sergeants {
@@ -85,10 +85,14 @@
   gap: 18px;
 }
 
-/* Defender: info box to the left of the card. */
-.combatant--defender .combatant__body {
-  flex-direction: row-reverse;
+/* Enemy: info box to the right of the card, level with its top. */
+.combatant--top .combatant__body {
   align-items: flex-start;
+}
+
+/* You: info box to the left of the card, level with its bottom. */
+.combatant--bottom .combatant__body {
+  flex-direction: row-reverse;
 }
 
 .combatant__card {
@@ -160,13 +164,13 @@
 }
 
 /* --- Center messages --- */
-/* Messages sit in the open ground bottom-right, between the two Knights. */
+/* Messages sit in the middle of the field, between the two Knights. */
 .battle__center {
   position: absolute;
-  left: 590px;
-  top: 490px;
-  width: 500px;
-  height: 330px;
+  left: 300px;
+  top: 300px;
+  width: 520px;
+  height: 200px;
   display: grid;
   place-items: center;
   pointer-events: none;
@@ -177,9 +181,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 18px 28px;
-  max-width: 500px;
+  gap: 8px;
+  padding: 14px 24px;
+  max-width: 520px;
   text-align: center;
   background: rgba(20, 15, 11, 0.9);
   border: 2px solid var(--gold-dim);
@@ -225,12 +229,12 @@
 }
 
 .revealed {
-  width: 120px;
+  width: 116px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 10px 6px;
+  padding: 6px 6px 8px;
   border-radius: 8px;
   border: 2px solid var(--wood-light);
   animation: reveal-flip 420ms ease-out both;
@@ -239,6 +243,12 @@
 .revealed--winner {
   border-color: var(--gold);
   box-shadow: 0 0 0 2px var(--gold), 0 0 24px rgba(217, 169, 58, 0.55);
+}
+
+.revealed__who {
+  font-size: 14px;
+  color: var(--parchment-dim);
+  letter-spacing: 0.06em;
 }
 
 .revealed__name {

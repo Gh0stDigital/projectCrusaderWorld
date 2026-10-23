@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { availableSergeants } from '../../engine/queries';
-import { KNIGHT_HP, type Clash, type Duel, type DuelRole, type MatchState, type Sergeant } from '../../engine/state';
+import { availableSergeants, duelRoleOf } from '../../engine/queries';
+import { KNIGHT_HP, type Clash, type Duel, type DuelRole, type MatchState, type PlayerId, type Sergeant } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, TACTIC_NAMES, captainName, knightArtFacing, knightName } from '../../data/names';
 import { Card } from '../components/Card';
 import { SergeantBox, TacticLegend, type SergeantBoxState } from '../components/SergeantBox';
@@ -15,6 +15,9 @@ const CLOSE_MS = 450;
 
 type Phase = 'intro' | 'choose' | 'reveal' | 'result' | 'over';
 
+/** The human always fights as Player 1 (blue); the computer answers for Player 2 (red). */
+const HUMAN: PlayerId = 'p1';
+
 interface BattleViewProps {
   match: MatchState;
   duel: Duel;
@@ -23,9 +26,10 @@ interface BattleViewProps {
 }
 
 /**
- * The battlefield. The attacking Knight stands bottom-left and the defender
- * top-right, each with their Sergeants above them. Clashes are revealed one
- * at a time with pauses, even though the rules resolve them instantly.
+ * The battlefield. Your blue Knight stands bottom-right facing left; the red
+ * enemy stands top-left facing right, whichever side attacked. Each has their
+ * Sergeants above them. Clashes are revealed one at a time with pauses, even
+ * though the rules resolve them instantly.
  */
 export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) {
   // How many clashes have been fully shown so far.
@@ -66,7 +70,9 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
   const upTo = phase === 'result' ? shown + 1 : shown;
   const current = phase === 'reveal' || phase === 'result' ? pendingClash : undefined;
   const canChoose = phase === 'choose' && !pendingClash && !duel.outcome;
-  const myOptions = new Set(canChoose ? availableSergeants(match, duel, 'attacker').map((s) => s.id) : []);
+  const myRole: DuelRole = duelRoleOf(duel, HUMAN) ?? 'attacker';
+  const enemyRole: DuelRole = myRole === 'attacker' ? 'defender' : 'attacker';
+  const myOptions = new Set(canChoose ? availableSergeants(match, duel, myRole).map((s) => s.id) : []);
 
   return (
     <div className={`battle${closing ? ' battle--closing' : ''}`}>
@@ -78,11 +84,12 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
         <TacticLegend />
       </header>
 
-      <Combatant match={match} duel={duel} role="defender" upTo={upTo} current={current} />
+      <Combatant match={match} duel={duel} role={enemyRole} position="top" upTo={upTo} current={current} />
       <Combatant
         match={match}
         duel={duel}
-        role="attacker"
+        role={myRole}
+        position="bottom"
         upTo={upTo}
         current={current}
         options={myOptions}
@@ -96,7 +103,8 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
           phase={phase}
           clash={current}
           clashNumber={shown + 1}
-          enemyReady={duel.pending.defender !== null}
+          enemyReady={duel.pending[enemyRole] !== null}
+          myRole={myRole}
           onReturn={close}
         />
       </div>
@@ -108,6 +116,8 @@ interface CombatantProps {
   match: MatchState;
   duel: Duel;
   role: DuelRole;
+  /** Top: the enemy, facing right. Bottom: you, facing left. */
+  position: 'top' | 'bottom';
   upTo: number;
   current: Clash | undefined;
   options?: Set<string>;
@@ -115,7 +125,7 @@ interface CombatantProps {
 }
 
 /** One Knight on the battlefield: card, info box with HP, and Sergeants above. */
-function Combatant({ match, duel, role, upTo, current, options, onPick }: CombatantProps) {
+function Combatant({ match, duel, role, position, upTo, current, options, onPick }: CombatantProps) {
   const side = duel[role];
   const knight = match.knights[side.knightId]!;
   const captain = match.captains[knight.captainId]!;
@@ -128,7 +138,7 @@ function Combatant({ match, duel, role, upTo, current, options, onPick }: Combat
   const tookDamage = current && upTo > 0 && current === last && current.winner !== role && current.winner !== 'tie';
 
   return (
-    <div className={`combatant combatant--${role} combatant--${side.player}`}>
+    <div className={`combatant combatant--${position} combatant--${side.player}`}>
       <div className="combatant__sergeants">
         {side.startSergeants.map((s) => {
           const now = alive.find((a) => a.id === s.id);
@@ -152,7 +162,7 @@ function Combatant({ match, duel, role, upTo, current, options, onPick }: Combat
 
       <div className="combatant__body">
         <div className={`combatant__card${hp <= 0 ? ' combatant__card--fallen' : ''}`}>
-          <Card art={knightArtFacing(side.player, role === 'attacker' ? 'right' : 'left')} size="detail" owner={side.player} />
+          <Card art={knightArtFacing(side.player, position === 'bottom' ? 'left' : 'right')} size="board" owner={side.player} />
         </div>
         <div className="combatant__info">
           <span className="combatant__name">{knightName(knight)}</span>
@@ -179,10 +189,12 @@ interface CenterPanelProps {
   clash: Clash | undefined;
   clashNumber: number;
   enemyReady: boolean;
+  myRole: DuelRole;
   onReturn: () => void;
 }
 
-function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, onReturn }: CenterPanelProps) {
+function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, myRole, onReturn }: CenterPanelProps) {
+  const enemyRole: DuelRole = myRole === 'attacker' ? 'defender' : 'attacker';
   const attacker = match.knights[duel.attacker.knightId]!;
   const defender = match.knights[duel.defender.knightId]!;
 
@@ -214,9 +226,9 @@ function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, onRet
     return (
       <div className="battle-msg">
         <div className="clash-reveal">
-          <RevealedPick pick={clash.attacker} winner={phase === 'result' && clash.winner === 'attacker'} />
+          <RevealedPick label="You" pick={clash[myRole]} winner={phase === 'result' && clash.winner === myRole} />
           <span className="clash-reveal__vs">vs</span>
-          <RevealedPick pick={clash.defender} winner={phase === 'result' && clash.winner === 'defender'} />
+          <RevealedPick label="Enemy" pick={clash[enemyRole]} winner={phase === 'result' && clash.winner === enemyRole} />
         </div>
         <span className={`battle-msg__small${phase === 'result' ? ' battle-msg__verdict' : ''}`}>
           {phase === 'reveal' ? 'Revealing…' : verdict(clash, knightName(attacker), knightName(defender))}
@@ -254,17 +266,19 @@ function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, onRet
   return null;
 }
 
-function RevealedPick({ pick, winner }: { pick: Clash['attacker']; winner: boolean }) {
+function RevealedPick({ label, pick, winner }: { label: string; pick: Clash['attacker']; winner: boolean }) {
   if (!pick) {
     return (
       <span className="revealed revealed--none">
+        <span className="revealed__who">{label}</span>
         <span className="revealed__name">No Sergeant</span>
       </span>
     );
   }
   return (
     <span className={`revealed revealed--${pick.tactic}${winner ? ' revealed--winner' : ''}`}>
-      <TacticIcon tactic={pick.tactic} size={52} />
+      <span className="revealed__who">{label}</span>
+      <TacticIcon tactic={pick.tactic} size={40} />
       <span className="revealed__name">{TACTIC_NAMES[pick.tactic]}</span>
       <span className="revealed__men">{pick.militia} men</span>
     </span>

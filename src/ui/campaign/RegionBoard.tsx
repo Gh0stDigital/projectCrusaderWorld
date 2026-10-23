@@ -1,6 +1,6 @@
 import { captainInRegion, knightAt } from '../../engine/queries';
 import { REGIONS, SQUARES, type MatchState, type PlayerId, type RegionIndex } from '../../engine/state';
-import { PLAYER_NAMES, REGION_NAMES, captainArt, captainName, knightArt } from '../../data/names';
+import { PLAYER_NAMES, REGION_NAMES, captainArt, captainName } from '../../data/names';
 import { Portrait } from '../components/Portrait';
 import './regionBoard.css';
 
@@ -22,8 +22,8 @@ interface RegionBoardProps {
 
 /**
  * The 3×3 Region board. Each tile shows the Captains stationed there as small
- * portraits, and a large map of its own 3×3 board so occupied squares read
- * at a glance.
+ * portraits, and a large map of its own 3×3 board marked X (Player 1, blue) and
+ * O (Player 2, red) so occupied squares read at a glance.
  */
 export function RegionBoard({ match, clickable, active, choosing, onClickRegion, labelFor }: RegionBoardProps) {
   return (
@@ -50,10 +50,10 @@ export function RegionBoard({ match, clickable, active, choosing, onClickRegion,
             <span className="region__map" aria-hidden="true">
               {SQUARES.map((square) => {
                 const knight = knightAt(match, region, square);
-                return knight ? (
-                  <Portrait key={square} art={knightArt(knight.owner)} size={50} owner={knight.owner} />
-                ) : (
-                  <span key={square} className="region__map-square" />
+                return (
+                  <span key={square} className="region__map-square">
+                    {knight && <Mark player={knight.owner} />}
+                  </span>
                 );
               })}
             </span>
@@ -63,6 +63,19 @@ export function RegionBoard({ match, clickable, active, choosing, onClickRegion,
         );
       })}
     </div>
+  );
+}
+
+/** Tic-tac-toe mark for a Knight on the Region map: X for Player 1, O for Player 2. */
+function Mark({ player }: { player: PlayerId }) {
+  return (
+    <svg className={`region__mark region__mark--${player}`} viewBox="0 0 40 40" aria-hidden="true">
+      {player === 'p1' ? (
+        <path d="M9 9 L31 31 M31 9 L9 31" />
+      ) : (
+        <circle cx="20" cy="20" r="12" />
+      )}
+    </svg>
   );
 }
 

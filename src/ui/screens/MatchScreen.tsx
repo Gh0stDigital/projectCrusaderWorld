@@ -187,7 +187,7 @@ export function MatchScreen() {
               <BattleView
                 match={match}
                 duel={match.duel}
-                onCommit={(sergeantId) => store.dispatch({ type: 'commitSergeant', player: turn.player, sergeantId })}
+                onCommit={(sergeantId) => store.dispatch({ type: 'commitSergeant', player: 'p1', sergeantId })}
                 onClose={store.closeBattle}
               />
             )}

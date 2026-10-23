@@ -21,7 +21,7 @@ The Lords are characters with their own card art: **Aubrey** (Army), **Nevadius*
 
 Captains have placeholder names, two per Lord (Player 1: Roderic, Godfrey, Edmund, Baldwin, Tancred, Alaric; enemy: Malric, Draven, Mordaunt, Varek, Corvin, Sauvic), set in `src/data/names.ts`. Player 1's Captains share one Captain card; the enemy's share a generic Captain card recolored crimson and mirrored to face inward from the right (the banner lettering is kept unmirrored).
 
-Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/data/names.ts`). Player 1's Knights use the blue Knight card; the enemy's use the same Knight with red armor and a crimson frame, mirrored to face inward. In battle the Knights always face each other, using left- and right-facing versions of each card. Which Lord leads which class is set in `src/data/names.ts` (`LORD_PERSONAS`).
+Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/data/names.ts`). Player 1's Knights use the blue Knight card; the enemy's use the same Knight with red armor and a crimson frame, mirrored to face inward. In battle the Knights always face each other. Which Lord leads which class is set in `src/data/names.ts` (`LORD_PERSONAS`).
 
 "Campaign" in scope notes means a story mode across several matches. The Region board itself (with Ultimate Tic-Tac-Toe routing) is the core of every match.
 
@@ -42,7 +42,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 
 - After choosing a Captain, the player is prompted to enter that Captain's Region (button and tile). Entering zooms smoothly from the Region's tile into its 3×3 board.
 - In the Region view, the Region's 3×3 board fills the center. Each player's side panel switches from their Lords to their Captain stationed in that Region, with the Captain's 6 Knights below in two columns of three (Player 1 left, Player 2 right; sides never swap). Knights already on the field are greyed.
-- On the Region board, each tile shows the stationed Captains as small square face portraits (Player 1 left of the name, Player 2 right) and a large 3×3 map where each occupied square shows that Knight's face ringed in the owner's color.
+- On the Region board, each tile shows the stationed Captains as small square face portraits (Player 1 left of the name, Player 2 right) and a large 3×3 map where occupied squares show a blue X (Player 1) or a red O (Player 2).
 - The player can zoom out to view the Region board at any time without changing orders, and return to their Region.
 - After End Turn: about 1 second of "orders complete" confirmation, zoom out to the Region board, about 1 second pause, then the next turn's announcement.
 
@@ -99,7 +99,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 
 - Sergeant tactics are **Rush, Flank and Counter**. Each Knight's five Sergeants mix them two, two and one, varying by Knight.
 - Before attacking, a window shows both Knights (HP, Sergeants, tactics) with Cancel or Commence attack.
-- Commencing zooms into a battlefield: the attacker bottom-left, the defender top-right, each with their Sergeants as boxes (tactic icon and men) above them.
+- Commencing zooms into a battlefield: your blue Knight bottom-right facing left, the red enemy top-left facing right, whichever side attacked, each with their Sergeants as boxes (tactic icon and men) above them. Clash results show in the middle of the field, labeled You and Enemy.
 - Each clash, both sides secretly choose a Sergeant; the winning tactic deals that Sergeant's men as damage to the other Knight's HP.
 - The Knight with less HP at the end loses and is removed from the board. The winner stays on its square and the square becomes empty.
 - Clashes are revealed one at a time with pauses (intro, reveal, result) so the information is easy to follow. After the result the player returns to the Region and ends the turn manually.
@@ -115,7 +115,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 6. The losing Knight dies at 0 HP; otherwise it retreats to its Captain with its remaining HP and Sergeants, and can be placed again later.
 7. Only the Knight placed this turn may attack, once, and only an enemy directly up, down, left or right of it. Attacking is optional.
 8. HP, Sergeant losses and deaths carry over to every later battle. Nothing regenerates.
-9. For now the defending side's Sergeant is chosen by the computer at random, committed before the attacker chooses, and never looks at the attacker's pick.
+9. The human always picks Player 1's (blue) Sergeants and the computer always picks Player 2's (red), whether attacking or defending. The computer picks at random, commits first, and never looks at the human's pick.
 
 ## Other rules — Proposed (not yet approved)
 
