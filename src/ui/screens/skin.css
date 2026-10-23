@@ -212,3 +212,92 @@
 .phase-window__end-turn.btn--primary {
   box-shadow: 0 0 18px rgba(217, 169, 58, 0.45);
 }
+
+/*
+ * Hub (side panel) typography, sized and spaced so each line sits on its bar
+ * in the art: header bars, then per Lord row three short bars and two boxes.
+ */
+.player-panel:not(.player-panel--company) {
+  padding-top: 26px;
+}
+
+.player-panel:not(.player-panel--company) .player-panel__header {
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.player-panel:not(.player-panel--company) .player-panel__name {
+  font-size: 28px;
+  line-height: 30px;
+}
+
+.player-panel:not(.player-panel--company) .player-panel__militia {
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 18px;
+}
+
+.player-panel:not(.player-panel--company) .player-panel__status {
+  margin-top: 8px;
+  padding-right: 6px;
+  font-size: 16px;
+  line-height: 22px;
+}
+
+.player-panel:not(.player-panel--company) .lord-row__info {
+  gap: 0;
+}
+
+.player-panel:not(.player-panel--company) .lord-row__title {
+  margin-top: 4px;
+  font-size: 19px;
+  line-height: 22px;
+  letter-spacing: 0.02em;
+}
+
+.player-panel:not(.player-panel--company) .lord-row__class {
+  margin-top: 7px;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.player-panel:not(.player-panel--company) .lord-row__militia {
+  margin: 1px 0 0;
+  font-size: 14px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.player-panel:not(.player-panel--company) .lord-row__captains {
+  margin-top: 13px;
+  gap: 10px;
+}
+
+.player-panel:not(.player-panel--company) .captain-chip {
+  height: 47px;
+  justify-content: center;
+  gap: 1px;
+  padding: 3px 12px;
+  line-height: 1.15;
+}
+
+.player-panel:not(.player-panel--company) .captain-chip > span:first-child {
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.player-panel:not(.player-panel--company) .captain-chip__where {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.player-panel:not(.player-panel--company) .lord-row__empty-hint {
+  margin-top: 52px;
+  font-size: 16px;
+}

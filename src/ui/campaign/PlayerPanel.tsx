@@ -97,7 +97,7 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
                       const where =
                         captain.region === null
                           ? 'Ready'
-                          : `${REGION_NAMES[captain.region]} · ${waiting} Knight${waiting === 1 ? '' : 's'} waiting`;
+                          : `${REGION_NAMES[captain.region]} · ${waiting} waiting`;
                       const content = (
                         <>
                           <span>{label}</span>
