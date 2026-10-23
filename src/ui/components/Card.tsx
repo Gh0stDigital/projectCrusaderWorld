@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { artCatalog, type ArtId } from '../../data/artCatalog';
 import './card.css';
+import './tactics.css';
 
 /**
  * Every card size in the game. All are 2:3: cards change size between views,

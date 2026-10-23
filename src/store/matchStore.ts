@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { MatchAction } from '../engine/actions';
 import type { MatchEvent } from '../engine/events';
 import { applyAction } from '../engine/match';
+import { chooseSergeant } from '../ai';
 import { actionableCaptains, canEndTurn, reserveKnights } from '../engine/queries';
 import { createMatch } from '../engine/setup';
 import type { LordClass, MatchState, PlayerId, RegionIndex } from '../engine/state';
@@ -29,6 +30,15 @@ interface MatchStore {
   focusedRegion: RegionIndex | null;
   /** True while the end-of-turn sequence plays; player input is ignored. */
   busy: boolean;
+  /** Enemy Knight being looked at before committing to an attack. */
+  attackPreviewId: string | null;
+  /** Whether the battle screen is showing. Stays open after the duel ends until the player returns. */
+  battleOpen: boolean;
+  /**
+   * The match as it stood when the battle began. Side panels show this while the
+   * battle plays, so they don't reveal results before the battle screen does.
+   */
+  battleSnapshot: MatchState | null;
   /** "Orders complete" confirmation shown at the end of a turn. */
   notice: { player: PlayerId } | null;
   error: string | null;
@@ -39,6 +49,9 @@ interface MatchStore {
   selectKnight: (id: string | null) => void;
   focusRegion: (region: RegionIndex | null) => void;
   requestEndTurn: () => void;
+  openAttackPreview: (knightId: string | null) => void;
+  commenceAttack: () => void;
+  closeBattle: () => void;
   dismissAnnouncement: () => void;
   newMatch: () => void;
 }
@@ -51,6 +64,9 @@ const freshScreenState = {
   notice: null,
   error: null,
   announcement: null,
+  attackPreviewId: null,
+  battleOpen: false,
+  battleSnapshot: null,
 };
 
 let sequenceTimers: number[] = [];
@@ -70,6 +86,15 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
       return false;
     }
     set({ match: result.state, error: null, ...screenUpdatesFor(result.state, result.events) });
+    // The computer answers for the defending side in a duel. It commits before the
+    // human picks and never sees the human's choice.
+    if (result.events.some((e) => e.type === 'duelStarted' || e.type === 'clashResolved')) {
+      const duel = result.state.duel;
+      if (duel && !duel.outcome) {
+        const reply = chooseSergeant(result.state, duel.defender.player);
+        if (reply) get().dispatch(reply);
+      }
+    }
     return true;
   },
 
@@ -82,9 +107,9 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
    * pause, then hand over to the next player.
    */
   requestEndTurn: () => {
-    const { match, busy, focusedRegion } = get();
+    const { match, busy, focusedRegion, battleOpen } = get();
     const turn = match.turn;
-    if (busy || !turn) return;
+    if (busy || battleOpen || !turn) return;
     if (!canEndTurn(match)) {
       // Let the engine explain why.
       get().dispatch({ type: 'endTurn', player: turn.player });
@@ -102,6 +127,21 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
       }, CONFIRM_MS + zoomTime + PAUSE_MS),
     );
   },
+
+  openAttackPreview: (knightId) => set({ attackPreviewId: knightId, error: null }),
+
+  /** Confirm the attack from the preview: start the duel and open the battle screen. */
+  commenceAttack: () => {
+    const { match, attackPreviewId } = get();
+    if (!match.turn || !attackPreviewId) return;
+    set({ attackPreviewId: null });
+    const before = get().match;
+    if (get().dispatch({ type: 'declareAttack', player: match.turn.player, targetKnightId: attackPreviewId })) {
+      set({ battleOpen: true, battleSnapshot: before });
+    }
+  },
+
+  closeBattle: () => set({ battleOpen: false, battleSnapshot: null }),
 
   dismissAnnouncement: () => set({ announcement: null }),
   newMatch: () => {

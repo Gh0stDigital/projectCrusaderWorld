@@ -1,6 +1,6 @@
-import { actionableCaptains, captainsOf, reserveKnights } from '../../engine/queries';
+import { actionableCaptains, captainsOf, lordMilitia, playerMilitia, reserveKnights } from '../../engine/queries';
 import type { LordClass, MatchState, PlayerId, RegionIndex } from '../../engine/state';
-import { LORD_TITLES, PLAYER_NAMES, REGION_NAMES } from '../../data/names';
+import { LORD_TITLES, PLAYER_NAMES, REGION_NAMES, formatMilitia } from '../../data/names';
 import { LordCard } from '../components/LordCard';
 import { CompanyView } from './CompanyView';
 import './playerPanel.css';
@@ -29,7 +29,10 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
   return (
     <aside className={`player-panel player-panel--${player}${isTheirTurn ? ' player-panel--active' : ''}`}>
       <header className="player-panel__header">
-        <h2 className="player-panel__name">{PLAYER_NAMES[player]}</h2>
+        <div>
+          <h2 className="player-panel__name">{PLAYER_NAMES[player]}</h2>
+          <p className="player-panel__militia">{formatMilitia(playerMilitia(match, player))} militia</p>
+        </div>
         <p className="player-panel__status">{statusFor(match, player)}</p>
       </header>
 
@@ -71,6 +74,13 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
 
               <div className="lord-row__info">
                 <h3 className="lord-row__title">{LORD_TITLES[lord]}</h3>
+                <p className="lord-row__militia">
+                  {formatMilitia(lordMilitia(match, player, lord))} militia
+                  <span className="lord-row__reserve">
+                    {' '}
+                    · {formatMilitia(match.players[player].lordReserves[lord])} in reserve
+                  </span>
+                </p>
                 {active && <span className="lord-row__badge">Taking this turn</span>}
                 {match.phase === 'turns' && (
                   <ul className="lord-row__captains">

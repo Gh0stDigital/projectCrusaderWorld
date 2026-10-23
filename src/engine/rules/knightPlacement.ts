@@ -1,11 +1,12 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
-import { actingCaptain, knightAt } from '../queries';
+import { actingCaptain, attackTargets, knightAt } from '../queries';
 import { SQUARES, type MatchState, type PlayerId, type SquareIndex } from '../state';
 
 /**
  * The acting Captain places one of their waiting Knights on an empty square
  * of their Region. One placement per turn. Knights never move afterwards.
+ * If an enemy Knight stands next to the new Knight, the turn moves to the Attack step.
  */
 export function placeKnight(
   state: MatchState,
@@ -23,18 +24,23 @@ export function placeKnight(
   if (!captain || captain.region === null) return reject('Your Captain is not stationed in a Region.');
   const knight = state.knights[knightId];
   if (!knight || knight.captainId !== captain.id) return reject('That Knight does not serve this Captain.');
-  if (knight.position !== null) return reject('That Knight is already on the field.');
+  if (knight.status === 'unmanned') return reject('That Knight has no men yet.');
+  if (knight.status !== 'ready') return reject('That Knight cannot take the field.');
   if (!SQUARES.includes(square)) return reject('That square does not exist.');
   if (knightAt(state, captain.region, square)) return reject('That square is taken.');
 
   const region = captain.region;
+  const placed: MatchState = {
+    ...state,
+    knights: { ...state.knights, [knightId]: { ...knight, status: 'fielded', position: { region, square } } },
+    turn: { ...turn, step: 'attack', placedKnightId: knightId },
+  };
+  // With no enemy next to the new Knight there is nothing to attack: go straight to End.
+  const next: MatchState =
+    attackTargets(placed).length > 0 ? placed : { ...placed, turn: { ...placed.turn!, step: 'end' } };
   return {
     ok: true,
-    state: {
-      ...state,
-      knights: { ...state.knights, [knightId]: { ...knight, position: { region, square } } },
-      turn: { ...turn, step: 'end', placedKnightId: knightId },
-    },
+    state: next,
     events: [{ type: 'knightPlaced', player, knightId, region, square }],
   };
 }

@@ -82,27 +82,47 @@ Lord classes: Army, Garrison, Raiders. Each player has one Lord of each.
 - **Narrative:** scripts are data files. A director plays scenes in response to engine events, one at a time. Scenes pause the game but never change it except through normal engine actions. Typewriter text: click finishes the line, click again advances, a held key fast-forwards, Esc skips the scene. Reduced motion shows text instantly. No scene during a duel may hint at an uncommitted Sergeant pick.
 - **Saves** are a versioned copy of the engine state, taken only between scenes.
 
-## Rules for Milestone 1 — Proposed (not yet approved)
+## Militia — Settled (test values)
 
-1. Tactic triangle: Attack beats Maneuver, Maneuver beats Counter, Counter beats Attack.
-2. Clash: the winning Sergeant deals their militia as damage and the losing Sergeant is lost. On a tie, both lose half, with the loss rounded up.
-3. Knight HP = sum of its Sergeants' militia.
-4. Starting Knight: 5 Sergeants × 20 militia = 100 HP.
-5. Each General has 1,000 militia. Each Commander starts with 4 staffed Knights (400), leaving 200 as General reserve. Capacity stays 6 Knights per Commander.
-6. Fewer than 5 Sergeants: the duel runs as many clashes as the side with more Sergeants. A side with none left takes unopposed hits.
-7. Equal HP at duel end: the defender holds and both Knights stay.
-8. Attack adjacency is orthogonal only.
-9. A turn is either: place a Knight, then optionally attack with that Knight; or attack with an already stationed Knight. Not both.
-10. After an attack-only turn, routing comes from the attacking Knight's square.
-11. A defeated Knight that survives returns to its Commander's undeployed pool.
-12. When a territory is secured, the losing Commander's Knights there are captured and that Commander counts as killed.
-13. A full board with no line and no legal attack closes as neutral.
-14. A player with no legal action skips to the next General with one. If none has one, that player loses.
-15. No reserves or reinforcement in Milestone 1. Reserves are only displayed.
+- Each Lord starts with 1,000 militia: 200 in the Lord's reserve, and each of 2 Captains holds 100 in reserve plus 3 staffed Knights.
+- A staffed Knight is 50 militia of their own (their HP; Knights hold no reserve) plus 5 Sergeants of 10 men each. 200 + 2 × (100 + 3 × 100) = 1,000.
+- A Captain has 6 Knight slots; slots 4–6 start unmanned (no men) and cannot be placed. Staffing them from reserves comes later.
+- Militia is shown per player, per Lord (with reserve), per Captain (with reserve), per Knight (HP) and per Sergeant (men). Totals count living men only.
+
+## Battles — Settled
+
+- Sergeant tactics are **Rush, Flank and Counter**. Each Knight's five Sergeants mix them two, two and one, varying by Knight.
+- Before attacking, a window shows both Knights (HP, Sergeants, tactics) with Cancel or Commence attack.
+- Commencing zooms into a battlefield: the attacker bottom-left, the defender top-right, each with their Sergeants as boxes (tactic icon and men) above them.
+- Each clash, both sides secretly choose a Sergeant; the winning tactic deals that Sergeant's men as damage to the other Knight's HP.
+- The Knight with less HP at the end loses and is removed from the board. The winner stays on its square and the square becomes empty.
+- Clashes are revealed one at a time with pauses (intro, reveal, result) so the information is easy to follow. After the result the player returns to the Region and ends the turn manually.
+- Side panels hold their numbers during a battle and update when the player returns, so they never reveal a result early.
+
+## Battles — Provisional (my choices, open to change)
+
+1. Rush beats Flank, Flank beats Counter, Counter beats Rush.
+2. The beaten Sergeant is lost with all their men. The winning Sergeant is unharmed.
+3. Same tactic: both Sergeants lose half their men (loss rounded up), and no HP damage.
+4. Up to 5 clashes; each Sergeant fights once per duel. The duel ends early at 0 HP. If one side runs out of Sergeants, the other's remaining Sergeants strike unopposed.
+5. Equal HP at the end: the defender holds and both Knights stay.
+6. The losing Knight dies at 0 HP; otherwise it retreats to its Captain with its remaining HP and Sergeants, and can be placed again later.
+7. Only the Knight placed this turn may attack, once, and only an enemy directly up, down, left or right of it. Attacking is optional.
+8. HP, Sergeant losses and deaths carry over to every later battle. Nothing regenerates.
+9. For now the defending side's Sergeant is chosen by the computer at random, committed before the attacker chooses, and never looks at the attacker's pick.
+
+## Other rules — Proposed (not yet approved)
+
+1. A turn may instead be an attack by an already stationed Knight, with no placement. After such a turn, routing comes from the attacking Knight's square.
+2. When a territory is secured, the losing Captain's Knights there are captured and that Captain counts as killed.
+3. A full board with no line and no legal attack closes as neutral.
+4. A player with no legal action skips to the next Lord with one. If none has one, that player loses.
+5. Reserves and reinforcement (staffing unmanned Knights, topping up Sergeants) come later. Reserves are only displayed for now.
 
 ## Still open
 
 - Army / Garrison / Raiders advantages.
+- Ultimate Tic-Tac-Toe routing (where a placement sends the opponent).
 - What makes factions differ (cosmetic or mechanical) and how many there are.
 - Whether there is a story campaign or only reactive scenes.
 - Whether eliminating all three enemy Generals is also a win.

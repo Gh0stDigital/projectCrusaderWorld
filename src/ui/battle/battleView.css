@@ -1,0 +1,262 @@
+/* The battlefield fills the board stage; the side panels stay visible. */
+.battle {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  overflow: clip;
+  background:
+    linear-gradient(180deg, #3b4a5a 0%, #6b6a55 38%, #4f5a33 39%, #39421f 100%);
+  animation: battle-in 500ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.battle--closing {
+  animation: battle-out 450ms ease-in both;
+}
+
+@keyframes battle-in {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes battle-out {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(0.6); opacity: 0; }
+}
+
+.battle__header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: rgba(20, 15, 11, 0.78);
+  border-bottom: 1px solid var(--gold-dim);
+}
+
+.battle__where {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--gold);
+}
+
+.battle__clash {
+  font-family: var(--font-display);
+  font-size: 24px;
+}
+
+/* --- Combatants: defender top-right, attacker bottom-left --- */
+.combatant {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.combatant--defender {
+  top: 70px;
+  right: 40px;
+  align-items: flex-end;
+}
+
+.combatant--attacker {
+  left: 40px;
+  bottom: 24px;
+  align-items: flex-start;
+}
+
+.combatant__sergeants {
+  display: flex;
+  gap: 8px;
+}
+
+.combatant__none {
+  padding: 12px;
+  font-size: 18px;
+  color: var(--parchment-dim);
+}
+
+.combatant__body {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+}
+
+/* Defender: info box to the left of the card. */
+.combatant--defender .combatant__body {
+  flex-direction: row-reverse;
+  align-items: flex-start;
+}
+
+.combatant__card {
+  transition: filter 400ms, transform 400ms;
+}
+
+.combatant__card--fallen {
+  filter: grayscale(1) brightness(0.45);
+  transform: rotate(-6deg) translateY(10px);
+}
+
+.combatant__info {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
+  background: rgba(20, 15, 11, 0.9);
+  border: 2px solid var(--gold-dim);
+  border-radius: 8px;
+}
+
+.combatant--p1 .combatant__info { border-left: 6px solid var(--p1); }
+.combatant--p2 .combatant__info { border-left: 6px solid var(--p2); }
+
+.combatant__name {
+  font-family: var(--font-display);
+  font-size: 26px;
+}
+
+.combatant__sub {
+  font-size: 17px;
+  color: var(--parchment-dim);
+}
+
+.hp-bar {
+  height: 14px;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(233, 220, 192, 0.2);
+}
+
+.hp-bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7fb357, #b7d26b);
+  transition: width 700ms ease-out;
+}
+
+.combatant__hp {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.combatant__damage {
+  color: #f07a63;
+  font-size: 26px;
+  font-weight: 700;
+  animation: damage-pop 900ms ease-out both;
+}
+
+@keyframes damage-pop {
+  0% { opacity: 0; transform: translateY(8px) scale(0.8); }
+  30% { opacity: 1; transform: translateY(-4px) scale(1.15); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* --- Center messages --- */
+/* Messages sit in the open ground bottom-right, between the two Knights. */
+.battle__center {
+  position: absolute;
+  left: 590px;
+  top: 490px;
+  width: 500px;
+  height: 330px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.battle-msg {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 28px;
+  max-width: 500px;
+  text-align: center;
+  background: rgba(20, 15, 11, 0.9);
+  border: 2px solid var(--gold-dim);
+  border-radius: 10px;
+  animation: msg-in 260ms ease-out both;
+}
+
+.battle-msg--intro,
+.battle-msg--over {
+  border-color: var(--gold);
+}
+
+.battle-msg__big {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--gold);
+}
+
+.battle-msg__small {
+  font-size: 20px;
+  color: var(--parchment-dim);
+}
+
+.battle-msg__verdict {
+  color: var(--parchment);
+}
+
+@keyframes msg-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.clash-reveal {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.clash-reveal__vs {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--parchment-dim);
+}
+
+.revealed {
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px;
+  border-radius: 8px;
+  border: 2px solid var(--wood-light);
+  animation: reveal-flip 420ms ease-out both;
+}
+
+.revealed--winner {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold), 0 0 24px rgba(217, 169, 58, 0.55);
+}
+
+.revealed__name {
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.revealed__men {
+  font-size: 16px;
+  color: var(--parchment-dim);
+}
+
+.revealed--none {
+  opacity: 0.6;
+  border-style: dashed;
+}
+
+@keyframes reveal-flip {
+  from { transform: rotateY(90deg); opacity: 0; }
+  to { transform: rotateY(0); opacity: 1; }
+}

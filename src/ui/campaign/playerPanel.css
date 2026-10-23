@@ -40,6 +40,21 @@
   color: var(--gold);
 }
 
+.player-panel__militia {
+  margin: 0;
+  font-size: 18px;
+  color: var(--parchment-dim);
+}
+
+.lord-row__militia {
+  margin: -4px 0 0;
+  font-size: 16px;
+}
+
+.lord-row__reserve {
+  color: var(--parchment-dim);
+}
+
 .player-panel__status {
   font-size: 18px;
   color: var(--parchment-dim);

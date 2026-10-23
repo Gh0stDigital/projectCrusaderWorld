@@ -4,11 +4,14 @@ import {
   REGIONS,
   SQUARES,
   type Captain,
+  type Duel,
+  type DuelRole,
   type Knight,
   type LordClass,
   type MatchState,
   type PlayerId,
   type RegionIndex,
+  type Sergeant,
   type SquareIndex,
 } from '../state';
 
@@ -40,15 +43,15 @@ export function knightsOf(state: MatchState, captainId: string): Knight[] {
     .sort((a, b) => a.number - b.number);
 }
 
-/** Knights still waiting with their Captain. */
+/** Staffed Knights waiting with their Captain, ready to be placed. */
 export function reserveKnights(state: MatchState, captainId: string): Knight[] {
-  return knightsOf(state, captainId).filter((k) => k.position === null);
+  return knightsOf(state, captainId).filter((k) => k.status === 'ready');
 }
 
 export function knightAt(state: MatchState, region: RegionIndex, square: SquareIndex): Knight | null {
   return (
     Object.values(state.knights).find(
-      (k) => k.position?.region === region && k.position.square === square,
+      (k) => k.status === 'fielded' && k.position?.region === region && k.position.square === square,
     ) ?? null
   );
 }
@@ -98,9 +101,86 @@ export function legalSquares(state: MatchState): SquareIndex[] {
   return emptySquares(state, captain.region);
 }
 
+// --- Adjacency and attacks ---
+
+/** Squares directly up, down, left and right of a square (no diagonals). */
+export function adjacentSquares(square: SquareIndex): SquareIndex[] {
+  const row = Math.floor(square / 3);
+  const col = square % 3;
+  const result: number[] = [];
+  if (row > 0) result.push(square - 3);
+  if (row < 2) result.push(square + 3);
+  if (col > 0) result.push(square - 1);
+  if (col < 2) result.push(square + 1);
+  return result as SquareIndex[];
+}
+
+/** Enemy Knights the Knight placed this turn may attack. */
+export function attackTargets(state: MatchState): Knight[] {
+  const turn = state.turn;
+  if (!turn || turn.step !== 'attack' || !turn.placedKnightId) return [];
+  const attacker = state.knights[turn.placedKnightId];
+  if (!attacker?.position) return [];
+  const { region, square } = attacker.position;
+  return adjacentSquares(square)
+    .map((s) => knightAt(state, region, s))
+    .filter((k): k is Knight => k !== null && k.owner !== attacker.owner);
+}
+
 export function canEndTurn(state: MatchState): boolean {
   const turn = state.turn;
   if (!turn) return false;
-  if (turn.step === 'end') return true;
+  if (turn.step === 'end' || turn.step === 'attack') return true;
   return turn.step === 'command' && actionableCaptains(state).length === 0;
+}
+
+// --- Duels ---
+
+export function duelKnight(state: MatchState, duel: Duel, role: DuelRole): Knight {
+  return state.knights[duel[role].knightId]!;
+}
+
+/** Sergeants of a Knight that are still alive and haven't fought yet in this duel. */
+export function availableSergeants(state: MatchState, duel: Duel, role: DuelRole): Sergeant[] {
+  const used = new Set(duel.clashes.map((c) => c[role]?.sergeantId).filter(Boolean));
+  return duelKnight(state, duel, role).sergeants.filter((s) => s.militia > 0 && !used.has(s.id));
+}
+
+/** The duel role a player has in the current duel, if any. */
+export function duelRoleOf(duel: Duel, player: PlayerId): DuelRole | null {
+  if (duel.attacker.player === player) return 'attacker';
+  if (duel.defender.player === player) return 'defender';
+  return null;
+}
+
+// --- Militia ---
+
+export function sergeantMilitia(knight: Knight): number {
+  return knight.sergeants.reduce((sum, s) => sum + s.militia, 0);
+}
+
+/** Living men in a Knight's company: the Knight's own HP plus their Sergeants' men. */
+export function knightMilitia(knight: Knight): number {
+  if (knight.status !== 'ready' && knight.status !== 'fielded') return 0;
+  return knight.hp + sergeantMilitia(knight);
+}
+
+/** A Captain's reserve plus every living Knight under them. */
+export function captainMilitia(state: MatchState, captainId: string): number {
+  const captain = state.captains[captainId];
+  if (!captain) return 0;
+  return captain.reserve + knightsOf(state, captainId).reduce((sum, k) => sum + knightMilitia(k), 0);
+}
+
+/** A Lord's reserve plus everything under their Captains. */
+export function lordMilitia(state: MatchState, player: PlayerId, lord: LordClass): number {
+  return (
+    state.players[player].lordReserves[lord] +
+    captainsOf(state, player, lord).reduce((sum, c) => sum + captainMilitia(state, c.id), 0)
+  );
+}
+
+export function playerMilitia(state: MatchState, player: PlayerId): number {
+  const order = state.players[player].lordOrder ?? (['army', 'garrison', 'raiders'] as LordClass[]);
+  return order.reduce((sum, lord) => sum + lordMilitia(state, player, lord), 0);
 }

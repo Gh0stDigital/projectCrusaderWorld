@@ -1,5 +1,5 @@
 // Display names. Placeholder wording until factions and the Muster screen exist.
-import type { LordClass, PlayerId, RegionIndex } from '../engine/state';
+import type { LordClass, PlayerId, RegionIndex, Tactic } from '../engine/state';
 
 export const PLAYER_NAMES: Record<PlayerId, string> = {
   p1: 'Player 1',
@@ -32,4 +32,18 @@ export const REGION_NAMES: Record<RegionIndex, string> = {
 
 export function captainName(lord: LordClass, rank: number): string {
   return `${LORD_NAMES[lord]} Captain ${rank === 1 ? 'I' : 'II'}`;
+}
+
+export const TACTIC_NAMES: Record<Tactic, string> = {
+  rush: 'Rush',
+  flank: 'Flank',
+  counter: 'Counter',
+};
+
+export function knightName(number: number): string {
+  return `Knight ${number}`;
+}
+
+export function formatMilitia(n: number): string {
+  return n.toLocaleString('en-US');
 }

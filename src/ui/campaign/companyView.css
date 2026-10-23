@@ -73,6 +73,12 @@
 .company__count {
   margin: auto 0 0;
   font-size: 18px;
+  line-height: 1.3;
+}
+
+.company__dim {
+  font-size: 16px;
+  color: var(--parchment-dim);
 }
 
 /* Six Knights: two columns of three, filled top to bottom. */
@@ -120,13 +126,40 @@
   white-space: nowrap;
 }
 
-.knight-slot--fielded .card {
+.knight-slot--fielded .card__art {
   filter: grayscale(0.85) brightness(0.55);
 }
 
 .knight-slot--fielded .knight-slot__label {
   color: var(--parchment-dim);
   border-color: var(--wood-light);
+}
+
+/* Empty slot: no men assigned yet. */
+.knight-slot--unmanned .card {
+  box-shadow: none;
+  outline: 2px dashed rgba(233, 220, 192, 0.25);
+  outline-offset: -2px;
+}
+
+.knight-slot--unmanned .card__art,
+.knight-slot--unmanned .card__pin {
+  opacity: 0.12;
+  filter: grayscale(1);
+}
+
+.knight-slot--unmanned .knight-slot__label {
+  color: var(--parchment-dim);
+  border-color: var(--wood-light);
+}
+
+.knight-slot--dead .card__art {
+  filter: grayscale(1) sepia(0.6) hue-rotate(-30deg) brightness(0.4);
+}
+
+.knight-slot--dead .knight-slot__label {
+  color: #e0715f;
+  border-color: #7a2f26;
 }
 
 .knight-slot--pickable {

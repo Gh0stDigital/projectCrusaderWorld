@@ -12,6 +12,8 @@ import { LordOrderSetup } from '../campaign/LordOrderSetup';
 import { PhaseWindow } from '../campaign/PhaseWindow';
 import { TurnAnnouncement } from '../overlays/TurnAnnouncement';
 import { OrdersNotice } from '../overlays/OrdersNotice';
+import { AttackPreview } from '../battle/AttackPreview';
+import { BattleView } from '../battle/BattleView';
 import './match.css';
 
 /**
@@ -22,6 +24,9 @@ export function MatchScreen() {
   const goTo = useAppStore((s) => s.goTo);
   const store = useMatchStore();
   const { match, selectedCaptainId, selectedKnightId, focusedRegion, busy, notice, error, announcement } = store;
+  const { attackPreviewId, battleOpen, battleSnapshot } = store;
+  // During a battle the side panels hold still until the battle screen has shown the result.
+  const panelMatch = battleOpen && battleSnapshot ? battleSnapshot : match;
   const [draft, setDraft] = useState<LordClass[]>([]);
 
   const ordering = match.phase === 'lordOrder' ? match.orderingPlayer : null;
@@ -79,12 +84,25 @@ export function MatchScreen() {
   };
 
   const placedKnight = turn?.placedKnightId ? match.knights[turn.placedKnightId] : undefined;
+  const outcome = match.duel?.outcome;
+  const battleNote = outcome
+    ? outcome.winner === 'attacker'
+      ? ' and won the battle'
+      : outcome.winner === 'defender'
+        ? ' but lost the battle'
+        : ', and the battle ended even'
+    : '';
   const noticeDetail =
     placedKnight && acting && acting.region !== null
-      ? `${captainName(acting.lord, acting.rank)} placed Knight ${placedKnight.number} in ${REGION_NAMES[acting.region]}`
+      ? `${captainName(acting.lord, acting.rank)} placed Knight ${placedKnight.number} in ${REGION_NAMES[acting.region]}${battleNote}`
       : turn
         ? `The ${LORD_NAMES[turn.lord]} had no orders to give`
         : '';
+
+  const previewTarget = attackPreviewId ? match.knights[attackPreviewId] : undefined;
+  const previewAttacker = turn?.placedKnightId ? match.knights[turn.placedKnightId] : undefined;
+  const attackPreview =
+    previewTarget && previewAttacker ? { attacker: previewAttacker, defender: previewTarget } : null;
 
   return (
     <div className="match">
@@ -100,7 +118,7 @@ export function MatchScreen() {
               : 'Exhibition'}
         </span>
         <span className="top-bar__right">
-          {focusedRegion !== null && !busy && (
+          {focusedRegion !== null && !busy && !battleOpen && (
             <button className="top-bar__button" onClick={() => store.focusRegion(null)}>
               View Region board
             </button>
@@ -110,7 +128,7 @@ export function MatchScreen() {
       </header>
 
       <PlayerPanel
-        match={match}
+        match={panelMatch}
         player="p1"
         selectedCaptainId={selectedCaptainId}
         onSelectCaptain={(id) => !busy && store.selectCaptain(id)}
@@ -145,6 +163,7 @@ export function MatchScreen() {
             match={match}
             region={region}
             selectedKnightId={selectedKnightId}
+            onChooseTarget={(id) => !busy && store.openAttackPreview(id)}
             onPlaceKnight={(square) =>
               turn &&
               !busy &&
@@ -155,6 +174,23 @@ export function MatchScreen() {
         )}
         overlays={
           <>
+            {attackPreview && (
+              <AttackPreview
+                match={match}
+                attacker={attackPreview.attacker}
+                defender={attackPreview.defender}
+                onCancel={() => store.openAttackPreview(null)}
+                onCommence={store.commenceAttack}
+              />
+            )}
+            {battleOpen && match.duel && turn && (
+              <BattleView
+                match={match}
+                duel={match.duel}
+                onCommit={(sergeantId) => store.dispatch({ type: 'commitSergeant', player: turn.player, sergeantId })}
+                onClose={store.closeBattle}
+              />
+            )}
             {notice && <OrdersNotice player={notice.player} detail={noticeDetail} />}
             {announcement && <TurnAnnouncement announcement={announcement} onDone={store.dismissAnnouncement} />}
           </>
@@ -162,7 +198,7 @@ export function MatchScreen() {
       />
 
       <PlayerPanel
-        match={match}
+        match={panelMatch}
         player="p2"
         selectedCaptainId={selectedCaptainId}
         onSelectCaptain={(id) => !busy && store.selectCaptain(id)}
@@ -175,6 +211,7 @@ export function MatchScreen() {
         selectedCaptainId={selectedCaptainId}
         focusedRegion={focusedRegion}
         busy={busy}
+        battleOpen={battleOpen}
         error={error}
         onEnterRegion={store.focusRegion}
         onEndTurn={store.requestEndTurn}

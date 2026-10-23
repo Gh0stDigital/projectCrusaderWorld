@@ -1,4 +1,4 @@
-import { actingCaptain, actionableCaptains, canEndTurn } from '../../engine/queries';
+import { actingCaptain, actionableCaptains, attackTargets, canEndTurn } from '../../engine/queries';
 import type { MatchState, RegionIndex } from '../../engine/state';
 import { LORD_NAMES, REGION_NAMES, captainName } from '../../data/names';
 import './phaseWindow.css';
@@ -16,22 +16,35 @@ interface PhaseWindowProps {
   selectedCaptainId: string | null;
   focusedRegion: RegionIndex | null;
   busy: boolean;
+  battleOpen: boolean;
   error: string | null;
   onEnterRegion: (region: RegionIndex) => void;
   onEndTurn: () => void;
 }
 
-export function PhaseWindow({ match, selectedCaptainId, focusedRegion, busy, error, onEnterRegion, onEndTurn }: PhaseWindowProps) {
+export function PhaseWindow({
+  match,
+  selectedCaptainId,
+  focusedRegion,
+  busy,
+  battleOpen,
+  error,
+  onEnterRegion,
+  onEndTurn,
+}: PhaseWindowProps) {
   const turn = match.turn;
   const captain = actingCaptain(match);
   const enterTarget =
-    turn && turn.step !== 'command' && captain?.region != null && focusedRegion !== captain.region ? captain.region : null;
+    turn && turn.step !== 'command' && !battleOpen && captain?.region != null && focusedRegion !== captain.region
+      ? captain.region
+      : null;
+  const current = battleOpen || turn?.step === 'battle' ? 'battle' : turn?.step;
 
   return (
     <footer className="phase-window">
       <ol className="phase-list">
         {PHASES.map((phase) => (
-          <li key={phase.id} className={`phase-list__item${turn?.step === phase.id ? ' phase-list__item--current' : ''}`}>
+          <li key={phase.id} className={`phase-list__item${current === phase.id ? ' phase-list__item--current' : ''}`}>
             {phase.label}
           </li>
         ))}
@@ -39,12 +52,18 @@ export function PhaseWindow({ match, selectedCaptainId, focusedRegion, busy, err
 
       <div className="phase-window__orders">
         <p className="phase-window__instruction">
-          {busy ? 'Orders complete.' : instructionFor(match, selectedCaptainId, focusedRegion)}
+          {busy
+            ? 'Orders complete.'
+            : battleOpen
+              ? match.duel?.outcome
+                ? 'The battle is over. Return to the Region.'
+                : 'Battle! Choose a Sergeant for each clash.'
+              : instructionFor(match, selectedCaptainId, focusedRegion)}
         </p>
         {error && !busy && <p className="phase-window__error">{error}</p>}
       </div>
 
-      {turn && !busy && (
+      {turn && !busy && !battleOpen && (
         <div className="phase-window__buttons">
           {enterTarget !== null && (
             <button
@@ -85,5 +104,13 @@ function instructionFor(match: MatchState, selectedCaptainId: string | null, foc
       ? 'Choose a Knight, then an empty square.'
       : `Enter ${where} to place a Knight.`;
   }
+  if (turn.step === 'attack') {
+    const placed = turn.placedKnightId ? match.knights[turn.placedKnightId] : undefined;
+    const n = attackTargets(match).length;
+    return focusedRegion === captain?.region
+      ? `Knight ${placed?.number} can attack ${n === 1 ? 'the enemy Knight' : 'an enemy Knight'} next to it, or press End turn.`
+      : `Enter ${where} to attack, or press End turn.`;
+  }
+  if (match.duel?.outcome) return 'Battle fought. Press End turn when ready.';
   return 'Knight placed. Press End turn when ready.';
 }

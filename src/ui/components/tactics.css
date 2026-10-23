@@ -1,0 +1,127 @@
+/* Tactic colors are kept apart from the player colors (blue / red). */
+:root {
+  --rush: #e2913a;
+  --flank: #7dbb5f;
+  --counter: #a58ae0;
+}
+
+.tactic-icon { flex: none; }
+.tactic-icon--rush { color: var(--rush); }
+.tactic-icon--flank { color: var(--flank); }
+.tactic-icon--counter { color: var(--counter); }
+
+.sergeant-box {
+  width: 84px;
+  height: 78px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 4px;
+  background: rgba(20, 15, 11, 0.92);
+  border: 2px solid var(--wood-light);
+  border-radius: 6px;
+  color: var(--parchment);
+  font: inherit;
+  transition: transform 120ms, border-color 120ms, opacity 200ms;
+}
+
+.sergeant-box--rush { border-color: color-mix(in srgb, var(--rush) 60%, var(--wood-light)); }
+.sergeant-box--flank { border-color: color-mix(in srgb, var(--flank) 60%, var(--wood-light)); }
+.sergeant-box--counter { border-color: color-mix(in srgb, var(--counter) 60%, var(--wood-light)); }
+
+.sergeant-box__militia {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sergeant-box__tactic {
+  font-size: 14px;
+  color: var(--parchment-dim);
+}
+
+.sergeant-box--compact {
+  width: 62px;
+  height: 52px;
+}
+
+.sergeant-box--compact .sergeant-box__militia {
+  font-size: 18px;
+}
+
+.sergeant-box--pickable {
+  cursor: pointer;
+}
+
+.sergeant-box--pickable:hover,
+.sergeant-box--pickable:focus-visible {
+  transform: translateY(-4px);
+  border-color: var(--gold);
+  outline: none;
+}
+
+.sergeant-box--chosen {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold), 0 0 18px rgba(217, 169, 58, 0.5);
+}
+
+.sergeant-box--used {
+  opacity: 0.4;
+}
+
+.sergeant-box--lost {
+  opacity: 0.35;
+  border-style: dashed;
+  border-color: #7a2f26;
+}
+
+.sergeant-box--lost .sergeant-box__militia {
+  color: #e0715f;
+}
+
+.tactic-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  color: var(--parchment-dim);
+}
+
+.tactic-legend__step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tactic-legend__tactic {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--parchment);
+  font-family: var(--font-display);
+}
+
+.tactic-legend__beats {
+  font-style: italic;
+}
+
+/* HP badge drawn on a Knight's card. */
+.hp-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  min-width: 34px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: rgba(20, 15, 11, 0.92);
+  border: 1px solid #c25b4d;
+  color: #f2c3b9;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2;
+}

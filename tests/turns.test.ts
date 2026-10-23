@@ -62,9 +62,10 @@ describe('Lord order setup', () => {
     expect(s.turn).toBeNull();
   });
 
-  it('gives every Captain six waiting Knights', () => {
+  it('gives every Captain six Knight slots, three of them staffed', () => {
     const s = createMatch();
-    expect(reserveKnights(s, 'p1-army-1')).toHaveLength(6);
+    expect(reserveKnights(s, 'p1-army-1').map((k) => k.number)).toEqual([1, 2, 3]);
+    expect(s.knights['p1-army-1-k4']!.status).toBe('unmanned');
     expect(Object.keys(s.knights)).toHaveLength(2 * 3 * 2 * 6);
   });
 
@@ -150,7 +151,7 @@ describe('Captain deployment', () => {
     let s = startedMatch();
     const knights = Object.values(s.knights).filter((k) => k.owner === 'p2').slice(0, 9);
     knights.forEach((k, i) => {
-      s.knights[k.id] = { ...k, position: { region: 2, square: i as SquareIndex } };
+      s.knights[k.id] = { ...k, status: 'fielded', position: { region: 2, square: i as SquareIndex } };
     });
     expect(regionsOpenTo(s, 'p1')).not.toContain(2);
     expect(rejected(s, { type: 'deployCaptain', player: 'p1', captainId: 'p1-raiders-1', region: 2 })).toMatch(/no room/);
@@ -181,8 +182,15 @@ describe('Knight placement', () => {
 
   it('places a waiting Knight on an empty square of the Captain’s Region', () => {
     const s = act(deployed(), { type: 'placeKnight', player: 'p1', knightId: 'p1-raiders-1-k3', square: 7 });
-    expect(s.knights['p1-raiders-1-k3']!.position).toEqual({ region: 4, square: 7 });
+    expect(s.knights['p1-raiders-1-k3']).toMatchObject({ status: 'fielded', position: { region: 4, square: 7 } });
+    // No enemy next to it, so there is nothing to attack.
     expect(s.turn).toMatchObject({ step: 'end', placedKnightId: 'p1-raiders-1-k3' });
+  });
+
+  it('refuses an unmanned Knight', () => {
+    expect(rejected(deployed(), { type: 'placeKnight', player: 'p1', knightId: 'p1-raiders-1-k4', square: 0 })).toMatch(
+      /no men/,
+    );
   });
 
   it('requires a Captain to be chosen first', () => {
@@ -231,8 +239,12 @@ describe('End Turn', () => {
     let s = startedMatch();
     // Put every Knight of p1's Raiders on the field so neither Captain can act.
     let square = 0;
-    for (const k of Object.values(s.knights).filter((k) => k.captainId.startsWith('p1-raiders'))) {
-      s.knights[k.id] = { ...k, position: { region: (square % 9) as RegionIndex, square: Math.floor(square / 9) as SquareIndex } };
+    for (const k of Object.values(s.knights).filter((k) => k.captainId.startsWith('p1-raiders') && k.status === 'ready')) {
+      s.knights[k.id] = {
+        ...k,
+        status: 'fielded',
+        position: { region: (square % 9) as RegionIndex, square: Math.floor(square / 9) as SquareIndex },
+      };
       square++;
     }
     expect(actionableCaptains(s)).toEqual([]);

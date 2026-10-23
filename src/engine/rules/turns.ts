@@ -16,6 +16,7 @@ export function startTurn(
     ...state,
     turnNumber,
     turn: { player, lord, step: 'command', captainId: null, placedKnightId: null },
+    duel: null,
   };
   const canAct = actionableCaptains(next).length > 0;
   return {
@@ -30,7 +31,12 @@ export function endTurn(state: MatchState, player: PlayerId): EngineResult<Match
   if (state.phase !== 'turns' || !turn) return reject('There is no turn to end.');
   if (turn.player !== player) return reject('It is not your turn.');
   if (!canEndTurn(state)) {
-    return reject(turn.step === 'placement' ? 'Place a Knight before ending your turn.' : 'Choose a Captain before ending your turn.');
+    const reasons: Record<string, string> = {
+      command: 'Choose a Captain before ending your turn.',
+      placement: 'Place a Knight before ending your turn.',
+      battle: 'Finish the battle before ending your turn.',
+    };
+    return reject(reasons[turn.step] ?? 'You cannot end your turn yet.');
   }
 
   const players = {
