@@ -14,7 +14,7 @@ import { TurnAnnouncement } from '../overlays/TurnAnnouncement';
 import { OrdersNotice } from '../overlays/OrdersNotice';
 import { AttackPreview } from '../battle/AttackPreview';
 import { BattleView } from '../battle/BattleView';
-import regionBoardSkin from '../../assets/ui/region-board-skin.png';
+import regionBoardSkin from '../../assets/ui/region-board-skin.webp';
 import './match.css';
 import './skin.css';
 
