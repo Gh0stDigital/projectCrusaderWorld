@@ -1,6 +1,6 @@
 import { actionableCaptains, captainsOf, lordMilitia, playerMilitia, reserveKnights } from '../../engine/queries';
 import type { LordClass, MatchState, PlayerId, RegionIndex } from '../../engine/state';
-import { LORD_TITLES, lordPersona, PLAYER_NAMES, REGION_NAMES, formatMilitia } from '../../data/names';
+import { LORD_TITLES, captainName, lordPersona, PLAYER_NAMES, REGION_NAMES, formatMilitia } from '../../data/names';
 import { LordCard } from '../components/LordCard';
 import { CompanyView } from './CompanyView';
 import './playerPanel.css';
@@ -88,7 +88,7 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
                 {match.phase === 'turns' && (
                   <ul className="lord-row__captains">
                     {captainsOf(match, player, lord).map((captain) => {
-                      const label = `Captain ${captain.rank === 1 ? 'I' : 'II'}`;
+                      const label = captainName(captain);
                       const waiting = reserveKnights(match, captain.id).length;
                       const where =
                         captain.region === null

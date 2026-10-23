@@ -157,7 +157,7 @@ function Combatant({ match, duel, role, upTo, current, options, onPick }: Combat
         <div className="combatant__info">
           <span className="combatant__name">Knight {knight.number}</span>
           <span className="combatant__sub">
-            {PLAYER_NAMES[side.player]} · {captainName(captain.lord, captain.rank)}
+            {PLAYER_NAMES[side.player]} · {captainName(captain)}
           </span>
           <div className="hp-bar" aria-label={`${hp} of ${maxHp} HP`}>
             <div className="hp-bar__fill" style={{ width: `${(hp / maxHp) * 100}%` }} />

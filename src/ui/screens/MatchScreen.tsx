@@ -94,7 +94,7 @@ export function MatchScreen() {
     : '';
   const noticeDetail =
     placedKnight && acting && acting.region !== null
-      ? `${captainName(acting.lord, acting.rank)} placed Knight ${placedKnight.number} in ${REGION_NAMES[acting.region]}${battleNote}`
+      ? `${captainName(acting)} placed Knight ${placedKnight.number} in ${REGION_NAMES[acting.region]}${battleNote}`
       : turn
         ? `The ${LORD_NAMES[turn.lord]} had no orders to give`
         : '';

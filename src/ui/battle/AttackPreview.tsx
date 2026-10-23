@@ -57,7 +57,7 @@ function KnightSummary({ match, knight, role }: { match: MatchState; knight: Kni
         <div className="knight-summary__info">
           <h3 className="knight-summary__name">Knight {knight.number}</h3>
           <p className="knight-summary__line">{PLAYER_NAMES[knight.owner]}</p>
-          <p className="knight-summary__line">{captainName(captain.lord, captain.rank)}</p>
+          <p className="knight-summary__line">{captainName(captain)}</p>
           <p className="knight-summary__hp">
             {knight.hp} <span>HP</span>
           </p>

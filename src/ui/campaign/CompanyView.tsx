@@ -1,6 +1,6 @@
 import { captainInRegion, captainMilitia, knightsOf, reserveKnights } from '../../engine/queries';
 import type { Knight, MatchState, PlayerId, RegionIndex } from '../../engine/state';
-import { REGION_NAMES, lordPersona, captainName, formatMilitia } from '../../data/names';
+import { REGION_NAMES, captainArt, captainName, formatMilitia, lordPersona } from '../../data/names';
 import { Card } from '../components/Card';
 import './companyView.css';
 
@@ -45,9 +45,9 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
       <p className="company__where">In {REGION_NAMES[region]}</p>
 
       <div className={`company__captain${acting ? ' company__captain--acting' : ''}`}>
-        <Card art="militia" size="roster" owner={player} alt={captainName(captain.lord, captain.rank)} />
+        <Card art={captainArt(player)} size="roster" owner={player} alt={captainName(captain)} />
         <div className="company__captain-info">
-          <h3 className="company__captain-name">{captainName(captain.lord, captain.rank)}</h3>
+          <h3 className="company__captain-name">{captainName(captain)}</h3>
           <p className="company__captain-lord">Serves {lordPersona(player, captain.lord).name}</p>
           {acting && <span className="company__badge">{picking ? 'Choose a Knight' : 'Orders given'}</span>}
           <p className="company__count">

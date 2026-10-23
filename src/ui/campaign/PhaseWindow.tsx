@@ -91,7 +91,7 @@ function instructionFor(match: MatchState, selectedCaptainId: string | null, foc
     if (actionableCaptains(match).length === 0) return `No ${lordName} Captain can act this turn. Press End turn.`;
     const selected = selectedCaptainId ? match.captains[selectedCaptainId] : undefined;
     if (!selected) return `Choose a ${lordName} Captain.`;
-    const name = captainName(selected.lord, selected.rank);
+    const name = captainName(selected);
     return selected.region === null
       ? `Choose a Region to deploy ${name}.`
       : `Click ${REGION_NAMES[selected.region]} to give ${name} new orders.`;
@@ -109,7 +109,7 @@ function instructionFor(match: MatchState, selectedCaptainId: string | null, foc
     const n = attackTargets(match).length;
     return focusedRegion === captain?.region
       ? `Knight ${placed?.number} can attack ${n === 1 ? 'the enemy Knight' : 'an enemy Knight'} next to it, or press End turn.`
-      : `Enter ${where} to attack, or press End turn.`;
+      : `Enter ${where} to attack, or End turn.`;
   }
   if (match.duel?.outcome) return 'Battle fought. Press End turn when ready.';
   return 'Knight placed. Press End turn when ready.';

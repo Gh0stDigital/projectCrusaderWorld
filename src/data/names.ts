@@ -1,5 +1,5 @@
 // Display names. Placeholder wording until factions and the Muster screen exist.
-import type { LordClass, PlayerId, RegionIndex, Tactic } from '../engine/state';
+import type { Captain, LordClass, PlayerId, RegionIndex, Tactic } from '../engine/state';
 import type { ArtId } from './artCatalog';
 
 export const PLAYER_NAMES: Record<PlayerId, string> = {
@@ -57,8 +57,36 @@ export const REGION_NAMES: Record<RegionIndex, string> = {
   8: 'Southeast',
 };
 
-export function captainName(lord: LordClass, rank: number): string {
-  return `${LORD_NAMES[lord]} Captain ${rank === 1 ? 'I' : 'II'}`;
+/**
+ * Placeholder Captain names, two per Lord, in Army, Garrison, Raiders order.
+ * Player 1's sound like crusaders; the enemy's sound darker.
+ */
+const CAPTAIN_NAMES: Record<PlayerId, Record<LordClass, [string, string]>> = {
+  p1: {
+    army: ['Roderic', 'Godfrey'],
+    garrison: ['Edmund', 'Baldwin'],
+    raiders: ['Tancred', 'Alaric'],
+  },
+  p2: {
+    army: ['Malric', 'Draven'],
+    garrison: ['Mordaunt', 'Varek'],
+    raiders: ['Corvin', 'Sauvic'],
+  },
+};
+
+/** A Captain's own name, e.g. "Roderic". */
+export function captainPersonalName(captain: Pick<Captain, 'owner' | 'lord' | 'rank'>): string {
+  return CAPTAIN_NAMES[captain.owner][captain.lord][captain.rank === 1 ? 0 : 1];
+}
+
+/** "Captain Roderic" */
+export function captainName(captain: Pick<Captain, 'owner' | 'lord' | 'rank'>): string {
+  return `Captain ${captainPersonalName(captain)}`;
+}
+
+/** Player 1's Captains share one card; the enemy's share a mirrored crimson one. */
+export function captainArt(owner: PlayerId): ArtId {
+  return owner === 'p1' ? 'captain' : 'enemyCaptain';
 }
 
 export const TACTIC_NAMES: Record<Tactic, string> = {

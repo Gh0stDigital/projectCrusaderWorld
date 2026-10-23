@@ -1,6 +1,6 @@
 import { captainInRegion, knightAt } from '../../engine/queries';
 import { REGIONS, SQUARES, type MatchState, type PlayerId, type RegionIndex } from '../../engine/state';
-import { PLAYER_NAMES, REGION_NAMES, captainName } from '../../data/names';
+import { PLAYER_NAMES, REGION_NAMES, captainArt, captainName } from '../../data/names';
 import { Portrait } from '../components/Portrait';
 import './regionBoard.css';
 
@@ -71,10 +71,10 @@ function CaptainMarker({ match, region, player }: { match: MatchState; region: R
   if (!captain) return <span className={`region__captain-empty region__captain-empty--${player}`} />;
   return (
     <Portrait
-      art="militia"
+      art={captainArt(player)}
       size={38}
       owner={player}
-      title={`${PLAYER_NAMES[player]}: ${captainName(captain.lord, captain.rank)}`}
+      title={`${PLAYER_NAMES[player]}: ${captainName(captain)}`}
     />
   );
 }
