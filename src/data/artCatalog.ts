@@ -2,6 +2,7 @@ import militia from '../assets/cards/militia.png';
 import aubrey from '../assets/cards/lords/aubrey.png';
 import jermaine from '../assets/cards/lords/jermaine.png';
 import nevadius from '../assets/cards/lords/nevadius.png';
+import enemyLord from '../assets/cards/lords/enemy-lord.png';
 
 /**
  * Every card image the game knows about. Code refers to art by id, never by
@@ -23,6 +24,8 @@ export const artCatalog = {
   aubrey: { src: aubrey, face: { x: 44, y: 32, zoom: 3.4 } },
   jermaine: { src: jermaine, face: { x: 49, y: 34, zoom: 3.4 } },
   nevadius: { src: nevadius, face: { x: 50, y: 32, zoom: 3.4 } },
+  /** The opponent's Lords: one portrait, recolored crimson. */
+  enemyLord: { src: enemyLord, face: { x: 51, y: 33, zoom: 3.4 } },
 } satisfies Record<string, ArtEntry>;
 
 export type ArtId = keyof typeof artCatalog;

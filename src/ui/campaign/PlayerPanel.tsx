@@ -1,6 +1,6 @@
 import { actionableCaptains, captainsOf, lordMilitia, playerMilitia, reserveKnights } from '../../engine/queries';
 import type { LordClass, MatchState, PlayerId, RegionIndex } from '../../engine/state';
-import { LORD_PERSONAS, LORD_TITLES, PLAYER_NAMES, REGION_NAMES, formatMilitia } from '../../data/names';
+import { LORD_TITLES, lordPersona, PLAYER_NAMES, REGION_NAMES, formatMilitia } from '../../data/names';
 import { LordCard } from '../components/LordCard';
 import { CompanyView } from './CompanyView';
 import './playerPanel.css';
@@ -74,7 +74,7 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
 
               <div className="lord-row__info">
                 <h3 className="lord-row__title">
-                  {LORD_PERSONAS[lord].name}
+                  {lordPersona(player, lord).name}
                   <span className="lord-row__class">{LORD_TITLES[lord]}</span>
                 </h3>
                 <p className="lord-row__militia">

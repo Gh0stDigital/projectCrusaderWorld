@@ -1,5 +1,5 @@
 import type { LordClass, PlayerId } from '../../engine/state';
-import { LORD_NAMES, LORD_PERSONAS } from '../../data/names';
+import { LORD_NAMES, lordPersona } from '../../data/names';
 import { Card, type CardSize } from './Card';
 import './lordCard.css';
 
@@ -15,12 +15,13 @@ interface LordCardProps {
 }
 
 export function LordCard({ lord, owner, size = 'board', position, active, captainsLeft }: LordCardProps) {
+  const persona = lordPersona(owner, lord);
   return (
     <div className={`lord-card${active ? ' lord-card--active' : ''}`}>
-      <Card art={LORD_PERSONAS[lord].art} size={size} owner={owner} alt={`${LORD_PERSONAS[lord].name}, ${LORD_NAMES[lord]} Lord`}>
+      <Card art={persona.art} size={size} owner={owner} alt={`${persona.name}, ${LORD_NAMES[lord]} Lord`}>
         {position !== undefined && <span className="lord-card__position">{position}</span>}
         <span className="lord-card__plate">
-          {LORD_PERSONAS[lord].name}
+          {persona.name}
           <span className="lord-card__class">{LORD_NAMES[lord]}</span>
           {captainsLeft !== undefined && (
             <span className="lord-card__captains">

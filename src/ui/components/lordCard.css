@@ -53,6 +53,14 @@
   line-height: 1.15;
 }
 
+/* Smaller cards: keep the name on one line so it doesn't cover the face. */
+.card--roster .lord-card__plate {
+  font-size: 17px;
+  white-space: nowrap;
+  left: 4px;
+  right: 4px;
+}
+
 .lord-card__class {
   font-family: var(--font-body);
   font-size: 14px;

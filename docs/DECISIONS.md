@@ -17,7 +17,7 @@ The game uses these names; SPEC.md uses the older ones.
 
 Lord classes: Army, Garrison, Raiders. Each player has one Lord of each.
 
-The Lords are characters with their own card art: **Aubrey** (Army), **Nevadius** (Garrison) and **Jermaine** (Raiders). Both players currently use the same three Lords. Which Lord leads which class is set in `src/data/names.ts` (`LORD_PERSONAS`).
+The Lords are characters with their own card art: **Aubrey** (Army), **Nevadius** (Garrison) and **Jermaine** (Raiders). The opponent (Player 2) uses one generic **Enemy Lord** card for all three of their Lords, recolored crimson (shown as "Enemy Lord of the Army" and so on). Which Lord leads which class is set in `src/data/names.ts` (`LORD_PERSONAS`).
 
 "Campaign" in scope notes means a story mode across several matches. The Region board itself (with Ultimate Tic-Tac-Toe routing) is the core of every match.
 

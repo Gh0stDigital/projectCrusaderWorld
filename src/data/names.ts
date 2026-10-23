@@ -13,16 +13,30 @@ export const LORD_NAMES: Record<LordClass, string> = {
   raiders: 'Raiders',
 };
 
-/** Who leads each Lord class, and their card art. */
-export const LORD_PERSONAS: Record<LordClass, { name: string; art: ArtId }> = {
+export interface LordPersona {
+  name: string;
+  art: ArtId;
+}
+
+/** Player 1's Lords: named characters with their own card art. */
+const PLAYER_LORDS: Record<LordClass, LordPersona> = {
   army: { name: 'Aubrey', art: 'aubrey' },
   garrison: { name: 'Nevadius', art: 'nevadius' },
   raiders: { name: 'Jermaine', art: 'jermaine' },
 };
 
-/** "Aubrey, Lord of the Army" */
-export function lordFullName(lord: LordClass): string {
-  return `${LORD_PERSONAS[lord].name}, ${LORD_TITLES[lord]}`;
+/** The opponent's Lords all share the generic Enemy Lord card. */
+const ENEMY_LORD: LordPersona = { name: 'Enemy Lord', art: 'enemyLord' };
+
+/** Who leads a player's Lord class, and their card art. */
+export function lordPersona(player: PlayerId, lord: LordClass): LordPersona {
+  return player === 'p1' ? PLAYER_LORDS[lord] : ENEMY_LORD;
+}
+
+/** "Aubrey, Lord of the Army" or "Enemy Lord of the Army" */
+export function lordFullName(player: PlayerId, lord: LordClass): string {
+  const { name } = lordPersona(player, lord);
+  return player === 'p1' ? `${name}, ${LORD_TITLES[lord]}` : `${name} of the ${LORD_NAMES[lord]}`;
 }
 
 export const LORD_TITLES: Record<LordClass, string> = {

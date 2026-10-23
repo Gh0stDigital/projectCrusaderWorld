@@ -19,7 +19,7 @@ export function TurnAnnouncement({ announcement, onDone }: { announcement: Annou
       <div className={`turn-announcement__banner turn-announcement__banner--${player}`}>
         <span className="turn-announcement__turn">Turn {turnNumber}</span>
         <span className="turn-announcement__player">{PLAYER_NAMES[player]}</span>
-        <span className="turn-announcement__lord">{lordFullName(lord)}</span>
+        <span className="turn-announcement__lord">{lordFullName(player, lord)}</span>
         <span className="turn-announcement__task">
           {canAct ? 'Deploy or command a Captain, then place a Knight' : 'This Lord has no orders to give this turn'}
         </span>
