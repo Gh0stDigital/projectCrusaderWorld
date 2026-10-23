@@ -5,7 +5,6 @@ import { deployableCaptains } from '../../engine/queries';
 import type { LordClass, RegionIndex } from '../../engine/state';
 import { LORD_NAMES, PLAYER_NAMES } from '../../data/names';
 import { PlayerPanel } from '../campaign/PlayerPanel';
-import { LordColumn } from '../campaign/LordColumn';
 import { RegionBoard } from '../campaign/RegionBoard';
 import { LordOrderSetup } from '../campaign/LordOrderSetup';
 import { PhaseWindow } from '../campaign/PhaseWindow';
@@ -24,6 +23,8 @@ export function MatchScreen() {
 
   const ordering = match.phase === 'lordOrder' ? match.orderingPlayer : null;
   const turn = match.turn;
+
+  const draftControls = { order: draft, remove: (lord: LordClass) => setDraft(draft.filter((d) => d !== lord)) };
 
   const confirmOrder = () => {
     if (ordering && dispatch({ type: 'setLordOrder', player: ordering, order: draft })) setDraft([]);
@@ -57,14 +58,15 @@ export function MatchScreen() {
         <span className="top-bar__turn">{match.turnNumber > 0 ? `Turn ${match.turnNumber}` : 'Setup'}</span>
       </header>
 
-      <PlayerPanel match={match} player="p1" selectedCaptainId={selectedCaptainId} onSelectCaptain={selectCaptain} />
+      <PlayerPanel
+        match={match}
+        player="p1"
+        selectedCaptainId={selectedCaptainId}
+        onSelectCaptain={selectCaptain}
+        draft={ordering === 'p1' ? draftControls : undefined}
+      />
 
       <main className="match__board-stage">
-        <LordColumn
-          match={match}
-          player="p1"
-          draft={ordering === 'p1' ? { order: draft, remove: (l) => setDraft(draft.filter((d) => d !== l)) } : undefined}
-        />
         <div className="match__board-center">
           {ordering ? (
             <LordOrderSetup
@@ -78,15 +80,16 @@ export function MatchScreen() {
             <RegionBoard match={match} onChooseRegion={chooseRegion} />
           )}
         </div>
-        <LordColumn
-          match={match}
-          player="p2"
-          draft={ordering === 'p2' ? { order: draft, remove: (l) => setDraft(draft.filter((d) => d !== l)) } : undefined}
-        />
         {announcement && <TurnAnnouncement announcement={announcement} onDone={dismissAnnouncement} />}
       </main>
 
-      <PlayerPanel match={match} player="p2" selectedCaptainId={selectedCaptainId} onSelectCaptain={selectCaptain} />
+      <PlayerPanel
+        match={match}
+        player="p2"
+        selectedCaptainId={selectedCaptainId}
+        onSelectCaptain={selectCaptain}
+        draft={ordering === 'p2' ? draftControls : undefined}
+      />
 
       <PhaseWindow
         match={match}

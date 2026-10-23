@@ -57,13 +57,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 28px;
+
   background: radial-gradient(ellipse at center, #3a2e22 0%, var(--wood-dark) 75%);
 }
 
 .match__board-center {
-  width: 696px;
-  height: 696px;
+  width: 808px;
+  height: 808px;
   display: grid;
   place-items: center;
 }

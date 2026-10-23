@@ -1,6 +1,7 @@
 import { captainsOf, deployableCaptains } from '../../engine/queries';
-import type { MatchState, PlayerId } from '../../engine/state';
-import { LORD_NAMES, PLAYER_NAMES, REGION_NAMES } from '../../data/names';
+import type { LordClass, MatchState, PlayerId } from '../../engine/state';
+import { LORD_TITLES, PLAYER_NAMES, REGION_NAMES } from '../../data/names';
+import { LordCard } from '../components/LordCard';
 import './playerPanel.css';
 
 interface PlayerPanelProps {
@@ -8,71 +9,102 @@ interface PlayerPanelProps {
   player: PlayerId;
   selectedCaptainId: string | null;
   onSelectCaptain: (id: string) => void;
+  /** While this player is ordering their Lords: their unconfirmed order, and how to take a Lord back. */
+  draft?: { order: LordClass[]; remove: (lord: LordClass) => void };
 }
 
-/** One player's side: their Lords in turn order and where each Captain is. */
-export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain }: PlayerPanelProps) {
-  const order = match.players[player].lordOrder;
-  const isTheirTurn = match.turn?.player === player;
+/**
+ * One player's side: their three Lords in turn order, each card on the left
+ * with that Lord's Captains and where they are stationed on the right.
+ */
+export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain, draft }: PlayerPanelProps) {
+  const order = draft ? draft.order : (match.players[player].lordOrder ?? []);
+  const turn = match.turn;
+  const isTheirTurn = turn?.player === player;
   const selectable = new Set(isTheirTurn ? deployableCaptains(match).map((c) => c.id) : []);
 
   return (
     <aside className={`player-panel player-panel--${player}${isTheirTurn ? ' player-panel--active' : ''}`}>
-      <h2 className="player-panel__name">{PLAYER_NAMES[player]}</h2>
-      <p className="player-panel__status">
-        {match.phase === 'lordOrder'
-          ? match.orderingPlayer === player
-            ? 'Ordering Lords'
-            : order
-              ? 'Lords in position'
-              : 'Waiting to order Lords'
-          : isTheirTurn
-            ? 'Taking their turn'
-            : 'Waiting'}
-      </p>
+      <header className="player-panel__header">
+        <h2 className="player-panel__name">{PLAYER_NAMES[player]}</h2>
+        <p className="player-panel__status">{statusFor(match, player)}</p>
+      </header>
 
-      {order && (
-        <ol className="player-panel__lords">
-          {order.map((lord, i) => {
-            const active = isTheirTurn && match.turn?.lord === lord;
+      <ol className="player-panel__lords">
+        {[0, 1, 2].map((i) => {
+          const lord = order[i];
+          if (!lord) {
             return (
-              <li key={lord} className={`lord-row${active ? ' lord-row--active' : ''}`}>
-                <div className="lord-row__header">
-                  <span className="lord-row__position">{i + 1}</span>
-                  <span className="lord-row__name">{LORD_NAMES[lord]}</span>
+              <li key={i} className="lord-row lord-row--empty">
+                <div className="lord-row__slot">
+                  <span className="lord-row__slot-number">{i + 1}</span>
                 </div>
-                <ul className="lord-row__captains">
-                  {captainsOf(match, player, lord).map((captain) => {
-                    const canPick = selectable.has(captain.id);
-                    const where = captain.region === null ? 'Ready' : REGION_NAMES[captain.region];
-                    const label = `Captain ${captain.rank === 1 ? 'I' : 'II'}`;
-                    return (
-                      <li key={captain.id}>
-                        {canPick ? (
-                          <button
-                            className={`captain-chip captain-chip--pickable${
-                              selectedCaptainId === captain.id ? ' captain-chip--selected' : ''
-                            }`}
-                            onClick={() => onSelectCaptain(captain.id)}
-                          >
-                            <span>{label}</span>
-                            <span className="captain-chip__where">{where}</span>
-                          </button>
-                        ) : (
-                          <span className={`captain-chip${captain.region === null ? '' : ' captain-chip--deployed'}`}>
-                            <span>{label}</span>
-                            <span className="captain-chip__where">{where}</span>
-                          </span>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
+                <p className="lord-row__empty-hint">{draft ? `Turn ${i + 1}: choose a Lord` : 'Not yet placed'}</p>
               </li>
             );
-          })}
-        </ol>
-      )}
+          }
+
+          const active = isTheirTurn && turn?.lord === lord;
+          const card = <LordCard lord={lord} owner={player} size="roster" position={i + 1} />;
+
+          return (
+            <li key={lord} className={`lord-row${active ? ' lord-row--active' : ''}`}>
+              {draft ? (
+                <button className="lord-row__draft" onClick={() => draft.remove(lord)} title="Take this Lord back">
+                  {card}
+                </button>
+              ) : (
+                card
+              )}
+
+              <div className="lord-row__info">
+                <h3 className="lord-row__title">{LORD_TITLES[lord]}</h3>
+                {active && <span className="lord-row__badge">Taking this turn</span>}
+                {match.phase === 'turns' && (
+                  <ul className="lord-row__captains">
+                    {captainsOf(match, player, lord).map((captain) => {
+                      const label = `Captain ${captain.rank === 1 ? 'I' : 'II'}`;
+                      const where = captain.region === null ? 'Ready' : REGION_NAMES[captain.region];
+                      const content = (
+                        <>
+                          <span>{label}</span>
+                          <span className="captain-chip__where">{where}</span>
+                        </>
+                      );
+                      return (
+                        <li key={captain.id}>
+                          {selectable.has(captain.id) ? (
+                            <button
+                              className={`captain-chip captain-chip--pickable${
+                                selectedCaptainId === captain.id ? ' captain-chip--selected' : ''
+                              }`}
+                              onClick={() => onSelectCaptain(captain.id)}
+                            >
+                              {content}
+                            </button>
+                          ) : (
+                            <span className={`captain-chip${captain.region === null ? '' : ' captain-chip--deployed'}`}>
+                              {content}
+                            </span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
     </aside>
   );
+}
+
+function statusFor(match: MatchState, player: PlayerId): string {
+  if (match.phase === 'lordOrder') {
+    if (match.orderingPlayer === player) return 'Ordering Lords';
+    return match.players[player].lordOrder ? 'Lords in position' : 'Waiting to order Lords';
+  }
+  return match.turn?.player === player ? 'Taking their turn' : 'Waiting';
 }

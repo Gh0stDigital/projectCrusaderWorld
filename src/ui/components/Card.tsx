@@ -8,6 +8,7 @@ import './card.css';
  */
 export const CARD_SIZES = {
   panel: { width: 80, height: 120 },
+  roster: { width: 144, height: 216 },
   board: { width: 160, height: 240 },
   detail: { width: 200, height: 300 },
   battle: { width: 320, height: 480 },

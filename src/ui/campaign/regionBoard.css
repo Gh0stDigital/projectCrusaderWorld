@@ -1,8 +1,8 @@
 .region-board {
   display: grid;
-  grid-template-columns: repeat(3, 224px);
-  grid-template-rows: repeat(3, 224px);
-  gap: 12px;
+  grid-template-columns: repeat(3, 260px);
+  grid-template-rows: repeat(3, 260px);
+  gap: 14px;
 }
 
 .region {
