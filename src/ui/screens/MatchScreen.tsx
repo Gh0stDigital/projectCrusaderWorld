@@ -3,7 +3,7 @@ import { useAppStore } from '../../store/appStore';
 import { useMatchStore } from '../../store/matchStore';
 import { actingCaptain, regionsOpenTo } from '../../engine/queries';
 import type { LordClass, RegionIndex } from '../../engine/state';
-import { LORD_NAMES, PLAYER_NAMES, REGION_NAMES, captainName } from '../../data/names';
+import { LORD_NAMES, PLAYER_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
 import { PlayerPanel } from '../campaign/PlayerPanel';
 import { RegionBoard } from '../campaign/RegionBoard';
 import { RegionView } from '../campaign/RegionView';
@@ -94,7 +94,7 @@ export function MatchScreen() {
     : '';
   const noticeDetail =
     placedKnight && acting && acting.region !== null
-      ? `${captainName(acting)} placed Knight ${placedKnight.number} in ${REGION_NAMES[acting.region]}${battleNote}`
+      ? `${captainName(acting)} placed ${knightName(placedKnight)} in ${REGION_NAMES[acting.region]}${battleNote}`
       : turn
         ? `The ${LORD_NAMES[turn.lord]} had no orders to give`
         : '';

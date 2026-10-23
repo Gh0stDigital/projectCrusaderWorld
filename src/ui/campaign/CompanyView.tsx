@@ -1,6 +1,15 @@
 import { captainInRegion, captainMilitia, knightsOf, reserveKnights } from '../../engine/queries';
 import type { Knight, MatchState, PlayerId, RegionIndex } from '../../engine/state';
-import { REGION_NAMES, captainArt, captainName, formatMilitia, lordPersona } from '../../data/names';
+import {
+  REGION_NAMES,
+  captainArt,
+  captainName,
+  formatMilitia,
+  knightArt,
+  knightName,
+  knightPersonalName,
+  lordPersona,
+} from '../../data/names';
 import { Card } from '../components/Card';
 import './companyView.css';
 
@@ -13,7 +22,7 @@ interface CompanyViewProps {
 }
 
 const SLOT_LABEL: Record<Knight['status'], (k: Knight) => string> = {
-  ready: (k) => `Knight ${k.number}`,
+  ready: (k) => knightPersonalName(k),
   fielded: () => 'Fielded',
   unmanned: () => 'Unmanned',
   dead: () => 'Fallen',
@@ -78,9 +87,9 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
                 className={classes}
                 disabled={!pickable}
                 onClick={() => onSelectKnight(knight.id)}
-                aria-label={`Knight ${knight.number}: ${SLOT_LABEL[knight.status](knight)}${alive ? `, ${knight.hp} HP` : ''}`}
+                aria-label={`${knightName(knight)}: ${SLOT_LABEL[knight.status](knight)}${alive ? `, ${knight.hp} HP` : ''}`}
               >
-                <Card art="militia" size="company" owner={player}>
+                <Card art={knightArt(player)} size="company" owner={player}>
                   {alive && <span className="hp-badge">{knight.hp}</span>}
                   <span className="knight-slot__label">{SLOT_LABEL[knight.status](knight)}</span>
                 </Card>

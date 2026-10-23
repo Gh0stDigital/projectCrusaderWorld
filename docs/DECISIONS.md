@@ -19,7 +19,9 @@ Lord classes: Army, Garrison, Raiders. Each player has one Lord of each.
 
 The Lords are characters with their own card art: **Aubrey** (Army), **Nevadius** (Garrison) and **Jermaine** (Raiders). The opponent (Player 2) uses one generic **Enemy Lord** card for all three of their Lords, recolored crimson (shown as "Enemy Lord of the Army" and so on).
 
-Captains have placeholder names, two per Lord (Player 1: Roderic, Godfrey, Edmund, Baldwin, Tancred, Alaric; enemy: Malric, Draven, Mordaunt, Varek, Corvin, Sauvic), set in `src/data/names.ts`. Player 1's Captains share one Captain card; the enemy's share a generic Captain card recolored crimson and mirrored to face inward from the right (the banner lettering is kept unmirrored). Which Lord leads which class is set in `src/data/names.ts` (`LORD_PERSONAS`).
+Captains have placeholder names, two per Lord (Player 1: Roderic, Godfrey, Edmund, Baldwin, Tancred, Alaric; enemy: Malric, Draven, Mordaunt, Varek, Corvin, Sauvic), set in `src/data/names.ts`. Player 1's Captains share one Captain card; the enemy's share a generic Captain card recolored crimson and mirrored to face inward from the right (the banner lettering is kept unmirrored).
+
+Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/data/names.ts`). Player 1's Knights use the blue Knight card; the enemy's use the same Knight with red armor and a crimson frame, mirrored to face inward. In battle the Knights always face each other, using left- and right-facing versions of each card. Which Lord leads which class is set in `src/data/names.ts` (`LORD_PERSONAS`).
 
 "Campaign" in scope notes means a story mode across several matches. The Region board itself (with Ultimate Tic-Tac-Toe routing) is the core of every match.
 

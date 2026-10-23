@@ -1,5 +1,5 @@
 // Display names. Placeholder wording until factions and the Muster screen exist.
-import type { Captain, LordClass, PlayerId, RegionIndex, Tactic } from '../engine/state';
+import type { Captain, Knight, LordClass, PlayerId, RegionIndex, Tactic } from '../engine/state';
 import type { ArtId } from './artCatalog';
 
 export const PLAYER_NAMES: Record<PlayerId, string> = {
@@ -95,8 +95,52 @@ export const TACTIC_NAMES: Record<Tactic, string> = {
   counter: 'Counter',
 };
 
-export function knightName(number: number): string {
-  return `Knight ${number}`;
+/**
+ * Placeholder Knight names: 36 per side, one per Knight slot, in
+ * Army, Garrison, Raiders order (Captain I's six, then Captain II's six).
+ */
+const KNIGHT_NAMES: Record<PlayerId, string[]> = {
+  p1: [
+    'Gareth', 'Percival', 'Tristan', 'Gawain', 'Bedivere', 'Galahad',
+    'Bors', 'Lionel', 'Ector', 'Lamorak', 'Pelleas', 'Geraint',
+    'Yvain', 'Erec', 'Owain', 'Caradoc', 'Dinadan', 'Elyan',
+    'Gaheris', 'Hugh', 'Raymond', 'Bohemond', 'Guy', 'Reynald',
+    'Amalric', 'Odo', 'Walter', 'Hubert', 'Giles', 'Aymer',
+    'Roland', 'Oliver', 'Turpin', 'Ogier', 'Renaud', 'Thierry',
+  ],
+  p2: [
+    'Vargus', 'Morvane', 'Thrax', 'Dravic', 'Skarn', 'Vorth',
+    'Grimald', 'Belzor', 'Kazrik', 'Zoltan', 'Malakai', 'Ravik',
+    'Sorn', 'Vex', 'Hargrim', 'Torvald', 'Brakka', 'Drogan',
+    'Kael', 'Murdoc', 'Szar', 'Varn', 'Gorvath', 'Rask',
+    'Zarek', 'Ostrik', 'Fenrik', 'Haldor', 'Krone', 'Vasko',
+    'Grendel', 'Tarvos', 'Mordrek', 'Scathe', 'Ulgar', 'Kresh',
+  ],
+};
+
+const LORD_ORDER: LordClass[] = ['army', 'garrison', 'raiders'];
+
+/** A Knight's own name, e.g. "Gareth". Captain ids look like "p1-army-1". */
+export function knightPersonalName(knight: Pick<Knight, 'owner' | 'captainId' | 'number'>): string {
+  const [, lord, rank] = knight.captainId.split('-');
+  const index = LORD_ORDER.indexOf(lord as LordClass) * 12 + (Number(rank) - 1) * 6 + (knight.number - 1);
+  return KNIGHT_NAMES[knight.owner][index] ?? `Knight ${knight.number}`;
+}
+
+/** "Sir Gareth" */
+export function knightName(knight: Pick<Knight, 'owner' | 'captainId' | 'number'>): string {
+  return `Sir ${knightPersonalName(knight)}`;
+}
+
+/** Player 1's Knights share the blue Knight card; the enemy's share a mirrored red one. */
+export function knightArt(owner: PlayerId): ArtId {
+  return owner === 'p1' ? 'knight' : 'enemyKnight';
+}
+
+/** Knight art facing a given direction, for battles where either side may stand on the left. */
+export function knightArtFacing(owner: PlayerId, facing: 'left' | 'right'): ArtId {
+  if (owner === 'p1') return facing === 'right' ? 'knight' : 'knightFacingLeft';
+  return facing === 'left' ? 'enemyKnight' : 'enemyKnightFacingRight';
 }
 
 export function formatMilitia(n: number): string {

@@ -1,5 +1,5 @@
 import type { Knight, MatchState } from '../../engine/state';
-import { PLAYER_NAMES, captainName } from '../../data/names';
+import { PLAYER_NAMES, captainName, knightArt, knightName } from '../../data/names';
 import { sergeantMilitia } from '../../engine/queries';
 import { Card } from '../components/Card';
 import { SergeantBox, TacticLegend } from '../components/SergeantBox';
@@ -53,9 +53,9 @@ function KnightSummary({ match, knight, role }: { match: MatchState; knight: Kni
     <div className={`knight-summary knight-summary--${knight.owner}`}>
       <span className="knight-summary__role">{role}</span>
       <div className="knight-summary__top">
-        <Card art="militia" size="roster" owner={knight.owner} />
+        <Card art={knightArt(knight.owner)} size="roster" owner={knight.owner} />
         <div className="knight-summary__info">
-          <h3 className="knight-summary__name">Knight {knight.number}</h3>
+          <h3 className="knight-summary__name">{knightName(knight)}</h3>
           <p className="knight-summary__line">{PLAYER_NAMES[knight.owner]}</p>
           <p className="knight-summary__line">{captainName(captain)}</p>
           <p className="knight-summary__hp">

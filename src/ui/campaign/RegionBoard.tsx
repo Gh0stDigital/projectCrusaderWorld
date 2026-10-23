@@ -1,6 +1,6 @@
 import { captainInRegion, knightAt } from '../../engine/queries';
 import { REGIONS, SQUARES, type MatchState, type PlayerId, type RegionIndex } from '../../engine/state';
-import { PLAYER_NAMES, REGION_NAMES, captainArt, captainName } from '../../data/names';
+import { PLAYER_NAMES, REGION_NAMES, captainArt, captainName, knightArt } from '../../data/names';
 import { Portrait } from '../components/Portrait';
 import './regionBoard.css';
 
@@ -51,7 +51,7 @@ export function RegionBoard({ match, clickable, active, choosing, onClickRegion,
               {SQUARES.map((square) => {
                 const knight = knightAt(match, region, square);
                 return knight ? (
-                  <Portrait key={square} art="militia" size={50} owner={knight.owner} />
+                  <Portrait key={square} art={knightArt(knight.owner)} size={50} owner={knight.owner} />
                 ) : (
                   <span key={square} className="region__map-square" />
                 );

@@ -1,6 +1,6 @@
 import { attackTargets, knightAt, legalSquares } from '../../engine/queries';
 import { SQUARES, type MatchState, type RegionIndex, type SquareIndex } from '../../engine/state';
-import { PLAYER_NAMES, REGION_NAMES } from '../../data/names';
+import { PLAYER_NAMES, REGION_NAMES, knightArt, knightName, knightPersonalName } from '../../data/names';
 import { Card } from '../components/Card';
 import './regionView.css';
 
@@ -42,7 +42,7 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
             .filter(Boolean)
             .join(' ');
           const label = knight
-            ? `Knight ${knight.number} of ${PLAYER_NAMES[knight.owner]}, ${knight.hp} HP${isTarget ? ', attack' : ''}`
+            ? `${knightName(knight)} of ${PLAYER_NAMES[knight.owner]}, ${knight.hp} HP${isTarget ? ', attack' : ''}`
             : isLegal
               ? 'Place Knight here'
               : 'Empty square';
@@ -55,9 +55,9 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
               aria-label={label}
             >
               {knight && (
-                <Card art="militia" size="field" owner={knight.owner}>
+                <Card art={knightArt(knight.owner)} size="field" owner={knight.owner}>
                   <span className="hp-badge">{knight.hp}</span>
-                  <span className="knight-plate">Knight {knight.number}</span>
+                  <span className="knight-plate">{knightPersonalName(knight)}</span>
                   {isTarget && <span className="attack-marker">Attack</span>}
                 </Card>
               )}

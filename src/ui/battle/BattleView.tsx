@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { availableSergeants } from '../../engine/queries';
 import { KNIGHT_HP, type Clash, type Duel, type DuelRole, type MatchState, type Sergeant } from '../../engine/state';
-import { PLAYER_NAMES, REGION_NAMES, TACTIC_NAMES, captainName } from '../../data/names';
+import { PLAYER_NAMES, REGION_NAMES, TACTIC_NAMES, captainName, knightArtFacing, knightName } from '../../data/names';
 import { Card } from '../components/Card';
 import { SergeantBox, TacticLegend, type SergeantBoxState } from '../components/SergeantBox';
 import { TacticIcon } from '../components/TacticIcon';
@@ -152,10 +152,10 @@ function Combatant({ match, duel, role, upTo, current, options, onPick }: Combat
 
       <div className="combatant__body">
         <div className={`combatant__card${hp <= 0 ? ' combatant__card--fallen' : ''}`}>
-          <Card art="militia" size="detail" owner={side.player} />
+          <Card art={knightArtFacing(side.player, role === 'attacker' ? 'right' : 'left')} size="detail" owner={side.player} />
         </div>
         <div className="combatant__info">
-          <span className="combatant__name">Knight {knight.number}</span>
+          <span className="combatant__name">{knightName(knight)}</span>
           <span className="combatant__sub">
             {PLAYER_NAMES[side.player]} · {captainName(captain)}
           </span>
@@ -190,7 +190,7 @@ function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, onRet
     return (
       <div className="battle-msg battle-msg--intro">
         <span className="battle-msg__big">
-          Knight {attacker.number} attacks Knight {defender.number}!
+          {knightName(attacker)} attacks {knightName(defender)}!
         </span>
         <span className="battle-msg__small">
           {PLAYER_NAMES[duel.attacker.player]} against {PLAYER_NAMES[duel.defender.player]}
@@ -219,7 +219,7 @@ function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, onRet
           <RevealedPick pick={clash.defender} winner={phase === 'result' && clash.winner === 'defender'} />
         </div>
         <span className={`battle-msg__small${phase === 'result' ? ' battle-msg__verdict' : ''}`}>
-          {phase === 'reveal' ? 'Revealing…' : verdict(clash, attacker.number, defender.number)}
+          {phase === 'reveal' ? 'Revealing…' : verdict(clash, knightName(attacker), knightName(defender))}
         </span>
       </div>
     );
@@ -234,14 +234,14 @@ function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, onRet
       <div className="battle-msg battle-msg--over">
         <span className="battle-msg__big">
           {winnerKnight
-            ? `${PLAYER_NAMES[duel[winner!].player]}’s Knight ${winnerKnight.number} wins!`
+            ? `${knightName(winnerKnight)} wins!`
             : 'The battle ends even'}
         </span>
         <span className="battle-msg__small">
           {loserKnight
             ? loserFate === 'killed'
-              ? `${PLAYER_NAMES[loserSide.player]}’s Knight ${loserKnight.number} has fallen.`
-              : `${PLAYER_NAMES[loserSide.player]}’s Knight ${loserKnight.number} retreats with ${loserKnight.hp} HP.`
+              ? `${PLAYER_NAMES[loserSide.player]}’s ${knightName(loserKnight)} has fallen.`
+              : `${PLAYER_NAMES[loserSide.player]}’s ${knightName(loserKnight)} retreats with ${loserKnight.hp} HP.`
             : 'The defender holds; both Knights keep their squares.'}
         </span>
         <button className="btn btn--primary" onClick={onReturn} autoFocus>
@@ -271,8 +271,8 @@ function RevealedPick({ pick, winner }: { pick: Clash['attacker']; winner: boole
   );
 }
 
-function verdict(clash: Clash, attackerNumber: number, defenderNumber: number): string {
-  const target = clash.winner === 'attacker' ? `Knight ${defenderNumber}` : `Knight ${attackerNumber}`;
+function verdict(clash: Clash, attackerName: string, defenderName: string): string {
+  const target = clash.winner === 'attacker' ? defenderName : attackerName;
   if (clash.winner === 'tie') {
     return `Both sent ${TACTIC_NAMES[clash.attacker!.tactic]}: each Sergeant loses half their men.`;
   }

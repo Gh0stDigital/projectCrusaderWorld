@@ -1,6 +1,6 @@
 import { actingCaptain, actionableCaptains, attackTargets, canEndTurn } from '../../engine/queries';
 import type { MatchState, RegionIndex } from '../../engine/state';
-import { LORD_NAMES, REGION_NAMES, captainName } from '../../data/names';
+import { LORD_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
 import './phaseWindow.css';
 
 const PHASES = [
@@ -108,7 +108,7 @@ function instructionFor(match: MatchState, selectedCaptainId: string | null, foc
     const placed = turn.placedKnightId ? match.knights[turn.placedKnightId] : undefined;
     const n = attackTargets(match).length;
     return focusedRegion === captain?.region
-      ? `Knight ${placed?.number} can attack ${n === 1 ? 'the enemy Knight' : 'an enemy Knight'} next to it, or press End turn.`
+      ? `${placed ? knightName(placed) : 'Your Knight'} can attack ${n === 1 ? 'the enemy Knight' : 'an enemy Knight'} next to it, or press End turn.`
       : `Enter ${where} to attack, or End turn.`;
   }
   if (match.duel?.outcome) return 'Battle fought. Press End turn when ready.';
