@@ -162,7 +162,11 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
       </div>
 
       <div className="combatant__body">
-        <div className={`combatant__card${hp <= 0 ? ' combatant__card--fallen' : ''}`}>
+        <div
+          key={tookDamage ? `hit-${upTo}` : 'idle'}
+          className={`combatant__card${hp <= 0 ? ' combatant__card--fallen' : ''}${tookDamage ? ' combatant__card--hit' : ''}`}
+        >
+          {tookDamage && <span className="combatant__slash" aria-hidden="true" />}
           <img
             className="combatant__sprite"
             src={side.player === 'p1' ? knightBattle : enemyKnightBattle}

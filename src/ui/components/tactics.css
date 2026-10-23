@@ -125,3 +125,32 @@
   text-align: center;
   line-height: 1.2;
 }
+
+/* Battle Sergeants: slim parallelograms. The box slants; its contents stay upright. */
+.combatant__sergeants {
+  display: flex;
+  gap: 10px;
+}
+
+.combatant__sergeants .sergeant-box {
+  width: 92px;
+  height: 52px;
+  flex-direction: row;
+  gap: 6px;
+  padding: 0 10px;
+  border-radius: 3px;
+  transform: skewX(-14deg);
+}
+
+.combatant__sergeants .sergeant-box > * {
+  transform: skewX(14deg);
+}
+
+.combatant__sergeants .sergeant-box__tactic {
+  display: none;
+}
+
+.combatant__sergeants .sergeant-box--pickable:hover,
+.combatant__sergeants .sergeant-box--pickable:focus-visible {
+  transform: skewX(-14deg) translateY(-4px);
+}
