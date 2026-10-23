@@ -8,8 +8,8 @@
  */
 
 .match {
-  --skin-ink: #13171b;
-  --skin-stone: #232a2f;
+  --skin-ink: #14120f;
+  --skin-stone: #24211b;
 }
 
 .match__top-bar,
@@ -35,7 +35,7 @@
 /* Keep the title inside the art's title bar. */
 .top-bar__title {
   max-width: 380px;
-  font-size: 22px;
+  font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -117,7 +117,7 @@
 
 /* --- Region board --- */
 .board-stage {
-  background: radial-gradient(ellipse at center, #26302f 0%, var(--skin-ink) 80%);
+  background: radial-gradient(ellipse at center, #2c2922 0%, var(--skin-ink) 80%);
 }
 
 .board-stage__regions {
@@ -140,7 +140,7 @@
   position: absolute;
   inset: 0;
   border-radius: 8px;
-  background: rgba(6, 9, 11, 0.55);
+  background: rgba(8, 7, 5, 0.55);
   pointer-events: none;
 }
 
@@ -149,7 +149,7 @@
 }
 
 .region__name {
-  font-size: 18px;
+  font-size: 10px;
   text-shadow: 0 2px 0 #000, 0 0 6px #000;
 }
 
@@ -186,7 +186,7 @@
 }
 
 .phase-window__instruction {
-  font-size: 21px;
+  font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -194,7 +194,7 @@
 }
 
 .phase-window .btn {
-  background: rgba(14, 18, 22, 0.55);
+  background: rgba(18, 16, 12, 0.55);
 }
 
 .phase-window__end-turn {
@@ -219,20 +219,20 @@
 }
 
 .player-panel:not(.player-panel--company) .player-panel__name {
-  font-size: 28px;
+  font-size: 14px;
   line-height: 30px;
 }
 
 .player-panel:not(.player-panel--company) .player-panel__militia {
   margin-top: 8px;
-  font-size: 15px;
+  font-size: 9px;
   line-height: 18px;
 }
 
 .player-panel:not(.player-panel--company) .player-panel__status {
   margin-top: 8px;
   padding-right: 6px;
-  font-size: 16px;
+  font-size: 10px;
   line-height: 22px;
 }
 
@@ -242,20 +242,20 @@
 
 .player-panel:not(.player-panel--company) .lord-row__title {
   margin-top: 4px;
-  font-size: 19px;
+  font-size: 12px;
   line-height: 22px;
   letter-spacing: 0.02em;
 }
 
 .player-panel:not(.player-panel--company) .lord-row__class {
   margin-top: 7px;
-  font-size: 14px;
+  font-size: 9px;
   line-height: 18px;
 }
 
 .player-panel:not(.player-panel--company) .lord-row__militia {
   margin: 1px 0 0;
-  font-size: 14px;
+  font-size: 9px;
   line-height: 18px;
   white-space: nowrap;
 }
@@ -274,7 +274,7 @@
 }
 
 .player-panel:not(.player-panel--company) .captain-chip > span:first-child {
-  font-size: 16px;
+  font-size: 10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -282,7 +282,7 @@
 }
 
 .player-panel:not(.player-panel--company) .captain-chip__where {
-  font-size: 13px;
+  font-size: 8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -291,7 +291,7 @@
 
 .player-panel:not(.player-panel--company) .lord-row__empty-hint {
   margin-top: 52px;
-  font-size: 16px;
+  font-size: 10px;
 }
 
 /* ================= Zoomed-in Region view skin =================
@@ -322,20 +322,20 @@
 }
 
 .player-panel--company .player-panel__name {
-  font-size: 28px;
+  font-size: 14px;
   line-height: 30px;
 }
 
 .player-panel--company .player-panel__militia {
   margin-top: 8px;
-  font-size: 15px;
+  font-size: 9px;
   line-height: 18px;
 }
 
 .player-panel--company .player-panel__status {
   margin-top: 8px;
   padding-right: 6px;
-  font-size: 16px;
+  font-size: 10px;
   line-height: 22px;
 }
 
@@ -367,20 +367,20 @@
 }
 
 .player-panel--company .company__captain-name {
-  font-size: 18px;
+  font-size: 10px;
   line-height: 22px;
   text-shadow: 0 1px 0 #000, 0 0 4px #000;
 }
 
 .player-panel--company .company__captain-lord {
-  font-size: 15px;
+  font-size: 9px;
   text-shadow: 0 1px 0 #000;
 }
 
 .player-panel--company .company__stats {
   margin-bottom: 6px;
   padding: 6px 10px;
-  font-size: 15px;
+  font-size: 9px;
   line-height: 1.25;
 }
 
@@ -413,3 +413,66 @@
   border-color: var(--gold);
   background: rgba(217, 169, 58, 0.2);
 }
+
+/* ================= Pixel font fitting =================
+ * Press Start 2P is wide and has its own letter spacing; these rules keep
+ * every line inside its frame in the art.
+ */
+.match *,
+.title-screen *,
+.main-menu * {
+  letter-spacing: 0 !important;
+}
+
+.top-bar__turn { font-size: 10px; }
+.top-bar__button { font-size: 10px; }
+
+.player-panel__status { font-size: 9px !important; }
+.lord-row__class { font-size: 8px !important; }
+.lord-row__militia { font-size: 8px !important; }
+.lord-row__empty-hint { font-size: 8px !important; }
+.captain-chip > span:first-child { font-size: 9px !important; }
+.captain-chip__where { font-size: 8px !important; }
+
+.company__captain-name { font-size: 11px !important; }
+.company__captain-lord { font-size: 9px !important; }
+.company__stats { font-size: 9px !important; }
+.knight-token__name { font-size: 10px !important; }
+.knight-token__detail { font-size: 8px !important; }
+
+/* Phase plaques: one label per plaque in the art, centered. */
+.phase-list { gap: 11px; }
+.phase-list__item {
+  height: 48px;
+  padding: 0 !important;
+  display: grid;
+  place-items: center;
+  font-size: 9px !important;
+}
+.phase-list__item:nth-child(1) { width: 145px; }
+.phase-list__item:nth-child(2) { width: 150px; }
+.phase-list__item:nth-child(3) { width: 113px; }
+.phase-list__item:nth-child(4) { width: 106px; }
+.phase-list__item:nth-child(5) { width: 78px; }
+
+/* Instruction sits on the scroll between the two finials. */
+.phase-window { position: relative; }
+.phase-window__orders {
+  position: absolute;
+  left: 748px;
+  top: 986px;
+  top: 66px;
+  width: 470px;
+  max-width: none;
+  text-align: center;
+}
+.phase-window__instruction { font-size: 9px !important; }
+.phase-window__error { font-size: 8px; }
+.phase-window .btn { font-size: 11px; }
+
+/* The instruction is placed on the scroll, so keep the buttons in the right-hand column. */
+.phase-window__buttons {
+  grid-column: 3;
+  justify-self: end;
+}
+.phase-window__orders { top: 70px; }

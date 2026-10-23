@@ -4,6 +4,7 @@ import {
   REGION_NAMES,
   captainArt,
   captainName,
+  captainPersonalName,
   formatMilitia,
   knightName,
   knightPersonalName,
@@ -55,8 +56,8 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
       <div className={`company__captain${acting ? ' company__captain--acting' : ''}`}>
         <Card art={captainArt(player)} size="detail" owner={player} alt={captainName(captain)} />
         <div className="company__captain-info">
-          <h3 className="company__captain-name">{captainName(captain)}</h3>
-          <p className="company__captain-lord">Serves {lordPersona(player, captain.lord).name}</p>
+          <h3 className="company__captain-name">{captainPersonalName(captain)}</h3>
+          <p className="company__captain-lord">{lordPersona(player, captain.lord).name}</p>
           {acting && <span className="company__badge">{picking ? 'Choose a Knight' : 'Orders given'}</span>}
           <dl className="company__stats">
             <dt>Militia</dt>
@@ -99,10 +100,11 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
                     {knight.status === 'unmanned' ? 'Empty slot' : knightPersonalName(knight)}
                   </span>
                   <span className="knight-token__detail">
-                    {alive ? `${knight.hp} HP · ${knight.sergeants.length} Sgt` : STATUS_LABEL[knight.status]}
+                    {alive
+                      ? `${knight.hp} HP${knight.status === 'fielded' ? ' · field' : ` · ${knight.sergeants.length} Sgt`}`
+                      : STATUS_LABEL[knight.status]}
                   </span>
                 </span>
-                {knight.status === 'fielded' && <span className="knight-token__flag">Field</span>}
               </button>
             </li>
           );

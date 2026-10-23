@@ -12,10 +12,11 @@
   --p1: #3f7fd1; /* Player 1, always on the left */
   --p2: #c4473a; /* Player 2, always on the right */
 
-  --font-display: 'Cinzel', Georgia, serif;
-  --font-body: 'Crimson Text', Georgia, serif;
+  /* Classic 8-bit NES-style pixel font (closest free match to Dragon Warrior III). */
+  --font-display: 'Press Start 2P', monospace;
+  --font-body: 'Press Start 2P', monospace;
 
-  --text-min: 18px;
+  --text-min: 8px;
   --radius: 6px;
 }
 
@@ -36,6 +37,9 @@ body {
   background: #0d0a08;
   color: var(--parchment);
   font-family: var(--font-body);
+  line-height: 1.4;
+  font-synthesis: none;
+  -webkit-font-smoothing: none;
   overflow: hidden;
 }
 
@@ -46,7 +50,7 @@ button {
 
 .btn {
   font-family: var(--font-display);
-  font-size: 26px;
+  font-size: 14px;
   letter-spacing: 0.06em;
   color: var(--parchment);
   background: var(--wood);

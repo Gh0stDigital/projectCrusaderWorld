@@ -44,13 +44,13 @@
 
 .battle__where {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 12px;
   color: var(--gold);
 }
 
 .battle__clash {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 14px;
 }
 
 /* --- Combatants: you (blue) bottom-left, the enemy (red) top-right --- */
@@ -80,7 +80,7 @@
 
 .combatant__none {
   padding: 12px;
-  font-size: 18px;
+  font-size: 10px;
   color: var(--parchment-dim);
 }
 
@@ -126,11 +126,11 @@
 
 .combatant__name {
   font-family: var(--font-display);
-  font-size: 26px;
+  font-size: 14px;
 }
 
 .combatant__sub {
-  font-size: 17px;
+  font-size: 10px;
   color: var(--parchment-dim);
 }
 
@@ -153,12 +153,12 @@
   align-items: baseline;
   gap: 12px;
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 12px;
 }
 
 .combatant__damage {
   color: #f07a63;
-  font-size: 26px;
+  font-size: 14px;
   font-weight: 700;
   animation: damage-pop 900ms ease-out both;
 }
@@ -204,12 +204,12 @@
 
 .battle-msg__big {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 14px;
   color: var(--gold);
 }
 
 .battle-msg__small {
-  font-size: 20px;
+  font-size: 12px;
   color: var(--parchment-dim);
 }
 
@@ -230,7 +230,7 @@
 
 .clash-reveal__vs {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 14px;
   color: var(--parchment-dim);
 }
 
@@ -252,18 +252,18 @@
 }
 
 .revealed__who {
-  font-size: 14px;
+  font-size: 9px;
   color: var(--parchment-dim);
   letter-spacing: 0.06em;
 }
 
 .revealed__name {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 12px;
 }
 
 .revealed__men {
-  font-size: 16px;
+  font-size: 10px;
   color: var(--parchment-dim);
 }
 

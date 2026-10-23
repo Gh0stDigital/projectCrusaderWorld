@@ -24,12 +24,12 @@
 
 .orders-notice__title {
   font-family: var(--font-display);
-  font-size: 34px;
+  font-size: 18px;
   color: var(--gold);
 }
 
 .orders-notice__detail {
-  font-size: 22px;
+  font-size: 12px;
   color: var(--parchment-dim);
 }
 

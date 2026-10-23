@@ -24,7 +24,7 @@
 .attack-preview__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 36px;
+  font-size: 18px;
   color: var(--gold);
 }
 
@@ -38,7 +38,7 @@
 
 .attack-preview__versus {
   font-family: var(--font-display);
-  font-size: 34px;
+  font-size: 18px;
   color: var(--parchment-dim);
 }
 
@@ -46,7 +46,7 @@
   margin: 0;
   max-width: 820px;
   text-align: center;
-  font-size: 18px;
+  font-size: 10px;
   color: var(--parchment-dim);
 }
 
@@ -71,7 +71,7 @@
 
 .knight-summary__role {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 10px;
   color: var(--gold);
   letter-spacing: 0.06em;
 }
@@ -90,26 +90,26 @@
 .knight-summary__name {
   margin: 0 0 4px;
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 14px;
   font-weight: 500;
 }
 
 .knight-summary__line {
   margin: 0;
-  font-size: 17px;
+  font-size: 10px;
   color: var(--parchment-dim);
 }
 
 .knight-summary__hp {
   margin: 8px 0 4px;
   font-family: var(--font-display);
-  font-size: 34px;
+  font-size: 18px;
   color: #f2c3b9;
   line-height: 1;
 }
 
 .knight-summary__hp span {
-  font-size: 18px;
+  font-size: 10px;
   color: var(--parchment-dim);
 }
 

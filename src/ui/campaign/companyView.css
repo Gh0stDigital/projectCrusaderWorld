@@ -8,7 +8,7 @@
 .company__where {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 12px;
   color: var(--gold);
 }
 
@@ -18,7 +18,7 @@
   place-items: center;
   border: 2px dashed rgba(233, 220, 192, 0.2);
   border-radius: 8px;
-  font-size: 20px;
+  font-size: 12px;
   color: var(--parchment-dim);
 }
 
@@ -51,14 +51,14 @@
 .company__captain-name {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 21px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1.15;
 }
 
 .company__captain-lord {
   margin: 0;
-  font-size: 17px;
+  font-size: 10px;
   color: var(--parchment-dim);
 }
 
@@ -69,7 +69,7 @@
   background: var(--gold);
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .company__stats {
@@ -77,7 +77,7 @@
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 2px 10px;
-  font-size: 17px;
+  font-size: 10px;
 }
 
 .company__stats dt {
@@ -146,7 +146,7 @@
   position: relative;
   margin-top: -3px;
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: 10px;
   font-weight: 700;
   color: #f4ead2;
 }
@@ -160,14 +160,14 @@
 
 .knight-token__name {
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: 10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .knight-token__detail {
-  font-size: 15px;
+  font-size: 9px;
   color: var(--parchment-dim);
 }
 
@@ -175,7 +175,7 @@
   position: absolute;
   top: 4px;
   right: 6px;
-  font-size: 12px;
+  font-size: 8px;
   letter-spacing: 0.06em;
   color: var(--gold);
 }

@@ -70,6 +70,11 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - The battle window (~1100×720), announcements, and notices are overlays on the board stage, so both side panels stay visible.
 - Minimum text size about 18px on the canvas.
 
+## Font — Settled
+
+- The whole game uses **Press Start 2P**, a free 8-bit NES-style pixel font, as the closest legal match to the Dragon Warrior III font (which belongs to Square Enix). Swapping in a licensed font later is a one-line change in `src/ui/theme.css`.
+- Text sizes are scaled for the pixel font (mostly 8–14px), letter spacing is off, and labels are shortened where needed so every line stays inside its frame in the art.
+
 ## Cards — Settled
 
 - Card art is 2:3 portrait (source art is 1024×1536).

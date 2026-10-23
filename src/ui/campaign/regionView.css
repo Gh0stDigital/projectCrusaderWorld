@@ -15,7 +15,7 @@
   width: 198px;
   margin: 0;
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 12px;
   line-height: 26px;
   color: var(--gold);
   letter-spacing: 0.06em;
@@ -109,7 +109,7 @@
   background: #b5402d;
   color: #fff3ea;
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 10px;
   letter-spacing: 0.04em;
 }
 
@@ -123,7 +123,7 @@
   border: 1px solid var(--gold-dim);
   border-radius: 4px;
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: 10px;
   text-align: center;
   line-height: 1.15;
 }

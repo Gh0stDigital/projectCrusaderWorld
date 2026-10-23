@@ -58,7 +58,7 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
                 <div className="lord-row__slot">
                   <span className="lord-row__slot-number">{i + 1}</span>
                 </div>
-                <p className="lord-row__empty-hint">{draft ? `Turn ${i + 1}: choose a Lord` : 'Not yet placed'}</p>
+                <p className="lord-row__empty-hint">{draft ? 'Choose a Lord' : 'Not placed'}</p>
               </li>
             );
           }
@@ -85,7 +85,7 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
                   {formatMilitia(lordMilitia(match, player, lord))} militia
                   <span className="lord-row__reserve">
                     {' '}
-                    · {formatMilitia(match.players[player].lordReserves[lord])} in reserve
+                    · {formatMilitia(match.players[player].lordReserves[lord])} rsv
                   </span>
                 </p>
                 {active && <span className="lord-row__badge">Taking this turn</span>}
@@ -97,7 +97,7 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
                       const where =
                         captain.region === null
                           ? 'Ready'
-                          : `${REGION_NAMES[captain.region]} · ${waiting} waiting`;
+                          : `${REGION_NAMES[captain.region]}: ${waiting} ready`;
                       const content = (
                         <>
                           <span>{label}</span>
@@ -137,8 +137,8 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
 
 function statusFor(match: MatchState, player: PlayerId): string {
   if (match.phase === 'lordOrder') {
-    if (match.orderingPlayer === player) return 'Ordering Lords';
-    return match.players[player].lordOrder ? 'Lords in position' : 'Waiting to order Lords';
+    if (match.orderingPlayer === player) return 'Ordering';
+    return match.players[player].lordOrder ? 'Ready' : 'Waiting';
   }
-  return match.turn?.player === player ? 'Taking their turn' : 'Waiting';
+  return match.turn?.player === player ? 'Your turn' : 'Waiting';
 }

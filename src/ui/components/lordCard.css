@@ -30,7 +30,7 @@
   border: 2px solid var(--gold);
   color: var(--gold);
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -47,7 +47,7 @@
   border: 1px solid var(--gold-dim);
   border-radius: 4px;
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 12px;
   color: var(--parchment);
   text-align: center;
   line-height: 1.15;
@@ -55,7 +55,7 @@
 
 /* Smaller cards: keep the name on one line so it doesn't cover the face. */
 .card--roster .lord-card__plate {
-  font-size: 17px;
+  font-size: 10px;
   white-space: nowrap;
   left: 4px;
   right: 4px;
@@ -63,13 +63,13 @@
 
 .lord-card__class {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 9px;
   color: var(--gold);
   letter-spacing: 0.04em;
 }
 
 .lord-card__captains {
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 9px;
   color: var(--parchment-dim);
 }
