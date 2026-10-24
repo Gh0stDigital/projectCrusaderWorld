@@ -12,4 +12,5 @@ export type MatchEvent =
   | { type: 'sergeantCommitted'; player: PlayerId; role: DuelRole }
   | { type: 'clashResolved'; clash: Clash }
   | { type: 'duelEnded'; outcome: DuelOutcome; attackerId: string; defenderId: string }
+  | { type: 'regionSecured'; player: PlayerId; captainId: string; region: RegionIndex; capturedKnightIds: string[] }
   | { type: 'turnEnded'; player: PlayerId };

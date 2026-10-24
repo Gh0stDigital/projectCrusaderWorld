@@ -56,8 +56,26 @@ export function knightAt(state: MatchState, region: RegionIndex, square: SquareI
   );
 }
 
+/** Empty squares a Knight could still be placed on. A secured Region has none. */
 export function emptySquares(state: MatchState, region: RegionIndex): SquareIndex[] {
+  if (state.secured[region]) return [];
   return SQUARES.filter((square) => knightAt(state, region, square) === null);
+}
+
+/** The eight lines of a 3×3 board: rows, columns and diagonals. */
+export const LINES: readonly (readonly [SquareIndex, SquareIndex, SquareIndex])[] = [
+  [0, 1, 2], [3, 4, 5], [6, 7, 8],
+  [0, 3, 6], [1, 4, 7], [2, 5, 8],
+  [0, 4, 8], [2, 4, 6],
+];
+
+/** The line of three a player's Knights complete in a Region, if any. */
+export function winningLine(
+  state: MatchState,
+  region: RegionIndex,
+  player: PlayerId,
+): readonly [SquareIndex, SquareIndex, SquareIndex] | null {
+  return LINES.find((line) => line.every((sq) => knightAt(state, region, sq)?.owner === player)) ?? null;
 }
 
 /**

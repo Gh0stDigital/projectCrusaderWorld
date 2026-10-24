@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { availableSergeants, duelRoleOf } from '../../engine/queries';
 import { KNIGHT_HP, type Clash, type Duel, type DuelRole, type MatchState, type PlayerId, type Sergeant } from '../../engine/state';
-import { PLAYER_NAMES, REGION_NAMES, TACTIC_NAMES, captainName, knightName } from '../../data/names';
+import { PLAYER_NAMES, REGION_NAMES, TACTIC_NAMES, captainName, knightArt, knightName } from '../../data/names';
+import { Card } from '../components/Card';
 import knightBattle from '../../assets/sprites/knight-battle.png';
 import enemyKnightBattle from '../../assets/sprites/enemy-knight-battle.png';
 import { SergeantBox, TacticLegend, type SergeantBoxState } from '../components/SergeantBox';
@@ -125,7 +127,19 @@ interface CombatantProps {
   onPick?: (sergeantId: string) => void;
 }
 
-/** One Knight on the battlefield: card, info box with HP, and Sergeants above. */
+/** The element a side panel provides for that player's battle HUD, once it exists. */
+function useHudHost(player: PlayerId): HTMLElement | null {
+  const [host, setHost] = useState<HTMLElement | null>(null);
+  useLayoutEffect(() => {
+    setHost(document.getElementById(`battle-hud-${player}`));
+  }, [player]);
+  return host;
+}
+
+/**
+ * One Knight in the battle: the sprite and HP box on the field, and in that
+ * player's side panel their Knight card with the Sergeants listed below it.
+ */
 function Combatant({ match, duel, role, position, upTo, current, options, onPick }: CombatantProps) {
   const side = duel[role];
   const knight = match.knights[side.knightId]!;
@@ -137,9 +151,24 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
   const chosenId = current?.[role]?.sergeantId;
   const maxHp = Math.max(KNIGHT_HP, side.startHp);
   const tookDamage = current && upTo > 0 && current === last && current.winner !== role && current.winner !== 'tie';
+  const hudHost = useHudHost(side.player);
+  const picking = (options?.size ?? 0) > 0;
 
-  return (
-    <div className={`combatant combatant--${position} combatant--${side.player}`}>
+  const hud = (
+    <div className={`battle-hud battle-hud--${side.player}${picking ? ' battle-hud--picking' : ''}`}>
+      <div className="battle-hud__card">
+        <Card art={knightArt(side.player)} size="detail" owner={side.player} alt={knightName(knight)} />
+      </div>
+      <div className="battle-hud__name">{knightName(knight)}</div>
+      <div className="battle-hud__hp">
+        <div className="hp-bar" aria-hidden="true">
+          <div className="hp-bar__fill" style={{ width: `${(hp / maxHp) * 100}%` }} />
+        </div>
+        <span>
+          {hp} / {maxHp} HP
+        </span>
+      </div>
+      <div className="battle-hud__label">{picking ? 'Choose a Sergeant' : 'Sergeants'}</div>
       <div className="combatant__sergeants">
         {side.startSergeants.map((s) => {
           const now = alive.find((a) => a.id === s.id);
@@ -160,6 +189,12 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
         })}
         {side.startSergeants.length === 0 && <span className="combatant__none">No Sergeants</span>}
       </div>
+    </div>
+  );
+
+  return (
+    <div className={`combatant combatant--${position} combatant--${side.player}`}>
+      {hudHost && createPortal(hud, hudHost)}
 
       <div className="combatant__body">
         <div

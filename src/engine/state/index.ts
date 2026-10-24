@@ -58,8 +58,9 @@ export interface Captain {
  * - ready: staffed and waiting with their Captain
  * - fielded: standing on a square
  * - dead: killed in battle
+ * - captured: was standing in a Region when the enemy secured it
  */
-export type KnightStatus = 'unmanned' | 'ready' | 'fielded' | 'dead';
+export type KnightStatus = 'unmanned' | 'ready' | 'fielded' | 'dead' | 'captured';
 
 export interface Knight {
   id: string;
@@ -177,6 +178,13 @@ export interface MatchState {
    * the square of the last Knight placed. null before the first placement.
    */
   route: RegionIndex | null;
+  /** Regions won with three Knights in a row: who holds each, and through which Captain. */
+  secured: Partial<Record<RegionIndex, SecuredRegion>>;
+}
+
+export interface SecuredRegion {
+  player: PlayerId;
+  captainId: string;
 }
 
 export function otherPlayer(player: PlayerId): PlayerId {

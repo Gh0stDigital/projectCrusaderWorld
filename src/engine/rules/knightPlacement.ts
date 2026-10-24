@@ -1,6 +1,6 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
-import { actingCaptain, attackTargets, knightAt } from '../queries';
+import { actingCaptain, attackTargets, knightAt, winningLine } from '../queries';
 import { SQUARES, type MatchState, type PlayerId, type SquareIndex } from '../state';
 
 /**
@@ -37,12 +37,34 @@ export function placeKnight(
     route: square,
     turn: { ...turn, step: 'attack', placedKnightId: knightId },
   };
+  const events: MatchEvent[] = [{ type: 'knightPlaced', player, knightId, region, square }];
+
+  // Three in a row secures the Region for this Captain. It is permanent: the
+  // board closes and enemy Knights still standing there are captured.
+  if (winningLine(placed, region, player)) {
+    const knights = { ...placed.knights };
+    const capturedKnightIds: string[] = [];
+    for (const k of Object.values(knights)) {
+      if (k.status === 'fielded' && k.position?.region === region && k.owner !== player) {
+        knights[k.id] = { ...k, status: 'captured', position: null };
+        capturedKnightIds.push(k.id);
+      }
+    }
+    events.push({ type: 'regionSecured', player, captainId: captain.id, region, capturedKnightIds });
+    return {
+      ok: true,
+      state: {
+        ...placed,
+        knights,
+        secured: { ...placed.secured, [region]: { player, captainId: captain.id } },
+        turn: { ...placed.turn!, step: 'end' },
+      },
+      events,
+    };
+  }
+
   // With no enemy next to the new Knight there is nothing to attack: go straight to End.
   const next: MatchState =
     attackTargets(placed).length > 0 ? placed : { ...placed, turn: { ...placed.turn!, step: 'end' } };
-  return {
-    ok: true,
-    state: next,
-    events: [{ type: 'knightPlaced', player, knightId, region, square }],
-  };
+  return { ok: true, state: next, events };
 }

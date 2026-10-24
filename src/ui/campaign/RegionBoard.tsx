@@ -2,6 +2,7 @@ import { captainInRegion, knightAt } from '../../engine/queries';
 import { REGIONS, SQUARES, type MatchState, type PlayerId, type RegionIndex } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, captainArt, captainName } from '../../data/names';
 import { Portrait } from '../components/Portrait';
+import { Card } from '../components/Card';
 import './regionBoard.css';
 
 export const REGION_TILE = 260;
@@ -37,6 +38,7 @@ export function RegionBoard({ match, clickable, active, required = null, choosin
           isClickable && 'region--open',
           active === region && 'region--active',
           required === region && 'region--required',
+          match.secured[region] && `region--secured region--secured-${match.secured[region]!.player}`,
         ]
           .filter(Boolean)
           .join(' ');
@@ -65,12 +67,27 @@ export function RegionBoard({ match, clickable, active, required = null, choosin
               })}
             </span>
 
+            {match.secured[region] && <SecuredMarker match={match} region={region} />}
             {required === region && <span className="region__required">Must play here</span>}
             {isClickable && <span className="region__action">{labelFor(region)}</span>}
           </button>
         );
       })}
     </div>
+  );
+}
+
+/** A secured Region: the winning Captain's card, with their side's X or O over it. */
+function SecuredMarker({ match, region }: { match: MatchState; region: RegionIndex }) {
+  const held = match.secured[region]!;
+  const captain = match.captains[held.captainId]!;
+  return (
+    <span className="region__secured" title={`Secured by ${PLAYER_NAMES[held.player]}: ${captainName(captain)}`}>
+      <Card art={captainArt(held.player)} size="company" owner={held.player} />
+      <span className="region__secured-mark">
+        <Mark player={held.player} />
+      </span>
+    </span>
   );
 }
 

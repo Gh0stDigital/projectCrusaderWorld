@@ -296,7 +296,7 @@
  * Each side is a column 500px wide: Sergeants on top, the Knight in the
  * middle, its info box underneath. Blue on the left; red on the right, lower.
  */
-.combatant--bottom { --col: 280px; --top: 66px; }
+.combatant--bottom { --col: 280px; --top: 110px; }
 .combatant--top { --col: 840px; --top: 300px; }
 
 .combatant__sergeants,
@@ -311,9 +311,8 @@
   transform: translateX(-50%);
 }
 
-.combatant__sergeants { top: var(--top); }
-.combatant__card { top: calc(var(--top) + 66px); }
-.combatant__info { top: calc(var(--top) + 410px); width: 420px; }
+.combatant__card { top: var(--top); }
+.combatant__info { top: calc(var(--top) + 344px); width: 420px; }
 
 .combatant__sprite {
   display: block;
@@ -379,4 +378,78 @@
   .combatant__card--hit .combatant__sprite,
   .combatant__slash { animation: none; }
   .combatant__slash { display: none; }
+}
+
+/* ================= Battle HUD in the side panels ================= */
+.battle-hud-host {
+  flex: 1;
+  margin-top: 4px;
+  border-radius: 8px;
+  background: rgba(14, 11, 8, 0.94);
+  border: 2px solid var(--gold-dim);
+}
+
+.battle-hud {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px;
+}
+
+.battle-hud--p1 { box-shadow: inset 0 4px 0 var(--p1); }
+.battle-hud--p2 { box-shadow: inset 0 4px 0 var(--p2); }
+
+.battle-hud__name {
+  font-size: 14px;
+  color: var(--gold);
+}
+
+.battle-hud__hp {
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 10px;
+  text-align: center;
+}
+
+.battle-hud__label {
+  margin-top: 6px;
+  font-size: 9px;
+  color: var(--parchment-dim);
+}
+
+.battle-hud--picking .battle-hud__label {
+  color: var(--gold);
+}
+
+/* Sergeants listed down the panel as slanted blocks. */
+.battle-hud .combatant__sergeants {
+  position: static;
+  transform: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.battle-hud .combatant__sergeants .sergeant-box {
+  width: 270px;
+  height: 42px;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 0 18px;
+}
+
+.battle-hud .combatant__sergeants .sergeant-box__tactic {
+  display: inline;
+  margin-left: auto;
+  font-size: 10px;
+}
+
+.battle-hud .combatant__sergeants .sergeant-box--pickable:hover,
+.battle-hud .combatant__sergeants .sergeant-box--pickable:focus-visible {
+  transform: skewX(-14deg) translateX(8px);
 }

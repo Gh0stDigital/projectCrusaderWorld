@@ -1,6 +1,6 @@
 import { attackTargets, knightAt, legalSquares } from '../../engine/queries';
 import { SQUARES, type MatchState, type RegionIndex, type SquareIndex } from '../../engine/state';
-import { PLAYER_NAMES, REGION_NAMES, knightName, knightPersonalName } from '../../data/names';
+import { PLAYER_NAMES, REGION_NAMES, captainName, knightName, knightPersonalName } from '../../data/names';
 import { KnightSprite } from '../components/KnightSprite';
 import './regionView.css';
 
@@ -27,6 +27,12 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
   return (
     <div className="region-view">
       <h2 className="region-view__title">{REGION_NAMES[region]}</h2>
+      {match.secured[region] && (
+        <p className={`region-view__secured region-view__secured--${match.secured[region]!.player}`}>
+          Secured by {PLAYER_NAMES[match.secured[region]!.player]}:{' '}
+          {captainName(match.captains[match.secured[region]!.captainId]!)}
+        </p>
+      )}
       <div className="inner-board">
         {SQUARES.map((square) => {
           const knight = knightAt(match, region, square);

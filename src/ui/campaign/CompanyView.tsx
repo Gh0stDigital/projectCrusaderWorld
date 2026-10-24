@@ -27,6 +27,7 @@ const STATUS_LABEL: Record<Knight['status'], string> = {
   fielded: 'In the field',
   unmanned: 'Unmanned',
   dead: 'Fallen',
+  captured: 'Captured',
 };
 
 /**

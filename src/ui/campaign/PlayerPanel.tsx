@@ -14,13 +14,23 @@ interface PlayerPanelProps {
   draft?: { order: LordClass[]; remove: (lord: LordClass) => void };
   /** While zoomed into a Region: show this player's Captain and Knights there instead of their Lords. */
   company?: { region: RegionIndex; selectedKnightId: string | null; onSelectKnight: (id: string) => void };
+  /** During a battle the panel shows this player's fighting Knight instead (filled in by the battle screen). */
+  battleHud?: boolean;
 }
 
 /**
  * One player's side: their three Lords in turn order, each card on the left
  * with that Lord's Captains and where they are stationed on the right.
  */
-export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain, draft, company }: PlayerPanelProps) {
+export function PlayerPanel({
+  match,
+  player,
+  selectedCaptainId,
+  onSelectCaptain,
+  draft,
+  company,
+  battleHud,
+}: PlayerPanelProps) {
   const order = draft ? draft.order : (match.players[player].lordOrder ?? []);
   const turn = match.turn;
   const isTheirTurn = turn?.player === player;
@@ -30,6 +40,7 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
     <aside
       className={`player-panel player-panel--${player}${isTheirTurn ? ' player-panel--active' : ''}${
         company ? ' player-panel--company' : ''
+      }${battleHud ? ' player-panel--battle' : ''
       }`}
     >
       <header className="player-panel__header">
@@ -40,7 +51,9 @@ export function PlayerPanel({ match, player, selectedCaptainId, onSelectCaptain,
         <p className="player-panel__status">{statusFor(match, player)}</p>
       </header>
 
-      {company ? (
+      {battleHud ? (
+        <div className="battle-hud-host" id={`battle-hud-${player}`} />
+      ) : company ? (
         <CompanyView
           match={match}
           player={player}

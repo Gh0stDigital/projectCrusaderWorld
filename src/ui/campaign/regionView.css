@@ -180,3 +180,22 @@
 .inner-board__square--legal:focus-visible .route-preview {
   opacity: 1;
 }
+
+.region-view__secured {
+  position: absolute;
+  left: 50%;
+  top: 420px;
+  transform: translateX(-50%);
+  z-index: 3;
+  margin: 0;
+  padding: 14px 24px;
+  border-radius: 6px;
+  background: rgba(20, 15, 11, 0.92);
+  border: 2px solid var(--gold);
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--gold);
+}
+
+.region-view__secured--p1 { box-shadow: 0 0 0 3px rgba(91, 156, 240, 0.7); }
+.region-view__secured--p2 { box-shadow: 0 0 0 3px rgba(226, 96, 79, 0.7); }

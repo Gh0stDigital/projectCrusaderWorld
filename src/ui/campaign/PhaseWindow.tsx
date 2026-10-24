@@ -126,5 +126,8 @@ function instructionFor(match: MatchState, selectedCaptainId: string | null, foc
       : `Enter ${where} to attack, or End turn.`;
   }
   if (match.duel?.outcome) return 'Battle fought. Press End turn when ready.';
+  if (captain?.region != null && match.secured[captain.region]?.captainId === captain.id) {
+    return `${where} secured! Press End turn.`;
+  }
   return 'Knight placed. Press End turn when ready.';
 }

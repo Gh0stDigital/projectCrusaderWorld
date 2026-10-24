@@ -84,5 +84,6 @@ export function createMatch(): MatchState {
     knights,
     duel: null,
     route: null,
+    secured: {},
   };
 }

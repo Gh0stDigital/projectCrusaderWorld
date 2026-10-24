@@ -95,9 +95,13 @@ export function MatchScreen() {
         ? ' but lost the battle'
         : ', and the battle ended even'
     : '';
+  const securedNote =
+    acting && acting.region !== null && match.secured[acting.region]?.captainId === acting.id && placedKnight
+      ? ` and secured it`
+      : '';
   const noticeDetail =
     placedKnight && acting && acting.region !== null
-      ? `${captainName(acting)} placed ${knightName(placedKnight)} in ${REGION_NAMES[acting.region]}${battleNote}`
+      ? `${captainName(acting)} placed ${knightName(placedKnight)} in ${REGION_NAMES[acting.region]}${securedNote}${battleNote}`
       : turn
         ? `The ${LORD_NAMES[turn.lord]} had no orders to give`
         : '';
@@ -140,6 +144,7 @@ export function MatchScreen() {
         onSelectCaptain={(id) => !busy && store.selectCaptain(id)}
         draft={ordering === 'p1' ? draftControls : undefined}
         company={companyControls}
+        battleHud={battleOpen}
       />
 
       <BoardStage
@@ -211,6 +216,7 @@ export function MatchScreen() {
         onSelectCaptain={(id) => !busy && store.selectCaptain(id)}
         draft={ordering === 'p2' ? draftControls : undefined}
         company={companyControls}
+        battleHud={battleOpen}
       />
 
       <PhaseWindow

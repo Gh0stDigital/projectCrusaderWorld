@@ -113,6 +113,14 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - **Narrative:** scripts are data files. A director plays scenes in response to engine events, one at a time. Scenes pause the game but never change it except through normal engine actions. Typewriter text: click finishes the line, click again advances, a held key fast-forwards, Esc skips the scene. Reduced motion shows text instantly. No scene during a duel may hint at an uncommitted Sergeant pick.
 - **Saves** are a versioned copy of the engine state, taken only between scenes.
 
+## Securing Regions — Settled
+
+- A placement that completes three of a player's Knights in a row (row, column or diagonal) in a Region secures it for the placing Captain, permanently.
+- Enemy Knights still standing there are captured: out of play, kept distinct from dead and retreated, and no longer counted as militia.
+- A secured Region is closed: no deployments or placements. Routing into it becomes a free choice. No attack follows the securing placement.
+- On the Region board a secured tile shows the winning Captain's card under a large X (Player 1) or O (Player 2).
+- Still open: what happens to the losing player's Captain stationed there, and the campaign win (three secured Regions in a row).
+
 ## Militia — Settled (test values)
 
 - Each Lord starts with 1,000 militia: 200 in the Lord's reserve, and each of 2 Captains holds 100 in reserve plus 3 staffed Knights.
@@ -129,6 +137,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - The Knight with less HP at the end loses and is removed from the board. The winner stays on its square and the square becomes empty.
 - Clashes are revealed one at a time with pauses (intro, reveal, result) so the information is easy to follow. After the result the player returns to the Region and ends the turn manually.
 - Side panels hold their numbers during a battle and update when the player returns, so they never reveal a result early.
+- During a battle each side panel shows that player's fighting Knight: card, name, HP, and their Sergeants listed below as slanted blocks. The human picks from the left panel. The field shows the two Knight sprites, HP boxes and clash results.
 
 ## Battles — Provisional (my choices, open to change)
 
