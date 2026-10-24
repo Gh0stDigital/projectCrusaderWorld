@@ -4,6 +4,7 @@ import { createMatch } from '../src/engine/setup';
 import {
   actionableCaptains,
   canEndTurn,
+  commandOptions,
   emptySquares,
   legalSquares,
   nextLordFor,
@@ -36,21 +37,31 @@ function startedMatch(): MatchState {
 }
 
 /**
- * Play a full turn: the current Lord's first usable Captain deploys to `region`
- * (or resumes if already stationed), places its first waiting Knight on the
- * first empty square, and ends the turn.
+ * Play a full turn following the routing rules: the first Captain allowed to act
+ * deploys (to the routed Region, or the first open one when free) or resumes,
+ * places its first waiting Knight on `square` if free (else the first empty
+ * square), and ends the turn.
  */
-function playTurn(s: MatchState, region: RegionIndex): MatchState {
+function playTurn(s: MatchState, square: SquareIndex = 0): MatchState {
   const player = s.turn!.player;
   const captain = actionableCaptains(s)[0];
   if (captain) {
     s =
       captain.region === null
-        ? act(s, { type: 'deployCaptain', player, captainId: captain.id, region })
+        ? act(s, { type: 'deployCaptain', player, captainId: captain.id, region: commandOptions(s).deployRegions[0]! })
         : act(s, { type: 'resumeCaptain', player, captainId: captain.id });
     const knight = reserveKnights(s, captain.id)[0]!;
-    s = act(s, { type: 'placeKnight', player, knightId: knight.id, square: legalSquares(s)[0]! });
+    const legal = legalSquares(s);
+    s = act(s, { type: 'placeKnight', player, knightId: knight.id, square: legal.includes(square) ? square : legal[0]! });
   }
+  return act(s, { type: 'endTurn', player });
+}
+
+/** Deploy a Captain to a Region and place one of its Knights on a square, then end the turn. */
+function deployAndPlace(s: MatchState, captainId: string, region: RegionIndex, square: SquareIndex): MatchState {
+  const player = s.turn!.player;
+  s = act(s, { type: 'deployCaptain', player, captainId, region });
+  s = act(s, { type: 'placeKnight', player, knightId: reserveKnights(s, captainId)[0]!.id, square });
   return act(s, { type: 'endTurn', player });
 }
 
@@ -91,22 +102,22 @@ describe('Lord rotation', () => {
   it('follows each player’s own chosen order, advancing only when their turn returns', () => {
     let s = startedMatch();
     const seen: string[] = [];
-    for (const region of [0, 1, 2, 3, 4, 5] as RegionIndex[]) {
+    for (const square of [0, 1, 2, 3, 4, 5] as SquareIndex[]) {
       seen.push(`${s.turn!.player}:${s.turn!.lord}`);
-      s = playTurn(s, region);
+      s = playTurn(s, square);
     }
     expect(seen).toEqual(['p1:raiders', 'p2:garrison', 'p1:army', 'p2:raiders', 'p1:garrison', 'p2:army']);
   });
 
   it('does not advance Player 1’s Lord while it is Player 2’s turn', () => {
-    const s = playTurn(startedMatch(), 0);
+    const s = playTurn(startedMatch());
     expect(s.turn!.player).toBe('p2');
     expect(nextLordFor(s, 'p1')).toBe('army');
   });
 
   it('wraps back to the first Lord after the third', () => {
     let s = startedMatch();
-    for (let i = 0; i < 6; i++) s = playTurn(s, i as RegionIndex);
+    for (let i = 0; i < 6; i++) s = playTurn(s, i as SquareIndex);
     expect(s.turn).toMatchObject({ player: 'p1', lord: 'raiders' });
   });
 });
@@ -135,16 +146,11 @@ describe('Captain deployment', () => {
     expect(rejected(s, { type: 'deployCaptain', player: 'p1', captainId: 'p1-raiders-2', region: 5 })).toMatch(/already chosen/);
   });
 
-  it('allows only one of your Captains per Region, but the opponent can share it', () => {
-    let s = startedMatch();
-    s = playTurn(s, 4); // p1 raiders-1 -> 4
-    s = playTurn(s, 4); // p2 garrison-1 -> 4, shared with p1
+  it('lets the opponent share a Region', () => {
+    let s = deployAndPlace(startedMatch(), 'p1-raiders-1', 4, 4); // routes p2 to Region 4
+    s = deployAndPlace(s, 'p2-garrison-1', 4, 0);
     expect(s.captains['p2-garrison-1']!.region).toBe(4);
-    for (const r of [0, 0, 1, 1] as RegionIndex[]) s = playTurn(s, r);
-    // p1 raiders again: region 4 already holds p1-raiders-1
-    expect(rejected(s, { type: 'deployCaptain', player: 'p1', captainId: 'p1-raiders-2', region: 4 })).toMatch(
-      /already have a Captain/,
-    );
+    expect(s.captains['p1-raiders-1']!.region).toBe(4);
   });
 
   it('closes a Region to new Captains once its board is full', () => {
@@ -154,20 +160,92 @@ describe('Captain deployment', () => {
       s.knights[k.id] = { ...k, status: 'fielded', position: { region: 2, square: i as SquareIndex } };
     });
     expect(regionsOpenTo(s, 'p1')).not.toContain(2);
-    expect(rejected(s, { type: 'deployCaptain', player: 'p1', captainId: 'p1-raiders-1', region: 2 })).toMatch(/no room/);
+    expect(rejected(s, { type: 'deployCaptain', player: 'p1', captainId: 'p1-raiders-1', region: 2 })).toMatch(
+      /cannot deploy/,
+    );
+  });
+});
+
+describe('Routing', () => {
+  it('gives a free choice of Region on the first turn', () => {
+    const o = commandOptions(startedMatch());
+    expect(o).toMatchObject({ mode: 'free', route: null });
+    expect(o.deployRegions).toHaveLength(9);
+  });
+
+  it('sends the opponent to the Region matching the square played', () => {
+    const s = deployAndPlace(startedMatch(), 'p1-raiders-1', 2, 7);
+    expect(s.route).toBe(7);
+    expect(commandOptions(s)).toMatchObject({ mode: 'routed', route: 7, deployRegions: [7], resumeCaptainIds: [] });
+    expect(rejected(s, { type: 'deployCaptain', player: 'p2', captainId: 'p2-garrison-1', region: 3 })).toMatch(
+      /sent you to/,
+    );
+    const next = act(s, { type: 'deployCaptain', player: 'p2', captainId: 'p2-garrison-1', region: 7 });
+    expect(next.captains['p2-garrison-1']!.region).toBe(7);
+  });
+
+  it('hands the turn to a Captain already stationed in the routed Region, from any Lord', () => {
+    let s = deployAndPlace(startedMatch(), 'p1-raiders-1', 4, 0); // p2 -> Region 0
+    s = deployAndPlace(s, 'p2-garrison-1', 0, 4); // p1 -> Region 4, where Raiders Captain I stands
+    expect(s.turn!.lord).toBe('army');
+    expect(commandOptions(s)).toMatchObject({ mode: 'routed', route: 4, deployRegions: [], resumeCaptainIds: ['p1-raiders-1'] });
+    expect(rejected(s, { type: 'deployCaptain', player: 'p1', captainId: 'p1-army-1', region: 4 })).toMatch(
+      /stationed Captain/,
+    );
+    s = act(s, { type: 'resumeCaptain', player: 'p1', captainId: 'p1-raiders-1' });
+    expect(legalSquares(s)).toEqual(emptySquares(s, 4));
+  });
+
+  it('does not let a Lord with a Ready Captain revisit other Regions', () => {
+    let s = deployAndPlace(startedMatch(), 'p1-raiders-1', 2, 0); // p2 -> Region 0
+    s = playTurn(s, 1); // p2 -> p1 routed to Region 1
+    s = playTurn(s, 3); // p1 Army
+    s = playTurn(s, 5); // p2
+    s = playTurn(s, 6); // p1 Garrison
+    s = playTurn(s, 8); // p2
+    // p1 Raiders again: Captain I is stationed in Region 2, Captain II is Ready.
+    expect(s.turn!.lord).toBe('raiders');
+    expect(commandOptions(s).mode).toBe('routed');
+    expect(commandOptions(s).resumeCaptainIds).not.toContain('p1-raiders-1');
+    expect(rejected(s, { type: 'resumeCaptain', player: 'p1', captainId: 'p1-raiders-1' })).toMatch(/sent you to/);
+  });
+
+  it('ignores routing once the Lord has deployed both Captains: choose either of their Regions', () => {
+    let s = startedMatch();
+    s.captains['p1-raiders-1'] = { ...s.captains['p1-raiders-1']!, region: 2 };
+    s.captains['p1-raiders-2'] = { ...s.captains['p1-raiders-2']!, region: 6 };
+    s.captains['p1-army-1'] = { ...s.captains['p1-army-1']!, region: 4 };
+    s = { ...s, route: 4 };
+    const o = commandOptions(s);
+    expect(o).toMatchObject({ mode: 'lordCaptains', deployRegions: [] });
+    expect(o.resumeCaptainIds.sort()).toEqual(['p1-raiders-1', 'p1-raiders-2']);
+    expect(rejected(s, { type: 'resumeCaptain', player: 'p1', captainId: 'p1-army-1' })).toMatch(/current Lord/);
+    s = act(s, { type: 'resumeCaptain', player: 'p1', captainId: 'p1-raiders-2' });
+    expect(legalSquares(s)).toEqual(emptySquares(s, 6));
+  });
+
+  it('gives a free choice when the routed Region is closed', () => {
+    let s = startedMatch();
+    Object.values(s.knights)
+      .filter((k) => k.owner === 'p2')
+      .slice(0, 9)
+      .forEach((k, i) => {
+        s.knights[k.id] = { ...k, status: 'fielded', position: { region: 5, square: i as SquareIndex } };
+      });
+    s = { ...s, route: 5 };
+    const o = commandOptions(s);
+    expect(o).toMatchObject({ mode: 'free', route: 5 });
+    expect(o.deployRegions).not.toContain(5);
+    expect(o.deployRegions).toContain(0);
+  });
+
+  it('keeps the route set by the placement even after a battle', () => {
+    const s = deployAndPlace(startedMatch(), 'p1-raiders-1', 4, 8);
+    expect(s.route).toBe(8);
   });
 });
 
 describe('Resuming a stationed Captain', () => {
-  it('lets a Lord give orders to a Captain already in the field', () => {
-    let s = startedMatch();
-    for (let i = 0; i < 6; i++) s = playTurn(s, i as RegionIndex);
-    // p1 raiders' turn again; raiders-1 is stationed in region 0
-    s = act(s, { type: 'resumeCaptain', player: 'p1', captainId: 'p1-raiders-1' });
-    expect(s.turn).toMatchObject({ step: 'placement', captainId: 'p1-raiders-1' });
-    expect(legalSquares(s)).toEqual(emptySquares(s, 0));
-  });
-
   it('refuses to resume a Captain who has not been deployed', () => {
     expect(rejected(startedMatch(), { type: 'resumeCaptain', player: 'p1', captainId: 'p1-raiders-1' })).toMatch(
       /not been deployed/,
@@ -211,10 +289,10 @@ describe('Knight placement', () => {
   });
 
   it('refuses a taken square, including one held by the opponent', () => {
-    let s = playTurn(startedMatch(), 4); // p1 Knight on region 4, square 0
+    let s = deployAndPlace(startedMatch(), 'p1-raiders-1', 4, 4); // p1 Knight on Region 4, square 4
     s = act(s, { type: 'deployCaptain', player: 'p2', captainId: 'p2-garrison-1', region: 4 });
-    expect(rejected(s, { type: 'placeKnight', player: 'p2', knightId: 'p2-garrison-1-k1', square: 0 })).toMatch(/taken/);
-    expect(legalSquares(s)).not.toContain(0);
+    expect(rejected(s, { type: 'placeKnight', player: 'p2', knightId: 'p2-garrison-1-k1', square: 4 })).toMatch(/taken/);
+    expect(legalSquares(s)).not.toContain(4);
   });
 });
 

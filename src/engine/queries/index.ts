@@ -80,11 +80,79 @@ export function captainCanAct(state: MatchState, captain: Captain): boolean {
   return emptySquares(state, captain.region).length > 0;
 }
 
-/** Captains of the current Lord that can be chosen this turn. Empty when nothing can be done. */
+/**
+ * What the player may do in this turn's Command step.
+ * - routed: the last placement sends them to `route`. If they already have a
+ *   Captain there who can act, that Captain takes the turn; otherwise one of the
+ *   current Lord's Ready Captains deploys there.
+ * - lordCaptains: the current Lord has no Ready Captain left, so routing is
+ *   ignored and they choose one of that Lord's stationed Captains.
+ * - free: no route yet, or the routed Region is closed to them; they deploy a
+ *   Ready Captain to any open Region (or, if none is open, resume any Captain).
+ */
+export interface CommandOptions {
+  mode: 'routed' | 'lordCaptains' | 'free';
+  /** The routed Region, when there is one (even if it turned out closed). */
+  route: RegionIndex | null;
+  /** Regions a Ready Captain of the current Lord may deploy to. */
+  deployRegions: RegionIndex[];
+  /** Stationed Captains that may be given orders. */
+  resumeCaptainIds: string[];
+}
+
+export function commandOptions(state: MatchState): CommandOptions {
+  const turn = state.turn;
+  const none: CommandOptions = { mode: 'free', route: null, deployRegions: [], resumeCaptainIds: [] };
+  if (!turn || turn.step !== 'command') return none;
+  const player = turn.player;
+  const lordCaptains = captainsOf(state, player, turn.lord);
+  const ready = lordCaptains.filter((c) => c.region === null && reserveKnights(state, c.id).length > 0);
+  const route = state.route;
+
+  if (ready.length === 0) {
+    return {
+      mode: 'lordCaptains',
+      route,
+      deployRegions: [],
+      resumeCaptainIds: lordCaptains.filter((c) => c.region !== null && captainCanAct(state, c)).map((c) => c.id),
+    };
+  }
+
+  if (route !== null) {
+    const stationed = captainInRegion(state, route, player);
+    if (stationed && captainCanAct(state, stationed)) {
+      return { mode: 'routed', route, deployRegions: [], resumeCaptainIds: [stationed.id] };
+    }
+    if (!stationed && emptySquares(state, route).length > 0) {
+      return { mode: 'routed', route, deployRegions: [route], resumeCaptainIds: [] };
+    }
+  }
+
+  const open = regionsOpenTo(state, player);
+  if (open.length > 0) return { mode: 'free', route, deployRegions: open, resumeCaptainIds: [] };
+  return {
+    mode: 'free',
+    route,
+    deployRegions: [],
+    resumeCaptainIds: captainsOf(state, player)
+      .filter((c) => c.region !== null && captainCanAct(state, c))
+      .map((c) => c.id),
+  };
+}
+
+/** Captains that can be chosen this turn. Empty when nothing can be done. */
 export function actionableCaptains(state: MatchState): Captain[] {
   const turn = state.turn;
   if (!turn || turn.step !== 'command') return [];
-  return captainsOf(state, turn.player, turn.lord).filter((c) => captainCanAct(state, c));
+  const options = commandOptions(state);
+  const deployers =
+    options.deployRegions.length > 0
+      ? captainsOf(state, turn.player, turn.lord).filter(
+          (c) => c.region === null && reserveKnights(state, c.id).length > 0,
+        )
+      : [];
+  const resumers = options.resumeCaptainIds.map((id) => state.captains[id]!);
+  return [...deployers, ...resumers];
 }
 
 /** The Captain acting this turn, once chosen. */

@@ -83,5 +83,6 @@ export function createMatch(): MatchState {
     captains,
     knights,
     duel: null,
+    route: null,
   };
 }

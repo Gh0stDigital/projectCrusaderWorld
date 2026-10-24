@@ -14,6 +14,8 @@ interface RegionBoardProps {
   clickable: ReadonlySet<RegionIndex>;
   /** The Region the current turn is happening in, if any. */
   active: RegionIndex | null;
+  /** The Region the opponent's last placement sent this player to, if routing applies. */
+  required?: RegionIndex | null;
   /** Whether the player is choosing a Region; dims the ones they can't pick. */
   choosing: boolean;
   onClickRegion: (region: RegionIndex) => void;
@@ -25,12 +27,17 @@ interface RegionBoardProps {
  * portraits, and a large map of its own 3×3 board marked X (Player 1, blue) and
  * O (Player 2, red) so occupied squares read at a glance.
  */
-export function RegionBoard({ match, clickable, active, choosing, onClickRegion, labelFor }: RegionBoardProps) {
+export function RegionBoard({ match, clickable, active, required = null, choosing, onClickRegion, labelFor }: RegionBoardProps) {
   return (
     <div className={`region-board${choosing ? ' region-board--choosing' : ''}`}>
       {REGIONS.map((region) => {
         const isClickable = clickable.has(region);
-        const classes = ['region', isClickable && 'region--open', active === region && 'region--active']
+        const classes = [
+          'region',
+          isClickable && 'region--open',
+          active === region && 'region--active',
+          required === region && 'region--required',
+        ]
           .filter(Boolean)
           .join(' ');
         return (
@@ -58,6 +65,7 @@ export function RegionBoard({ match, clickable, active, choosing, onClickRegion,
               })}
             </span>
 
+            {required === region && <span className="region__required">Must play here</span>}
             {isClickable && <span className="region__action">{labelFor(region)}</span>}
           </button>
         );

@@ -33,6 +33,8 @@ export function placeKnight(
   const placed: MatchState = {
     ...state,
     knights: { ...state.knights, [knightId]: { ...knight, status: 'fielded', position: { region, square } } },
+    // The square sends the opponent to the Region in the same position.
+    route: square,
     turn: { ...turn, step: 'attack', placedKnightId: knightId },
   };
   // With no enemy next to the new Knight there is nothing to attack: go straight to End.

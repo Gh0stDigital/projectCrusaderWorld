@@ -573,3 +573,16 @@
 .phase-window__buttons {
   margin-right: 250px;
 }
+
+/* No Captain here: the note sits inside the empty portrait frame. */
+.player-panel--company .company__vacant {
+  flex: none;
+  height: 312px;
+  margin-top: 14px;
+  width: 210px;
+  padding: 0 24px;
+  border: none;
+  font-size: 9px;
+  text-align: center;
+  line-height: 1.6;
+}

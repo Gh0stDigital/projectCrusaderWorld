@@ -12,7 +12,7 @@ export function TurnAnnouncement({ announcement, onDone }: { announcement: Annou
     return () => window.clearTimeout(timer);
   }, [announcement, onDone]);
 
-  const { player, lord, turnNumber, canAct } = announcement;
+  const { player, lord, turnNumber, task } = announcement;
 
   return (
     <button className="turn-announcement" onClick={onDone}>
@@ -21,7 +21,7 @@ export function TurnAnnouncement({ announcement, onDone }: { announcement: Annou
         <span className="turn-announcement__player">{PLAYER_NAMES[player]}</span>
         <span className="turn-announcement__lord">{lordFullName(player, lord)}</span>
         <span className="turn-announcement__task">
-          {canAct ? 'Deploy or command a Captain, then place a Knight' : 'This Lord has no orders to give this turn'}
+          {task}
         </span>
       </div>
     </button>

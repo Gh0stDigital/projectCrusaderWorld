@@ -54,6 +54,13 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
               onClick={() => (isTarget ? onChooseTarget(knight.id) : onPlaceKnight(square))}
               aria-label={label}
             >
+              {!knight && isLegal && (
+                <span className="route-preview">
+                  Sends enemy to
+                  <br />
+                  {REGION_NAMES[square]}
+                </span>
+              )}
               {knight && (
                 <span className={`board-piece board-piece--${knight.owner}`}>
                   <KnightSprite owner={knight.owner} width={128} animate title={knightName(knight)} />

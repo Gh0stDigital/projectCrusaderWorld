@@ -31,14 +31,15 @@ function rejected(state: MatchState, action: MatchAction): string {
 /**
  * Turn 3: Player 2's Knight p2-garrison-1-k1 stands on Heartland square 4.
  * Player 1 has just placed p1-army-1-k1 on square 1, next to it, and may attack.
- * (Turn 1: p1 Raiders placed in the North; turn 2: p2 Garrison placed in the Heartland.)
+ * (Turn 1: p1 Raiders placed in the North, square 4; turn 2: p2 Garrison routed to the Heartland.)
  */
 function readyToAttack(): MatchState {
   let s = createMatch();
   s = act(s, { type: 'setLordOrder', player: 'p1', order: ['raiders', 'army', 'garrison'] });
   s = act(s, { type: 'setLordOrder', player: 'p2', order: ['garrison', 'raiders', 'army'] });
   s = act(s, { type: 'deployCaptain', player: 'p1', captainId: 'p1-raiders-1', region: 1 });
-  s = act(s, { type: 'placeKnight', player: 'p1', knightId: 'p1-raiders-1-k1', square: 0 });
+  // Square 4 routes Player 2 to the Heartland (Region 4); their square 4 routes Player 1 back there.
+  s = act(s, { type: 'placeKnight', player: 'p1', knightId: 'p1-raiders-1-k1', square: 4 });
   s = act(s, { type: 'endTurn', player: 'p1' });
   s = act(s, { type: 'deployCaptain', player: 'p2', captainId: 'p2-garrison-1', region: 4 });
   s = act(s, { type: 'placeKnight', player: 'p2', knightId: 'p2-garrison-1-k1', square: 4 });

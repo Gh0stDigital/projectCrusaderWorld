@@ -129,3 +129,32 @@
 .region-board--choosing .region--open:focus-visible .region__action {
   opacity: 1;
 }
+
+/* The Region the opponent's last placement sent this player to. */
+.region--required {
+  box-shadow: 0 0 0 3px var(--gold), 0 0 28px rgba(217, 169, 58, 0.55);
+  animation: required-glow 1.6s ease-in-out infinite;
+}
+
+@keyframes required-glow {
+  0%, 100% { box-shadow: 0 0 0 3px var(--gold), 0 0 18px rgba(217, 169, 58, 0.35); }
+  50% { box-shadow: 0 0 0 3px var(--gold), 0 0 34px rgba(217, 169, 58, 0.7); }
+}
+
+.region__required {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: var(--gold);
+  color: var(--ink);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .region--required { animation: none; }
+}

@@ -3,6 +3,7 @@ import type { MatchAction } from '../engine/actions';
 import type { MatchEvent } from '../engine/events';
 import { applyAction } from '../engine/match';
 import { chooseSergeant } from '../ai';
+import { commandSummary } from '../ui/campaign/commandText';
 import { actionableCaptains, canEndTurn, reserveKnights } from '../engine/queries';
 import { createMatch } from '../engine/setup';
 import type { LordClass, MatchState, PlayerId, RegionIndex } from '../engine/state';
@@ -12,6 +13,8 @@ export interface TurnAnnouncement {
   lord: LordClass;
   turnNumber: number;
   canAct: boolean;
+  /** Where the player must (or may) play this turn. */
+  task: string;
 }
 
 /** Timing of the end-of-turn sequence, in milliseconds. */
@@ -155,8 +158,8 @@ function screenUpdatesFor(state: MatchState, events: MatchEvent[]): Partial<Matc
   for (const event of events) {
     switch (event.type) {
       case 'turnStarted': {
-        const { type: _type, ...announcement } = event;
-        updates.announcement = announcement;
+        const { type: _type, ...rest } = event;
+        updates.announcement = { ...rest, task: commandSummary(state) };
         updates.focusedRegion = null;
         updates.selectedKnightId = null;
         // Pre-select the first Captain that can act, so one click on a Region is enough.

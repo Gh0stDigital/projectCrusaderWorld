@@ -172,6 +172,11 @@ export interface MatchState {
   knights: Record<string, Knight>;
   /** This turn's duel, kept until the turn ends so its result can be shown. */
   duel: Duel | null;
+  /**
+   * Ultimate Tic-Tac-Toe routing: the Region the next player is sent to, set by
+   * the square of the last Knight placed. null before the first placement.
+   */
+  route: RegionIndex | null;
 }
 
 export function otherPlayer(player: PlayerId): PlayerId {

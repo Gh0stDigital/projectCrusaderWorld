@@ -1,4 +1,5 @@
-import { actingCaptain, actionableCaptains, attackTargets, canEndTurn } from '../../engine/queries';
+import { actingCaptain, actionableCaptains, attackTargets, canEndTurn, commandOptions } from '../../engine/queries';
+import { commandSummary } from './commandText';
 import type { MatchState, RegionIndex } from '../../engine/state';
 import { LORD_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
 import './phaseWindow.css';
@@ -99,11 +100,15 @@ function instructionFor(match: MatchState, selectedCaptainId: string | null, foc
   if (turn.step === 'command') {
     if (actionableCaptains(match).length === 0) return `No ${lordName} Captain can act this turn. Press End turn.`;
     const selected = selectedCaptainId ? match.captains[selectedCaptainId] : undefined;
-    if (!selected) return `Choose a ${lordName} Captain.`;
+    if (!selected) return `${commandSummary(match)}.`;
     const name = captainName(selected);
-    return selected.region === null
-      ? `Choose a Region to deploy ${name}.`
-      : `Click ${REGION_NAMES[selected.region]} to give ${name} new orders.`;
+    const routed = commandOptions(match);
+    if (selected.region === null) {
+      return routed.mode === 'routed' && routed.route !== null
+        ? `Sent to ${REGION_NAMES[routed.route]}: click it to deploy.`
+        : `Choose a Region to deploy ${name}.`;
+    }
+    return `Click ${REGION_NAMES[selected.region]} to give ${name} orders.`;
   }
 
   const captain = actingCaptain(match);

@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { useAppStore } from '../../store/appStore';
 import { useMatchStore } from '../../store/matchStore';
-import { actingCaptain, regionsOpenTo } from '../../engine/queries';
+import { actingCaptain, commandOptions } from '../../engine/queries';
 import type { LordClass, RegionIndex } from '../../engine/state';
 import { LORD_NAMES, PLAYER_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
 import { PlayerPanel } from '../campaign/PlayerPanel';
@@ -49,7 +49,7 @@ export function MatchScreen() {
   if (turn && !busy) {
     if (turn.step === 'command' && selected) {
       if (selected.region === null) {
-        regionsOpenTo(match, turn.player).forEach((r) => clickable.add(r));
+        commandOptions(match).deployRegions.forEach((r) => clickable.add(r));
         regionAction = 'Deploy here';
       } else {
         clickable.add(selected.region);
@@ -158,6 +158,7 @@ export function MatchScreen() {
               match={match}
               clickable={clickable}
               active={acting?.region ?? null}
+              required={turn?.step === 'command' && commandOptions(match).mode === 'routed' ? match.route : null}
               choosing={turn?.step === 'command' && clickable.size > 0}
               onClickRegion={clickRegion}
               labelFor={() => regionAction}
