@@ -25,7 +25,10 @@ function readyToAttack(): MatchState {
   s = act(s, { type: 'placeKnight', player: 'p2', knightId: DEFENDER, square: 4 });
   s = act(s, { type: 'endTurn', player: 'p2' });
   s = act(s, { type: 'deployCaptain', player: 'p1', captainId: 'p1-army-1', region: 4 });
-  return act(s, { type: 'placeKnight', player: 'p1', knightId: ATTACKER, square: 1 });
+  s = act(s, { type: 'placeKnight', player: 'p1', knightId: ATTACKER, square: 1 });
+  // The opponent is a plain Knight here, so only Army abilities apply.
+  s.knights[DEFENDER] = { ...s.knights[DEFENDER]!, subclass: null, hp: 50 };
+  return s;
 }
 
 function setup(
@@ -57,7 +60,7 @@ describe('Army Knight types', () => {
     expect(s.knights['p1-army-1-k2']!.subclass).toBe('cavalry');
     expect(s.knights['p1-army-2-k3']!.subclass).toBe('archers');
     expect(s.knights['p1-army-2-k4']!.subclass).toBe('infantry');
-    expect(s.knights['p1-garrison-1-k1']!.subclass).toBeNull();
+    expect(s.knights['p1-garrison-1-k1']!.subclass).toBe('gatekeeper');
     expect(s.knights['p2-raiders-1-k2']!.subclass).toBeNull();
   });
 });

@@ -1,6 +1,7 @@
 import {
-  ARCHER_SERGEANTS,
   CAPTAIN_RESERVE,
+  SUBCLASS_HP,
+  SUBCLASS_SERGEANTS,
   CAPTAINS_PER_LORD,
   KNIGHT_HP,
   KNIGHTS_PER_CAPTAIN,
@@ -42,10 +43,19 @@ function startingSergeants(knight: string, number: number, count: number = SERGE
   }));
 }
 
-/** Army Knights cycle Infantry, Cavalry, Archers by slot. Other Lords' types come later. */
+/** Knight types cycle by slot: Army Infantry/Cavalry/Archers, Garrison Gatekeeper/Watchman/Warden. Raiders later. */
 export function startingSubclass(lord: LordClass, number: number): KnightSubclass | null {
   if (lord === 'army') return (['infantry', 'cavalry', 'archers'] as const)[(number - 1) % 3]!;
+  if (lord === 'garrison') return (['gatekeeper', 'watchman', 'warden'] as const)[(number - 1) % 3]!;
   return null;
+}
+
+function sergeantCount(subclass: KnightSubclass | null): number {
+  return (subclass && SUBCLASS_SERGEANTS[subclass]) ?? SERGEANTS_PER_KNIGHT;
+}
+
+function baseHp(subclass: KnightSubclass | null): number {
+  return (subclass && SUBCLASS_HP[subclass]) ?? KNIGHT_HP;
 }
 
 function lordReserves(): Record<LordClass, number> {
@@ -61,11 +71,13 @@ export function createMatch(): MatchState {
       for (let rank = 1; rank <= CAPTAINS_PER_LORD; rank++) {
         const id = captainId(owner, lord, rank);
         captains[id] = { id, owner, lord, rank, region: null, reserve: CAPTAIN_RESERVE };
-        // Archers lead fewer Sergeants; their unused men stay in the Captain's reserve.
+        // Knight types change a Knight's size; the difference comes from or goes to the
+        // Captain's reserve, so every Lord still totals the same militia.
         for (let n = 1; n <= STAFFED_KNIGHTS_PER_CAPTAIN; n++) {
-          if (startingSubclass(lord, n) === 'archers') {
-            captains[id]!.reserve += (SERGEANTS_PER_KNIGHT - ARCHER_SERGEANTS) * SERGEANT_MILITIA;
-          }
+          const sub = startingSubclass(lord, n);
+          const standard = KNIGHT_HP + SERGEANTS_PER_KNIGHT * SERGEANT_MILITIA;
+          const actual = baseHp(sub) + sergeantCount(sub) * SERGEANT_MILITIA;
+          captains[id]!.reserve += standard - actual;
         }
         for (let number = 1; number <= KNIGHTS_PER_CAPTAIN; number++) {
           const kid = knightId(id, number);
@@ -77,10 +89,8 @@ export function createMatch(): MatchState {
             number,
             status: staffed ? 'ready' : 'unmanned',
             position: null,
-            hp: staffed ? KNIGHT_HP : 0,
-            sergeants: staffed
-              ? startingSergeants(kid, number, startingSubclass(lord, number) === 'archers' ? ARCHER_SERGEANTS : SERGEANTS_PER_KNIGHT)
-              : [],
+            hp: staffed ? baseHp(startingSubclass(lord, number)) : 0,
+            sergeants: staffed ? startingSergeants(kid, number, sergeantCount(startingSubclass(lord, number))) : [],
             subclass: startingSubclass(lord, number),
           };
         }

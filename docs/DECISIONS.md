@@ -155,6 +155,17 @@ Each Lord class gives its Knights types. Army effects happen after a battle; Gar
 - Provisional choices: Army Knights cycle Infantry, Cavalry, Archers by slot (1–3 and 4–6); all three abilities trigger automatically rather than by prompt.
 - Abilities play out on the battlefield after the last clash ("Second Pass!", "Cover Retreat!", "Regroup") and are listed in the results window. Knight type shows on board pieces, Knight tokens, battle HUD, attack preview and Captain details.
 
+## Knight types: Garrison — Settled
+
+Garrison effects happen before a battle, when a Garrison Knight is attacked.
+
+- **Gatekeeper: Brace.** Double base HP (100), only 2 Sergeants.
+- **Watchman: Snipe.** 3 Sergeants. When a Gatekeeper it stands directly next to is attacked, or the Watchman itself is attacked while next to a Gatekeeper, it hits the attacker with its strongest Sergeant's men before the first clash. Every Watchman next to an attacked Gatekeeper snipes.
+- **Warden: First Strike.** 3 Sergeants. When attacked, hits the attacker with its strongest Sergeant's men before the first clash.
+- Snipe and First Strike can kill the attacker; the battle then ends at once and the attacker is destroyed. All trigger automatically.
+- Provisional choices: Garrison Knights cycle Gatekeeper, Watchman, Warden by slot; Brace is a permanent trait (base HP 100), not a per-battle effect. Knight size differences come from or go to the Captain's reserve, so every Lord still totals 1,000 militia.
+- Pre-battle strikes play out on the battlefield after the intro ("Watchman · Snipe!", "Warden · First Strike!") and are listed in the results window. If one ends the battle when the computer attacks, the reinforcement prompt is skipped.
+
 ## Computer opponent — Settled
 
 - The computer sets its own Lord order and plays its whole turn by itself at a watchable pace (about a second per step), zooming into the Region it plays in, and ends its own turns.

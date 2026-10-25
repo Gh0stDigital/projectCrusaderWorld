@@ -4,6 +4,7 @@ import { availableSergeants, duelRoleOf } from '../../engine/queries';
 import {
   KNIGHT_HP,
   type AftermathEffect,
+  type PreludeEffect,
   type Clash,
   type Duel,
   type DuelRole,
@@ -35,7 +36,7 @@ const REVEAL_MS = 1200;
 const RESULT_MS = 1900;
 const CLOSE_MS = 450;
 
-type Phase = 'intro' | 'choose' | 'reveal' | 'result' | 'aftermath' | 'over';
+type Phase = 'intro' | 'prelude' | 'choose' | 'reveal' | 'result' | 'aftermath' | 'over';
 
 /** How long each after-battle ability is shown. */
 const AFTERMATH_MS = 2200;
@@ -62,12 +63,20 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
   const [phase, setPhase] = useState<Phase>('intro');
   const [closing, setClosing] = useState(false);
   const [effectIndex, setEffectIndex] = useState(0);
+  const [preludeIndex, setPreludeIndex] = useState(0);
 
   const pendingClash = duel.clashes[shown];
 
   useEffect(() => {
     if (phase === 'intro') {
-      const t = window.setTimeout(() => setPhase('choose'), INTRO_MS);
+      const t = window.setTimeout(() => setPhase(duel.prelude.length > 0 ? 'prelude' : 'choose'), INTRO_MS);
+      return () => window.clearTimeout(t);
+    }
+    if (phase === 'prelude') {
+      const t = window.setTimeout(() => {
+        if (preludeIndex + 1 < duel.prelude.length) setPreludeIndex(preludeIndex + 1);
+        else setPhase('choose');
+      }, AFTERMATH_MS);
       return () => window.clearTimeout(t);
     }
     if (phase === 'choose') {
@@ -92,7 +101,7 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
       }, RESULT_MS);
       return () => window.clearTimeout(t);
     }
-  }, [phase, pendingClash, duel.outcome, duel.aftermath.length, effectIndex]);
+  }, [phase, pendingClash, duel.outcome, duel.aftermath.length, effectIndex, duel.prelude.length, preludeIndex]);
 
   const close = () => {
     setClosing(true);
@@ -110,6 +119,9 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
   const effects =
     phase === 'over' ? duel.aftermath : phase === 'aftermath' ? duel.aftermath.slice(0, effectIndex + 1) : [];
   const activeEffect = phase === 'aftermath' ? duel.aftermath[effectIndex] : undefined;
+  // Pre-battle strikes shown so far, and the one playing now.
+  const preludes = phase === 'intro' ? [] : phase === 'prelude' ? duel.prelude.slice(0, preludeIndex + 1) : duel.prelude;
+  const activePrelude = phase === 'prelude' ? duel.prelude[preludeIndex] : undefined;
 
   return (
     <div className={`battle${closing ? ' battle--closing' : ''}`}>
@@ -130,6 +142,8 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
         current={current}
         effects={effects}
         activeEffect={activeEffect}
+        preludes={preludes}
+        activePrelude={activePrelude}
       />
       <Combatant
         match={match}
@@ -140,6 +154,8 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
         current={current}
         effects={effects}
         activeEffect={activeEffect}
+        preludes={preludes}
+        activePrelude={activePrelude}
         options={myOptions}
         onPick={onCommit}
       />
@@ -155,6 +171,7 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
           myRole={myRole}
           onReturn={close}
           effect={activeEffect}
+          prelude={activePrelude}
         />
       </div>
 
@@ -179,6 +196,9 @@ interface CombatantProps {
   effects?: AftermathEffect[];
   /** The ability playing right now, if any. */
   activeEffect?: AftermathEffect;
+  /** Pre-battle strikes already shown, and the one playing now. */
+  preludes?: PreludeEffect[];
+  activePrelude?: PreludeEffect;
 }
 
 /** The element a side panel provides for that player's battle HUD, once it exists. */
@@ -194,13 +214,28 @@ function useHudHost(player: PlayerId): HTMLElement | null {
  * One Knight in the battle: the sprite and HP box on the field, and in that
  * player's side panel their Knight card with the Sergeants listed below it.
  */
-function Combatant({ match, duel, role, position, upTo, current, options, onPick, effects = [], activeEffect }: CombatantProps) {
+function Combatant({
+  match,
+  duel,
+  role,
+  position,
+  upTo,
+  current,
+  options,
+  onPick,
+  effects = [],
+  activeEffect,
+  preludes = [],
+  activePrelude,
+}: CombatantProps) {
   const side = duel[role];
   const knight = match.knights[side.knightId]!;
   const captain = match.captains[knight.captainId]!;
   const last = upTo > 0 ? duel.clashes[upTo - 1] : undefined;
   let hp = last ? last.hpAfter[role] : side.startHp;
   let alive: Sergeant[] = last ? last.sergeantsAfter[role] : side.startSergeants;
+  // Before any clash is shown, apply the pre-battle strikes revealed so far.
+  if (!last) for (const p of preludes) if (p.targetId === side.knightId) hp = Math.max(0, hp - p.damage);
   for (const e of effects) {
     if ((e.type === 'secondPass' || e.type === 'coverRetreat') && e.targetId === side.knightId) hp = Math.max(0, hp - e.damage);
     if (e.type === 'regroup' && e.knightId === side.knightId) {
@@ -209,8 +244,10 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
       );
     }
   }
+  const preludeTarget = activePrelude?.targetId === side.knightId;
   const passTarget =
-    (activeEffect?.type === 'secondPass' || activeEffect?.type === 'coverRetreat') && activeEffect.targetId === side.knightId;
+    preludeTarget ||
+    ((activeEffect?.type === 'secondPass' || activeEffect?.type === 'coverRetreat') && activeEffect.targetId === side.knightId);
   const passStriker = activeEffect?.type === 'secondPass' && activeEffect.knightId === side.knightId;
   const regrouping = activeEffect?.type === 'regroup' && activeEffect.knightId === side.knightId;
   const used = new Set(duel.clashes.slice(0, upTo).map((c) => c[role]?.sergeantId));
@@ -218,8 +255,8 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
   const maxHp = Math.max(KNIGHT_HP, side.startHp);
   const tookDamage =
     passTarget || (current && upTo > 0 && current === last && current.winner !== role && current.winner !== 'tie');
-  const struck = passStriker || (current && upTo > 0 && current === last && current.winner === role);
-  const hitKey = passTarget ? 'pass' : `${upTo}`;
+  const struck = (activePrelude?.knightId === side.knightId) || passStriker || (current && upTo > 0 && current === last && current.winner === role);
+  const hitKey = preludeTarget ? `pre-${activePrelude?.knightId}` : passTarget ? 'pass' : `${upTo}`;
   const hudHost = useHudHost(side.player);
   const picking = (options?.size ?? 0) > 0;
 
@@ -302,7 +339,12 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
             </span>
             {tookDamage && (
               <span className="combatant__damage">
-                −{passTarget && activeEffect && 'damage' in activeEffect ? activeEffect.damage : current?.damage}
+                −
+                {preludeTarget
+                  ? activePrelude?.damage
+                  : passTarget && activeEffect && 'damage' in activeEffect
+                    ? activeEffect.damage
+                    : current?.damage}
               </span>
             )}
           </span>
@@ -322,9 +364,27 @@ interface CenterPanelProps {
   myRole: DuelRole;
   onReturn: () => void;
   effect?: AftermathEffect;
+  prelude?: PreludeEffect;
 }
 
-function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, myRole, effect }: CenterPanelProps) {
+function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, myRole, effect, prelude }: CenterPanelProps) {
+  if (phase === 'prelude' && prelude) {
+    const actor = match.knights[prelude.knightId]!;
+    const target = match.knights[prelude.targetId]!;
+    return (
+      <div className="battle-msg battle-msg--ability">
+        <span className="battle-msg__ability">
+          {prelude.type === 'snipe' ? 'Watchman · Snipe!' : 'Warden · First Strike!'}
+        </span>
+        <span className="battle-msg__small battle-msg__verdict">
+          {knightName(actor)} {prelude.type === 'snipe' ? 'snipes' : 'strikes first at'} {knightName(target)} for{' '}
+          {prelude.damage}
+          {prelude.killed ? `. ${knightName(target)} falls before the battle begins!` : '.'}
+        </span>
+      </div>
+    );
+  }
+
   if (phase === 'aftermath' && effect) {
     const actor = match.knights[effect.knightId]!;
     if (effect.type === 'secondPass') {

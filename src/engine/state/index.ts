@@ -31,13 +31,24 @@ export const KNIGHT_HP = 50;
 export const SERGEANT_MILITIA = 10;
 
 /**
- * Knight types. Army: Infantry (Regroup), Cavalry (Second Pass) and Archers
- * (ranged attacks, Cover Retreat). Garrison and Raiders types come later.
+ * Knight types. Army (after battle): Infantry (Regroup), Cavalry (Second Pass),
+ * Archers (ranged attacks, Cover Retreat). Garrison (before battle): Gatekeeper
+ * (Brace), Watchman (Snipe), Warden (First Strike). Raiders types come later.
  */
-export type KnightSubclass = 'infantry' | 'cavalry' | 'archers';
+export type KnightSubclass = 'infantry' | 'cavalry' | 'archers' | 'gatekeeper' | 'watchman' | 'warden';
 
-/** Archer Knights lead fewer Sergeants; the men saved go to their Captain's reserve. */
-export const ARCHER_SERGEANTS = 3;
+/** Sergeants each Knight type leads (others lead SERGEANTS_PER_KNIGHT). Spare men go to the Captain's reserve. */
+export const SUBCLASS_SERGEANTS: Partial<Record<KnightSubclass, number>> = {
+  archers: 3,
+  gatekeeper: 2,
+  watchman: 3,
+  warden: 3,
+};
+
+/** Base HP for Knight types that differ from KNIGHT_HP. Gatekeepers Brace: double HP. */
+export const SUBCLASS_HP: Partial<Record<KnightSubclass, number>> = {
+  gatekeeper: 100,
+};
 
 /** Cavalry's Second Pass deals this share of its remaining HP to a retreating loser. */
 export const SECOND_PASS_SHARE = 0.5;
@@ -172,9 +183,20 @@ export interface Duel {
   clashes: Clash[];
   /** Set when the duel is over. */
   outcome: DuelOutcome | null;
+  /** Abilities that took effect before the first clash, in order. */
+  prelude: PreludeEffect[];
   /** Abilities that took effect after the duel, in order. */
   aftermath: AftermathEffect[];
 }
+
+/** Garrison strikes on the attacker before the first clash. */
+export type PreludeEffect = {
+  type: 'snipe' | 'firstStrike';
+  knightId: string;
+  targetId: string;
+  damage: number;
+  killed: boolean;
+};
 
 export type AftermathEffect =
   /** Infantry: tied Sergeants recover the men they lost in this duel. */

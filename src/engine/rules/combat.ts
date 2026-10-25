@@ -4,6 +4,7 @@ import { adjacentSquares, attackTargets, availableSergeants, duelKnight, duelRol
 import { SECOND_PASS_SHARE } from '../state';
 import type {
   AftermathEffect,
+  PreludeEffect,
   Clash,
   ClashPick,
   Duel,
@@ -58,10 +59,42 @@ export function declareAttack(
     pending: { attacker: null, defender: null },
     clashes: [],
     outcome: null,
+    prelude: [],
     aftermath: [],
   };
 
-  let next: MatchState = { ...state, duel, turn: { ...turn, step: 'battle' } };
+  // Garrison: Snipe and First Strike hit the attacker before the first clash.
+  let attackerNow = attacker;
+  const prelude: PreludeEffect[] = [];
+  const strike = (from: Knight, type: PreludeEffect['type']) => {
+    if (attackerNow.hp <= 0) return;
+    const damage = Math.min(maxSergeant(from), attackerNow.hp);
+    if (damage <= 0) return;
+    attackerNow = { ...attackerNow, hp: attackerNow.hp - damage };
+    prelude.push({ type, knightId: from.id, targetId: attacker.id, damage, killed: attackerNow.hp <= 0 });
+  };
+  if (target.position) {
+    const { region, square } = target.position;
+    const neighbours = adjacentSquares(square)
+      .map((sq) => knightAt(state, region, sq))
+      .filter((k): k is Knight => k !== null && k.owner === target.owner);
+    // Watchmen next to an attacked Gatekeeper snipe.
+    if (target.subclass === 'gatekeeper') {
+      neighbours.filter((k) => k.subclass === 'watchman').forEach((w) => strike(w, 'snipe'));
+    }
+    // An attacked Watchman snipes if it stands next to a Gatekeeper.
+    if (target.subclass === 'watchman' && neighbours.some((k) => k.subclass === 'gatekeeper')) strike(target, 'snipe');
+    // An attacked Warden strikes first.
+    if (target.subclass === 'warden') strike(target, 'firstStrike');
+  }
+  duel.prelude = prelude;
+
+  let next: MatchState = {
+    ...state,
+    knights: { ...state.knights, [attacker.id]: attackerNow },
+    duel,
+    turn: { ...turn, step: 'battle' },
+  };
   const events: MatchEvent[] = [
     { type: 'duelStarted', attackerId: attacker.id, defenderId: target.id, region: duel.region },
   ];

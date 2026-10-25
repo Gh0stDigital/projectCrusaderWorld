@@ -289,7 +289,13 @@ function runComputerStep() {
     case 'attack': {
       const action = chooseAttack(match);
       if (action && store.dispatch(action)) {
-        useMatchStore.setState({ defensePromptOpen: true });
+        const state = useMatchStore.getState();
+        if (state.match.duel?.outcome) {
+          // Snipe or First Strike already decided it: straight to the battlefield.
+          useMatchStore.setState({ battleOpen: true, battleSnapshot: state.match });
+        } else {
+          useMatchStore.setState({ defensePromptOpen: true });
+        }
         return;
       }
       store.requestEndTurn();

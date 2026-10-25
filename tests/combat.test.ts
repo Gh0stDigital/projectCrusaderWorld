@@ -46,6 +46,9 @@ function readyToAttack(): MatchState {
   s = act(s, { type: 'endTurn', player: 'p2' });
   s = act(s, { type: 'deployCaptain', player: 'p1', captainId: 'p1-army-1', region: 4 });
   s = act(s, { type: 'placeKnight', player: 'p1', knightId: 'p1-army-1-k1', square: 1 });
+  // These tests cover the basic duel, so both Knights are plain (no Knight type abilities).
+  s.knights['p1-army-1-k1'] = { ...s.knights['p1-army-1-k1']!, subclass: null };
+  s.knights['p2-garrison-1-k1'] = { ...s.knights['p2-garrison-1-k1']!, subclass: null, hp: 50 };
   return s;
 }
 

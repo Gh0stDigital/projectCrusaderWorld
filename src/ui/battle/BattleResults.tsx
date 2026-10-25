@@ -76,8 +76,14 @@ export function BattleResults({ match, duel, myRole, onReturn }: BattleResultsPr
           })}
         </div>
 
-        {duel.aftermath.length > 0 && (
+        {duel.aftermath.length + duel.prelude.length > 0 && (
           <ul className="battle-results__abilities">
+            {duel.prelude.map((e, i) => (
+              <li key={`p${i}`}>
+                {e.type === 'snipe' ? 'Snipe' : 'First Strike'}: {knightName(match.knights[e.knightId]!)} hit{' '}
+                {knightName(match.knights[e.targetId]!)} for {e.damage} before the battle{e.killed ? ', killing them' : ''}.
+              </li>
+            ))}
             {duel.aftermath.map((e, i) => {
               const actor = match.knights[e.knightId]!;
               return (

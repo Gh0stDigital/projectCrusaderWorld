@@ -93,6 +93,9 @@ export const SUBCLASS_NAMES: Record<KnightSubclass, string> = {
   infantry: 'Infantry',
   cavalry: 'Cavalry',
   archers: 'Archers',
+  gatekeeper: 'Gatekeeper',
+  watchman: 'Watchman',
+  warden: 'Warden',
 };
 
 /** Short label for tight spaces. */
@@ -100,6 +103,9 @@ export const SUBCLASS_SHORT: Record<KnightSubclass, string> = {
   infantry: 'Inf',
   cavalry: 'Cav',
   archers: 'Arc',
+  gatekeeper: 'Gate',
+  watchman: 'Watch',
+  warden: 'Ward',
 };
 
 /** Each Knight type's ability, with a one-line description. */
@@ -110,6 +116,12 @@ export const SUBCLASS_ABILITIES: Record<KnightSubclass, { name: string; text: st
     name: 'Cover Retreat',
     text: 'Attacks along its row or column. When adjacent Infantry retreats, blocks Second Pass and strikes the victor.',
   },
+  gatekeeper: { name: 'Brace', text: 'Double base HP, but only 2 Sergeants.' },
+  watchman: {
+    name: 'Snipe',
+    text: 'Next to a Gatekeeper: when either is attacked, hits the attacker with its strongest Sergeant before battle.',
+  },
+  warden: { name: 'First Strike', text: 'When attacked, hits the attacker with its strongest Sergeant before battle.' },
 };
 
 export const TACTIC_NAMES: Record<Tactic, string> = {
