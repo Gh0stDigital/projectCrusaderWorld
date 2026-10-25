@@ -33,9 +33,24 @@ export const SERGEANT_MILITIA = 10;
 /**
  * Knight types. Army (after battle): Infantry (Regroup), Cavalry (Second Pass),
  * Archers (ranged attacks, Cover Retreat). Garrison (before battle): Gatekeeper
- * (Brace), Watchman (Snipe), Warden (First Strike). Raiders types come later.
+ * (Brace), Watchman (Snipe), Warden (First Strike). Raiders (during battle):
+ * Skirmisher (Heist), Ambusher (Ambush!), Saboteur (Sabotage).
  */
-export type KnightSubclass = 'infantry' | 'cavalry' | 'archers' | 'gatekeeper' | 'watchman' | 'warden';
+export type KnightSubclass =
+  | 'infantry'
+  | 'cavalry'
+  | 'archers'
+  | 'gatekeeper'
+  | 'watchman'
+  | 'warden'
+  | 'skirmisher'
+  | 'ambusher'
+  | 'saboteur';
+
+/** Ambush takes this many of the opponent's strongest Sergeants out of the battle. */
+export const AMBUSH_COUNT = 2;
+/** Sabotage costs the opponent this much HP after every clash. */
+export const SABOTAGE_DAMAGE = 1;
 
 /** Sergeants each Knight type leads (others lead SERGEANTS_PER_KNIGHT). Spare men go to the Captain's reserve. */
 export const SUBCLASS_SERGEANTS: Partial<Record<KnightSubclass, number>> = {
@@ -43,6 +58,7 @@ export const SUBCLASS_SERGEANTS: Partial<Record<KnightSubclass, number>> = {
   gatekeeper: 2,
   watchman: 3,
   warden: 3,
+  ambusher: 3,
 };
 
 /** Base HP for Knight types that differ from KNIGHT_HP. Gatekeepers Brace: double HP. */
@@ -165,6 +181,10 @@ export interface Clash {
   damage: number;
   hpAfter: Record<DuelRole, number>;
   sergeantsAfter: Record<DuelRole, Sergeant[]>;
+  /** Skirmisher: this side won the clash by Heist, whatever the tactics. */
+  heist?: DuelRole;
+  /** Saboteur: sides that lost SABOTAGE_DAMAGE HP after this clash. */
+  sabotaged: DuelRole[];
 }
 
 export interface DuelOutcome {
@@ -185,18 +205,17 @@ export interface Duel {
   outcome: DuelOutcome | null;
   /** Abilities that took effect before the first clash, in order. */
   prelude: PreludeEffect[];
+  /** Sergeants that cannot fight in this battle (Ambush). They are not harmed. */
+  blocked: Record<DuelRole, string[]>;
   /** Abilities that took effect after the duel, in order. */
   aftermath: AftermathEffect[];
 }
 
-/** Garrison strikes on the attacker before the first clash. */
-export type PreludeEffect = {
-  type: 'snipe' | 'firstStrike';
-  knightId: string;
-  targetId: string;
-  damage: number;
-  killed: boolean;
-};
+/** Effects before the first clash: Garrison strikes on the attacker, and Raider ambushes. */
+export type PreludeEffect =
+  | { type: 'snipe' | 'firstStrike'; knightId: string; targetId: string; damage: number; killed: boolean }
+  /** Ambusher: the target's strongest Sergeants sit out this battle. */
+  | { type: 'ambush'; knightId: string; targetId: string; sergeantIds: string[] };
 
 export type AftermathEffect =
   /** Infantry: tied Sergeants recover the men they lost in this duel. */

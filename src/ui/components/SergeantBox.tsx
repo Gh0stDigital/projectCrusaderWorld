@@ -3,7 +3,7 @@ import { TACTIC_NAMES } from '../../data/names';
 import { TacticIcon } from './TacticIcon';
 import './tactics.css';
 
-export type SergeantBoxState = 'ready' | 'used' | 'lost' | 'chosen';
+export type SergeantBoxState = 'ready' | 'used' | 'lost' | 'chosen' | 'ambushed';
 
 interface SergeantBoxProps {
   tactic: Tactic;
@@ -25,7 +25,7 @@ export function SergeantBox({ tactic, militia, state = 'ready', onPick, compact 
   ]
     .filter(Boolean)
     .join(' ');
-  const label = `${TACTIC_NAMES[tactic]} Sergeant, ${militia} men${state === 'lost' ? ', lost' : state === 'used' ? ', already fought' : ''}`;
+  const label = `${TACTIC_NAMES[tactic]} Sergeant, ${militia} men${state === 'lost' ? ', lost' : state === 'used' ? ', already fought' : state === 'ambushed' ? ', ambushed' : ''}`;
   const content = (
     <>
       <TacticIcon tactic={tactic} size={compact ? 20 : 28} />

@@ -1,7 +1,7 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
 import { adjacentSquares, attackTargets, availableSergeants, duelKnight, duelRoleOf, knightAt } from '../queries';
-import { SECOND_PASS_SHARE } from '../state';
+import { AMBUSH_COUNT, SABOTAGE_DAMAGE, SECOND_PASS_SHARE } from '../state';
 import type {
   AftermathEffect,
   PreludeEffect,
@@ -60,13 +60,14 @@ export function declareAttack(
     clashes: [],
     outcome: null,
     prelude: [],
+    blocked: { attacker: [], defender: [] },
     aftermath: [],
   };
 
   // Garrison: Snipe and First Strike hit the attacker before the first clash.
   let attackerNow = attacker;
   const prelude: PreludeEffect[] = [];
-  const strike = (from: Knight, type: PreludeEffect['type']) => {
+  const strike = (from: Knight, type: 'snipe' | 'firstStrike') => {
     if (attackerNow.hp <= 0) return;
     const damage = Math.min(maxSergeant(from), attackerNow.hp);
     if (damage <= 0) return;
@@ -86,6 +87,19 @@ export function declareAttack(
     if (target.subclass === 'watchman' && neighbours.some((k) => k.subclass === 'gatekeeper')) strike(target, 'snipe');
     // An attacked Warden strikes first.
     if (target.subclass === 'warden') strike(target, 'firstStrike');
+  }
+  // Raiders: an Ambusher on either side takes the opponent's strongest Sergeants out of this battle.
+  for (const role of ['attacker', 'defender'] as const) {
+    const ambusher = role === 'attacker' ? attackerNow : target;
+    const victim = role === 'attacker' ? target : attackerNow;
+    if (ambusher.subclass !== 'ambusher' || ambusher.hp <= 0) continue;
+    const taken = [...victim.sergeants]
+      .sort((x, y) => y.militia - x.militia)
+      .slice(0, AMBUSH_COUNT)
+      .map((sg) => sg.id);
+    if (taken.length === 0) continue;
+    duel.blocked[OTHER[role]] = taken;
+    prelude.push({ type: 'ambush', knightId: ambusher.id, targetId: victim.id, sergeantIds: taken });
   }
   duel.prelude = prelude;
 
@@ -177,7 +191,18 @@ function resolveClash(state: MatchState): { state: MatchState; events: MatchEven
   let winner: DuelRole | 'tie';
   const a = picks.attacker;
   const d = picks.defender;
-  if (a && d) {
+  // Skirmisher: the first clash it sends a Sergeant into is won by Heist.
+  const heisting = (['attacker', 'defender'] as const).filter(
+    (role) =>
+      knights[role].subclass === 'skirmisher' &&
+      picks[role] !== null &&
+      !duel.clashes.some((c) => c[role] !== null),
+  );
+  let heist: DuelRole | undefined;
+  if (a && d && heisting.length === 1) {
+    heist = heisting[0]!;
+    winner = heist;
+  } else if (a && d) {
     winner = a.tactic === d.tactic ? 'tie' : BEATS[a.tactic] === d.tactic ? 'attacker' : 'defender';
   } else {
     // Only one side had a Sergeant to send: an unopposed blow.
@@ -199,6 +224,16 @@ function resolveClash(state: MatchState): { state: MatchState; events: MatchEven
     if (loserPick) knights[loser] = withSergeant(knights[loser], loserPick.sergeantId, 0);
   }
 
+  // Saboteur: the opponent loses a little HP after every clash.
+  const sabotaged: DuelRole[] = [];
+  for (const role of ['attacker', 'defender'] as const) {
+    const victim = OTHER[role];
+    if (knights[role].subclass === 'saboteur' && knights[role].hp > 0 && knights[victim].hp > 0) {
+      knights[victim] = { ...knights[victim], hp: Math.max(0, knights[victim].hp - SABOTAGE_DAMAGE) };
+      sabotaged.push(victim);
+    }
+  }
+
   const clash: Clash = {
     number: duel.clashes.length + 1,
     attacker: a,
@@ -207,6 +242,8 @@ function resolveClash(state: MatchState): { state: MatchState; events: MatchEven
     damage,
     hpAfter: { attacker: knights.attacker.hp, defender: knights.defender.hp },
     sergeantsAfter: { attacker: knights.attacker.sergeants, defender: knights.defender.sergeants },
+    sabotaged,
+    ...(heist ? { heist } : {}),
   };
 
   let next: MatchState = {

@@ -16,7 +16,6 @@ const men = (sergeants: Sergeant[]) => sergeants.reduce((sum, s) => sum + s.mili
 /** Summary shown in the middle of the battlefield once a battle is decided. */
 export function BattleResults({ match, duel, myRole, onReturn }: BattleResultsProps) {
   const outcome = duel.outcome!;
-  const last = duel.clashes[duel.clashes.length - 1];
   const title =
     outcome.winner === null ? 'Stand-off' : outcome.winner === myRole ? 'Victory!' : 'Defeat';
 
@@ -42,8 +41,9 @@ export function BattleResults({ match, duel, myRole, onReturn }: BattleResultsPr
           {[myRole, enemyRole].map((role, i) => {
             const side = duel[role];
             const knight = match.knights[side.knightId]!;
-            const endHp = last ? last.hpAfter[role] : side.startHp;
-            const endSergeants = last ? last.sergeantsAfter[role] : side.startSergeants;
+            // Final state, after every ability (Second Pass, Cover Retreat, Regroup).
+            const endHp = knight.hp;
+            const endSergeants = knight.sergeants;
             const sergeantsLost = side.startSergeants.length - endSergeants.length;
             const menLost = side.startHp - endHp + (men(side.startSergeants) - men(endSergeants));
             const won = outcome.winner === role;
@@ -76,14 +76,19 @@ export function BattleResults({ match, duel, myRole, onReturn }: BattleResultsPr
           })}
         </div>
 
-        {duel.aftermath.length + duel.prelude.length > 0 && (
+        {duel.aftermath.length + duel.prelude.length > 0 || duel.clashes.some((c) => c.heist || c.sabotaged.length > 0) ? (
           <ul className="battle-results__abilities">
             {duel.prelude.map((e, i) => (
               <li key={`p${i}`}>
-                {e.type === 'snipe' ? 'Snipe' : 'First Strike'}: {knightName(match.knights[e.knightId]!)} hit{' '}
-                {knightName(match.knights[e.targetId]!)} for {e.damage} before the battle{e.killed ? ', killing them' : ''}.
+                {e.type === 'ambush'
+                  ? `Ambush: ${knightName(match.knights[e.knightId]!)} kept ${e.sergeantIds.length} of ${knightName(match.knights[e.targetId]!)}’s Sergeants out of the battle.`
+                  : `${e.type === 'snipe' ? 'Snipe' : 'First Strike'}: ${knightName(match.knights[e.knightId]!)} hit ${knightName(match.knights[e.targetId]!)} for ${e.damage} before the battle${e.killed ? ', killing them' : ''}.`}
               </li>
             ))}
+            {duel.clashes.some((c) => c.heist) && <li>Heist won a clash outright.</li>}
+            {duel.clashes.some((c) => c.sabotaged.length > 0) && (
+              <li>Sabotage cost {duel.clashes.reduce((n, c) => n + c.sabotaged.length, 0)} HP over the battle.</li>
+            )}
             {duel.aftermath.map((e, i) => {
               const actor = match.knights[e.knightId]!;
               return (
@@ -97,7 +102,7 @@ export function BattleResults({ match, duel, myRole, onReturn }: BattleResultsPr
               );
             })}
           </ul>
-        )}
+        ) : null}
 
         <div className="attack-preview__actions">
           <button className="btn btn--primary" onClick={onReturn} autoFocus>

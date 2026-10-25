@@ -61,7 +61,7 @@ describe('Army Knight types', () => {
     expect(s.knights['p1-army-2-k3']!.subclass).toBe('archers');
     expect(s.knights['p1-army-2-k4']!.subclass).toBe('infantry');
     expect(s.knights['p1-garrison-1-k1']!.subclass).toBe('gatekeeper');
-    expect(s.knights['p2-raiders-1-k2']!.subclass).toBeNull();
+    expect(s.knights['p2-raiders-1-k2']!.subclass).toBe('ambusher');
   });
 });
 

@@ -235,7 +235,11 @@ function Combatant({
   let hp = last ? last.hpAfter[role] : side.startHp;
   let alive: Sergeant[] = last ? last.sergeantsAfter[role] : side.startSergeants;
   // Before any clash is shown, apply the pre-battle strikes revealed so far.
-  if (!last) for (const p of preludes) if (p.targetId === side.knightId) hp = Math.max(0, hp - p.damage);
+  if (!last) for (const p of preludes) if (p.type !== 'ambush' && p.targetId === side.knightId) hp = Math.max(0, hp - p.damage);
+  // Ambushed Sergeants sit out this battle once the Ambush has been shown.
+  const ambushed = new Set(
+    preludes.flatMap((p) => (p.type === 'ambush' && p.targetId === side.knightId ? p.sergeantIds : [])),
+  );
   for (const e of effects) {
     if ((e.type === 'secondPass' || e.type === 'coverRetreat') && e.targetId === side.knightId) hp = Math.max(0, hp - e.damage);
     if (e.type === 'regroup' && e.knightId === side.knightId) {
@@ -244,7 +248,7 @@ function Combatant({
       );
     }
   }
-  const preludeTarget = activePrelude?.targetId === side.knightId;
+  const preludeTarget = activePrelude?.type !== 'ambush' && activePrelude?.targetId === side.knightId;
   const passTarget =
     preludeTarget ||
     ((activeEffect?.type === 'secondPass' || activeEffect?.type === 'coverRetreat') && activeEffect.targetId === side.knightId);
@@ -286,6 +290,7 @@ function Combatant({
           let state: SergeantBoxState = 'ready';
           if (s.id === chosenId) state = 'chosen';
           else if (!now) state = 'lost';
+          else if (ambushed.has(s.id)) state = 'ambushed';
           else if (used.has(s.id)) state = 'used';
           const pickable = options?.has(s.id) && onPick;
           return (
@@ -340,8 +345,8 @@ function Combatant({
             {tookDamage && (
               <span className="combatant__damage">
                 −
-                {preludeTarget
-                  ? activePrelude?.damage
+                {preludeTarget && activePrelude && 'damage' in activePrelude
+                  ? activePrelude.damage
                   : passTarget && activeEffect && 'damage' in activeEffect
                     ? activeEffect.damage
                     : current?.damage}
@@ -371,6 +376,17 @@ function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, myRol
   if (phase === 'prelude' && prelude) {
     const actor = match.knights[prelude.knightId]!;
     const target = match.knights[prelude.targetId]!;
+    if (prelude.type === 'ambush') {
+      return (
+        <div className="battle-msg battle-msg--ability">
+          <span className="battle-msg__ability">Ambusher · Ambush!</span>
+          <span className="battle-msg__small battle-msg__verdict">
+            {knightName(actor)} springs an ambush: {prelude.sergeantIds.length} of {knightName(target)}&rsquo;s strongest
+            Sergeants are cut off for this battle.
+          </span>
+        </div>
+      );
+    }
     return (
       <div className="battle-msg battle-msg--ability">
         <span className="battle-msg__ability">
@@ -491,7 +507,17 @@ function RevealedPick({ label, pick, winner }: { label: string; pick: Clash['att
 }
 
 function verdict(clash: Clash, attackerName: string, defenderName: string): string {
+  const base = baseVerdict(clash, attackerName, defenderName);
+  const sabo = clash.sabotaged.map((r) => `Sabotage: -1 HP to ${r === 'attacker' ? attackerName : defenderName}.`);
+  return [base, ...sabo].join(' ');
+}
+
+function baseVerdict(clash: Clash, attackerName: string, defenderName: string): string {
   const target = clash.winner === 'attacker' ? defenderName : attackerName;
+  if (clash.heist) {
+    const thief = clash.heist === 'attacker' ? attackerName : defenderName;
+    return `Heist! ${thief} wins the clash outright: ${clash.damage} damage to ${target}.`;
+  }
   if (clash.winner === 'tie') {
     return `Both sent ${TACTIC_NAMES[clash.attacker!.tactic]}: each Sergeant loses half their men.`;
   }

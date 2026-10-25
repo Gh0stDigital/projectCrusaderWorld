@@ -164,3 +164,10 @@
 .hp-badge--over {
   border-color: var(--gold) !important;
 }
+
+/* Ambushed: sits out this battle. */
+.sergeant-box--ambushed {
+  opacity: 0.35;
+  border-style: dotted;
+  border-color: #8a6bd6;
+}

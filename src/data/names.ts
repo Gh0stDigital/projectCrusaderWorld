@@ -96,6 +96,9 @@ export const SUBCLASS_NAMES: Record<KnightSubclass, string> = {
   gatekeeper: 'Gatekeeper',
   watchman: 'Watchman',
   warden: 'Warden',
+  skirmisher: 'Skirmisher',
+  ambusher: 'Ambusher',
+  saboteur: 'Saboteur',
 };
 
 /** Short label for tight spaces. */
@@ -106,6 +109,9 @@ export const SUBCLASS_SHORT: Record<KnightSubclass, string> = {
   gatekeeper: 'Gate',
   watchman: 'Watch',
   warden: 'Ward',
+  skirmisher: 'Skirm',
+  ambusher: 'Amb',
+  saboteur: 'Sabo',
 };
 
 /** Each Knight type's ability, with a one-line description. */
@@ -122,6 +128,9 @@ export const SUBCLASS_ABILITIES: Record<KnightSubclass, { name: string; text: st
     text: 'Next to a Gatekeeper: when either is attacked, hits the attacker with its strongest Sergeant before battle.',
   },
   warden: { name: 'First Strike', text: 'When attacked, hits the attacker with its strongest Sergeant before battle.' },
+  skirmisher: { name: 'Heist', text: 'Wins the first clash it sends a Sergeant into, whatever the tactics.' },
+  ambusher: { name: 'Ambush!', text: "Takes the opponent's 2 strongest Sergeants out of the battle. Only 3 Sergeants." },
+  saboteur: { name: 'Sabotage', text: 'The opponent loses 1 HP after every clash.' },
 };
 
 export const TACTIC_NAMES: Record<Tactic, string> = {

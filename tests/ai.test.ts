@@ -77,14 +77,15 @@ describe('Reinforcements', () => {
     const before = captainMilitia(underAttack(), 'p1-raiders-1');
     const s = act(underAttack(), { type: 'reinforceKnight', player: 'p1', knightId: 'p1-raiders-1-k1', amount: 30 });
     expect(s.knights['p1-raiders-1-k1']!.hp).toBe(80);
-    expect(s.captains['p1-raiders-1']!.reserve).toBe(70);
+    expect(s.captains['p1-raiders-1']!.reserve).toBe(underAttack().captains['p1-raiders-1']!.reserve - 30);
     expect(s.duel!.defender.startHp).toBe(80);
     expect(captainMilitia(s, 'p1-raiders-1')).toBe(before);
   });
 
   it('refuses more men than the reserve holds, the attacker, and anything after the first clash', () => {
     const s = underAttack();
-    expect(applyAction(s, { type: 'reinforceKnight', player: 'p1', knightId: 'p1-raiders-1-k1', amount: 101 }).ok).toBe(false);
+    const reserve = s.captains['p1-raiders-1']!.reserve;
+    expect(applyAction(s, { type: 'reinforceKnight', player: 'p1', knightId: 'p1-raiders-1-k1', amount: reserve + 1 }).ok).toBe(false);
     expect(applyAction(s, { type: 'reinforceKnight', player: 'p2', knightId: 'p2-garrison-1-k1', amount: 10 }).ok).toBe(false);
     let after = act(s, { type: 'commitSergeant', player: 'p2', sergeantId: s.knights['p2-garrison-1-k1']!.sergeants[0]!.id });
     after = act(after, { type: 'commitSergeant', player: 'p1', sergeantId: s.knights['p1-raiders-1-k1']!.sergeants[0]!.id });

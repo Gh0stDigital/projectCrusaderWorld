@@ -166,6 +166,16 @@ Garrison effects happen before a battle, when a Garrison Knight is attacked.
 - Provisional choices: Garrison Knights cycle Gatekeeper, Watchman, Warden by slot; Brace is a permanent trait (base HP 100), not a per-battle effect. Knight size differences come from or go to the Captain's reserve, so every Lord still totals 1,000 militia.
 - Pre-battle strikes play out on the battlefield after the intro ("Watchman · Snipe!", "Warden · First Strike!") and are listed in the results window. If one ends the battle when the computer attacks, the reinforcement prompt is skipped.
 
+## Knight types: Raiders — Settled
+
+Raiders effects happen during a battle, whether the Raider attacks or defends.
+
+- **Skirmisher: Heist.** Wins the first clash it sends a Sergeant into, whatever the tactics. Two Skirmishers' Heists cancel out (that clash resolves normally).
+- **Ambusher: Ambush!** 3 Sergeants. At the start of the battle, the opponent's 2 strongest Sergeants are kept out of this battle only (not harmed; back for later battles).
+- **Saboteur: Sabotage.** The opponent loses 1 HP after every clash (ties and unopposed blows included). This can finish a Knight off.
+- Provisional choices: Raiders Knights cycle Skirmisher, Ambusher, Saboteur by slot; Ambush takes the strongest Sergeants (not random); all trigger automatically.
+- Ambush plays out after the battle intro ("Ambusher · Ambush!") and the cut-off Sergeants show dotted and faded; Heist and Sabotage appear in each clash's verdict; all are summarised in the results window.
+
 ## Computer opponent — Settled
 
 - The computer sets its own Lord order and plays its whole turn by itself at a watchable pace (about a second per step), zooming into the Region it plays in, and ends its own turns.

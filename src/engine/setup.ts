@@ -43,11 +43,11 @@ function startingSergeants(knight: string, number: number, count: number = SERGE
   }));
 }
 
-/** Knight types cycle by slot: Army Infantry/Cavalry/Archers, Garrison Gatekeeper/Watchman/Warden. Raiders later. */
+/** Knight types cycle by slot: Army Infantry/Cavalry/Archers, Garrison Gatekeeper/Watchman/Warden, Raiders Skirmisher/Ambusher/Saboteur. */
 export function startingSubclass(lord: LordClass, number: number): KnightSubclass | null {
   if (lord === 'army') return (['infantry', 'cavalry', 'archers'] as const)[(number - 1) % 3]!;
   if (lord === 'garrison') return (['gatekeeper', 'watchman', 'warden'] as const)[(number - 1) % 3]!;
-  return null;
+  return (['skirmisher', 'ambusher', 'saboteur'] as const)[(number - 1) % 3]!;
 }
 
 function sergeantCount(subclass: KnightSubclass | null): number {

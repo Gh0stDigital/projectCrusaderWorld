@@ -238,7 +238,8 @@ export function duelKnight(state: MatchState, duel: Duel, role: DuelRole): Knigh
 /** Sergeants of a Knight that are still alive and haven't fought yet in this duel. */
 export function availableSergeants(state: MatchState, duel: Duel, role: DuelRole): Sergeant[] {
   const used = new Set(duel.clashes.map((c) => c[role]?.sergeantId).filter(Boolean));
-  return duelKnight(state, duel, role).sergeants.filter((s) => s.militia > 0 && !used.has(s.id));
+  const blocked = new Set(duel.blocked?.[role] ?? []);
+  return duelKnight(state, duel, role).sergeants.filter((s) => s.militia > 0 && !used.has(s.id) && !blocked.has(s.id));
 }
 
 /** The duel role a player has in the current duel, if any. */
