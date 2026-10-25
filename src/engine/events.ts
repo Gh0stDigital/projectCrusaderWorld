@@ -13,5 +13,14 @@ export type MatchEvent =
   | { type: 'clashResolved'; clash: Clash }
   | { type: 'duelEnded'; outcome: DuelOutcome; attackerId: string; defenderId: string }
   | { type: 'knightReinforced'; player: PlayerId; knightId: string; captainId: string; amount: number }
-  | { type: 'regionSecured'; player: PlayerId; captainId: string; region: RegionIndex; capturedKnightIds: string[] }
+  | {
+      type: 'regionSecured';
+      player: PlayerId;
+      captainId: string;
+      region: RegionIndex;
+      capturedKnightIds: string[];
+      /** Losing Captains who went back to their Lord, and those who fell (no men left). */
+      returnedCaptainIds: string[];
+      fallenCaptainIds: string[];
+    }
   | { type: 'turnEnded'; player: PlayerId };

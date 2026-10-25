@@ -68,7 +68,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - The player can zoom out to view the Region board at any time without changing orders, and return to their Region.
 - During a turn, every Lord row except the acting Lord is greyed and darkened in both side panels.
 - Each Lord's two Captains show as small face icons with a status ribbon: Standby (with their Lord), Deployed (in a contested Region), Stationed (holds a Region they secured), Dead (all their staffed Knights killed or captured). Click to choose a Captain when allowed; press and hold to see their card, Lord, status, Region, militia, reserve and Knights.
-- Status is display-only for now. Still open: a Captain returning to Standby after losing a Region, and what being Dead changes in the rules.
+- A Dead Captain cannot act. Press and hold a Knight (token or board piece) to see its card, type, ability description, HP and Sergeants.
 - After End Turn: about 1 second of "orders complete" confirmation, zoom out to the Region board, about 1 second pause, then the next turn's announcement.
 
 ## Project and platform — Settled
@@ -124,7 +124,8 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - Enemy Knights still standing there are captured: out of play, kept distinct from dead and retreated, and no longer counted as militia.
 - A secured Region is closed: no deployments or placements. Routing into it becomes a free choice. No attack follows the securing placement.
 - On the Region board a secured tile shows the winning Captain's card under a large X (Player 1) or O (Player 2).
-- Still open: what happens to the losing player's Captain stationed there, and the campaign win (three secured Regions in a row).
+- The losing player's Captain stationed there returns to their Lord (Standby) if they still have men (waiting Knights or reserve); their waiting Knights come with them, and their Knights on that board are captured. A Captain with no men left falls (shown as Dead) and cannot act again.
+- Still open: the campaign win (three secured Regions in a row).
 
 ## Militia — Settled (test values)
 
@@ -154,7 +155,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 | Garrison | Gatekeeper / Watchman / Warden | 2 / 3 / 3 |
 | Raiders | Skirmisher / Ambusher / Saboteur | 4 / 3 / 2 |
 
-Each Sergeant starts with 10 men. Men a Knight type doesn't use (versus 5 Sergeants and 50 HP) sit in its Captain's reserve, so every Lord still totals 1,000. Starting Captain reserves: Army 130, Garrison 120 (the Gatekeeper's extra HP is paid from it), Raiders 160.
+Each Sergeant starts with 10 men. Men a Knight type doesn't use (versus 5 Sergeants and 50 HP) sit in its Captain's reserve, so every Lord still totals 1,000. Starting Captain reserves: Army 130, Garrison 170 (the Gatekeeper's Brace draws 50 of it), Raiders 160.
 
 ## Knight types: Army — Settled
 
@@ -170,11 +171,11 @@ Each Lord class gives its Knights types. Army effects happen after a battle; Gar
 
 Garrison effects happen before a battle, when a Garrison Knight is attacked.
 
-- **Gatekeeper: Brace.** Double base HP (100), only 2 Sergeants.
+- **Gatekeeper: Brace.** Starts at 50 HP with 2 Sergeants. Once per game, in its first battle (attacking or defending), Brace doubles its base HP (+50) before the first clash. The men come from its Captain's reserve (as many as it holds, up to 50), so no militia is created.
 - **Watchman: Snipe.** 3 Sergeants. When a Gatekeeper it stands directly next to is attacked, or the Watchman itself is attacked while next to a Gatekeeper, it hits the attacker with its strongest Sergeant's men before the first clash. Every Watchman next to an attacked Gatekeeper snipes.
 - **Warden: First Strike.** 3 Sergeants. When attacked, hits the attacker with its strongest Sergeant's men before the first clash.
 - Snipe and First Strike can kill the attacker; the battle then ends at once and the attacker is destroyed. All trigger automatically.
-- Provisional choices: Garrison Knights cycle Gatekeeper, Watchman, Warden by slot; Brace is a permanent trait (base HP 100), not a per-battle effect. Knight size differences come from or go to the Captain's reserve, so every Lord still totals 1,000 militia.
+- Provisional choices: Garrison Knights cycle Gatekeeper, Watchman, Warden by slot. Knight size differences come from or go to the Captain's reserve, so every Lord still totals 1,000 militia.
 - Pre-battle strikes play out on the battlefield after the intro ("Watchman · Snipe!", "Warden · First Strike!") and are listed in the results window. If one ends the battle when the computer attacks, the reinforcement prompt is skipped.
 
 ## Knight types: Raiders — Settled

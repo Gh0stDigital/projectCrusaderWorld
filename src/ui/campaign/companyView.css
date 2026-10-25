@@ -279,3 +279,7 @@
 .knight-token--dead .knight-token__icon .knight-sprite {
   filter: grayscale(1) sepia(0.7) hue-rotate(-30deg) brightness(0.45);
 }
+
+.knight-token[aria-disabled='true'] {
+  cursor: help;
+}

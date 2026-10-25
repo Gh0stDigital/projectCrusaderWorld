@@ -44,7 +44,7 @@ describe('Garrison Knight types', () => {
     const k = (n: number) => s.knights[`p1-garrison-1-k${n}`]!;
     expect([k(1).subclass, k(2).subclass, k(3).subclass]).toEqual(['gatekeeper', 'watchman', 'warden']);
     expect([k(1).sergeants.length, k(2).sergeants.length, k(3).sergeants.length]).toEqual([2, 3, 3]);
-    expect(k(1).hp).toBe(100); // Brace
+    expect(k(1).hp).toBe(50); // Brace adds 50 in its first battle
     expect(k(2).hp).toBe(50);
     expect(lordMilitia(s, 'p1', 'garrison')).toBe(1000);
   });
@@ -78,7 +78,7 @@ describe('Watchman: Snipe', () => {
       { id: 'p2-garrison-1-k2', square: 5, subclass: 'watchman', strongest: 20 },
     ]);
     s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: 'p2-garrison-1-k1' });
-    expect(s.duel!.prelude).toEqual([
+    expect(s.duel!.prelude.filter((e) => e.type !== 'brace')).toEqual([
       { type: 'snipe', knightId: 'p2-garrison-1-k2', targetId: ATTACKER, damage: 20, killed: false },
     ]);
   });
@@ -99,6 +99,28 @@ describe('Watchman: Snipe', () => {
   it('does not fire when a Gatekeeper is attacked with no Watchman beside it', () => {
     let s = arena([{ id: 'p2-garrison-1-k1', square: 4, subclass: 'gatekeeper' }]);
     s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: 'p2-garrison-1-k1' });
+    expect(s.duel!.prelude.filter((e) => e.type !== 'brace')).toEqual([]);
+  });
+});
+
+describe('Gatekeeper: Brace', () => {
+  it('doubles base HP in its first battle, paid from its Captain\u2019s reserve', () => {
+    let s = arena([{ id: 'p2-garrison-1-k1', square: 4, subclass: 'gatekeeper' }]);
+    const reserve = s.captains['p2-garrison-1']!.reserve;
+    const total = lordMilitia(s, 'p2', 'garrison');
+    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: 'p2-garrison-1-k1' });
+    expect(s.duel!.prelude[0]).toEqual({ type: 'brace', knightId: 'p2-garrison-1-k1', amount: 50 });
+    expect(s.knights['p2-garrison-1-k1']).toMatchObject({ hp: 100, braced: true });
+    expect(s.duel!.defender.startHp).toBe(100);
+    expect(s.captains['p2-garrison-1']!.reserve).toBe(reserve - 50);
+    expect(lordMilitia(s, 'p2', 'garrison')).toBe(total);
+  });
+
+  it('is used only once per game', () => {
+    let s = arena([{ id: 'p2-garrison-1-k1', square: 4, subclass: 'gatekeeper' }]);
+    s.knights['p2-garrison-1-k1'] = { ...s.knights['p2-garrison-1-k1']!, braced: true };
+    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: 'p2-garrison-1-k1' });
     expect(s.duel!.prelude).toEqual([]);
+    expect(s.knights['p2-garrison-1-k1']!.hp).toBe(50);
   });
 });

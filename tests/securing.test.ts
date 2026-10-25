@@ -68,6 +68,21 @@ describe('Securing a Region', () => {
     expect(o.deployRegions).not.toContain(4);
   });
 
+  it('sends the losing Captain back to their Lord with their waiting Knights; Knights on the board are captured', () => {
+    const s = act(aboutToSecure(), { type: 'placeKnight', player: 'p1', knightId: 'p1-raiders-1-k3', square: 2 });
+    expect(s.captains['p2-garrison-1']).toMatchObject({ region: null, fallen: false });
+    expect(s.knights['p2-garrison-1-k1']!.status).toBe('captured');
+    expect(s.knights['p2-garrison-1-k2']!.status).toBe('ready');
+  });
+
+  it('a losing Captain with no men left falls instead', () => {
+    let s = aboutToSecure();
+    s.captains['p2-garrison-1'] = { ...s.captains['p2-garrison-1']!, reserve: 0 };
+    for (const n of [2, 3]) s.knights[`p2-garrison-1-k${n}`] = { ...s.knights[`p2-garrison-1-k${n}`]!, status: 'dead' };
+    s = act(s, { type: 'placeKnight', player: 'p1', knightId: 'p1-raiders-1-k3', square: 2 });
+    expect(s.captains['p2-garrison-1']).toMatchObject({ region: null, fallen: true });
+  });
+
   it('does not offer an attack after securing', () => {
     const s = act(aboutToSecure(), { type: 'placeKnight', player: 'p1', knightId: 'p1-raiders-1-k3', square: 2 });
     expect(s.turn!.step).toBe('end');

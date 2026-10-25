@@ -18,14 +18,16 @@ const STATUS_LABEL: Record<CaptainStatus, string> = {
 
 /**
  * Display status of a Captain:
- * - dead: none of their staffed Knights are left alive (all killed or captured)
+ * - dead: fell when their Region was lost with no men left, or has no living Knights and no reserve
  * - stationed: holds a Region they secured
  * - deployed: in a Region still being fought over
  * - standby: waiting with their Lord
  */
 export function captainStatus(match: MatchState, captain: Captain): CaptainStatus {
+  if (captain.fallen) return 'dead';
   const staffed = knightsOf(match, captain.id).filter((k) => k.status !== 'unmanned');
-  if (staffed.length > 0 && staffed.every((k) => k.status === 'dead' || k.status === 'captured')) return 'dead';
+  const noKnights = staffed.length > 0 && staffed.every((k) => k.status === 'dead' || k.status === 'captured');
+  if (noKnights && captain.reserve === 0) return 'dead';
   if (captain.region !== null && match.secured[captain.region]?.captainId === captain.id) return 'stationed';
   if (captain.region !== null) return 'deployed';
   return 'standby';

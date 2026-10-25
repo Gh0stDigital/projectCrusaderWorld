@@ -1,7 +1,7 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
 import { adjacentSquares, attackTargets, availableSergeants, duelKnight, duelRoleOf, knightAt } from '../queries';
-import { AMBUSH_COUNT, SABOTAGE_DAMAGE, SECOND_PASS_SHARE } from '../state';
+import { AMBUSH_COUNT, BRACE_BONUS, SABOTAGE_DAMAGE, SECOND_PASS_SHARE } from '../state';
 import type {
   AftermathEffect,
   PreludeEffect,
@@ -66,7 +66,23 @@ export function declareAttack(
 
   // Garrison: Snipe and First Strike hit the attacker before the first clash.
   let attackerNow = attacker;
+  let targetNow = target;
   const prelude: PreludeEffect[] = [];
+  // Gatekeeper Brace: once per game, in its first battle, doubles its base HP.
+  // The men come from its Captain's reserve (as many as it holds, up to the bonus).
+  const captains = { ...state.captains };
+  const brace = (k: Knight, role: 'attacker' | 'defender'): Knight => {
+    if (k.subclass !== 'gatekeeper' || k.braced) return k;
+    const captain = captains[k.captainId]!;
+    const amount = Math.min(BRACE_BONUS, captain.reserve);
+    if (amount <= 0) return k;
+    captains[captain.id] = { ...captain, reserve: captain.reserve - amount };
+    duel[role].startHp += amount;
+    prelude.push({ type: 'brace', knightId: k.id, amount });
+    return { ...k, hp: k.hp + amount, braced: true };
+  };
+  attackerNow = brace(attackerNow, 'attacker');
+  targetNow = brace(targetNow, 'defender');
   const strike = (from: Knight, type: 'snipe' | 'firstStrike') => {
     if (attackerNow.hp <= 0) return;
     const damage = Math.min(maxSergeant(from), attackerNow.hp);
@@ -90,8 +106,8 @@ export function declareAttack(
   }
   // Raiders: an Ambusher on either side takes the opponent's strongest Sergeants out of this battle.
   for (const role of ['attacker', 'defender'] as const) {
-    const ambusher = role === 'attacker' ? attackerNow : target;
-    const victim = role === 'attacker' ? target : attackerNow;
+    const ambusher = role === 'attacker' ? attackerNow : targetNow;
+    const victim = role === 'attacker' ? targetNow : attackerNow;
     if (ambusher.subclass !== 'ambusher' || ambusher.hp <= 0) continue;
     const taken = [...victim.sergeants]
       .sort((x, y) => y.militia - x.militia)
@@ -105,7 +121,8 @@ export function declareAttack(
 
   let next: MatchState = {
     ...state,
-    knights: { ...state.knights, [attacker.id]: attackerNow },
+    captains,
+    knights: { ...state.knights, [attacker.id]: attackerNow, [target.id]: targetNow },
     duel,
     turn: { ...turn, step: 'battle' },
   };

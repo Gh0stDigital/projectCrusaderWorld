@@ -292,3 +292,8 @@
   font-size: 8px;
   color: var(--gold);
 }
+
+/* A square with a Knight can be pressed and held even when it isn't a move. */
+.inner-board__square[aria-disabled='true'] {
+  cursor: help;
+}

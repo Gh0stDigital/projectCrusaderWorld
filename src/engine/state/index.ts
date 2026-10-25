@@ -65,10 +65,11 @@ export const SUBCLASS_SERGEANTS: Record<KnightSubclass, number> = {
   saboteur: 2,
 };
 
-/** Base HP for Knight types that differ from KNIGHT_HP. Gatekeepers Brace: double HP. */
-export const SUBCLASS_HP: Partial<Record<KnightSubclass, number>> = {
-  gatekeeper: 100,
-};
+/** Base HP for Knight types that differ from KNIGHT_HP (none at the moment). */
+export const SUBCLASS_HP: Partial<Record<KnightSubclass, number>> = {};
+
+/** Gatekeeper Brace: once per game, its first battle doubles its base HP (adds this many). */
+export const BRACE_BONUS = KNIGHT_HP;
 
 /** Cavalry's Second Pass deals this share of its remaining HP to a retreating loser. */
 export const SECOND_PASS_SHARE = 0.5;
@@ -94,6 +95,8 @@ export interface Captain {
   region: RegionIndex | null;
   /** Militia held back by the Captain, not assigned to any Knight. */
   reserve: number;
+  /** Fell when their Region was lost with no men left to return with. */
+  fallen: boolean;
 }
 
 /**
@@ -120,6 +123,8 @@ export interface Knight {
   sergeants: Sergeant[];
   /** The Knight's military type, set by their Lord's class. null until that class's types exist. */
   subclass: KnightSubclass | null;
+  /** Gatekeeper: Brace has been used (once per game). */
+  braced: boolean;
 }
 
 export interface PlayerState {
@@ -215,8 +220,10 @@ export interface Duel {
   aftermath: AftermathEffect[];
 }
 
-/** Effects before the first clash: Garrison strikes on the attacker, and Raider ambushes. */
+/** Effects before the first clash: Brace, Garrison strikes on the attacker, and Raider ambushes. */
 export type PreludeEffect =
+  /** Gatekeeper: doubles its base HP, once per game. */
+  | { type: 'brace'; knightId: string; amount: number }
   | { type: 'snipe' | 'firstStrike'; knightId: string; targetId: string; damage: number; killed: boolean }
   /** Ambusher: the target's strongest Sergeants sit out this battle. */
   | { type: 'ambush'; knightId: string; targetId: string; sergeantIds: string[] };

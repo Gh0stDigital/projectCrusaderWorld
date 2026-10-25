@@ -156,3 +156,8 @@
   from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: scale(1); }
 }
+
+.knight-details__ability {
+  color: var(--parchment) !important;
+  line-height: 1.5;
+}

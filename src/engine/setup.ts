@@ -70,7 +70,7 @@ export function createMatch(): MatchState {
     for (const lord of LORD_CLASSES) {
       for (let rank = 1; rank <= CAPTAINS_PER_LORD; rank++) {
         const id = captainId(owner, lord, rank);
-        captains[id] = { id, owner, lord, rank, region: null, reserve: CAPTAIN_RESERVE };
+        captains[id] = { id, owner, lord, rank, region: null, reserve: CAPTAIN_RESERVE, fallen: false };
         // Knight types change a Knight's size; the difference comes from or goes to the
         // Captain's reserve, so every Lord still totals the same militia.
         for (let n = 1; n <= STAFFED_KNIGHTS_PER_CAPTAIN; n++) {
@@ -78,6 +78,7 @@ export function createMatch(): MatchState {
           const standard = KNIGHT_HP + SERGEANTS_PER_KNIGHT * SERGEANT_MILITIA;
           const actual = baseHp(sub) + sergeantCount(sub) * SERGEANT_MILITIA;
           captains[id]!.reserve += standard - actual;
+          // Gatekeepers' Brace draws its men from here, so it never creates militia.
         }
         for (let number = 1; number <= KNIGHTS_PER_CAPTAIN; number++) {
           const kid = knightId(id, number);
@@ -92,6 +93,7 @@ export function createMatch(): MatchState {
             hp: staffed ? baseHp(startingSubclass(lord, number)) : 0,
             sergeants: staffed ? startingSergeants(kid, number, sergeantCount(startingSubclass(lord, number))) : [],
             subclass: startingSubclass(lord, number),
+            braced: false,
           };
         }
       }

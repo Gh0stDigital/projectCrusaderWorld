@@ -50,12 +50,38 @@ export function placeKnight(
         capturedKnightIds.push(k.id);
       }
     }
-    events.push({ type: 'regionSecured', player, captainId: captain.id, region, capturedKnightIds });
+    // A losing Captain stationed there goes back to their Lord with any men they
+    // still have (waiting Knights or reserve); with none left they fall.
+    const captains = { ...placed.captains };
+    const returnedCaptainIds: string[] = [];
+    const fallenCaptainIds: string[] = [];
+    for (const c of Object.values(captains)) {
+      if (c.region !== region || c.owner === player) continue;
+      const hasMen =
+        c.reserve > 0 || Object.values(knights).some((k) => k.captainId === c.id && k.status === 'ready');
+      if (hasMen) {
+        captains[c.id] = { ...c, region: null };
+        returnedCaptainIds.push(c.id);
+      } else {
+        captains[c.id] = { ...c, region: null, fallen: true };
+        fallenCaptainIds.push(c.id);
+      }
+    }
+    events.push({
+      type: 'regionSecured',
+      player,
+      captainId: captain.id,
+      region,
+      capturedKnightIds,
+      returnedCaptainIds,
+      fallenCaptainIds,
+    });
     return {
       ok: true,
       state: {
         ...placed,
         knights,
+        captains,
         secured: { ...placed.secured, [region]: { player, captainId: captain.id } },
         turn: { ...placed.turn!, step: 'end' },
       },

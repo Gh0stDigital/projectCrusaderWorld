@@ -122,7 +122,7 @@ export const SUBCLASS_ABILITIES: Record<KnightSubclass, { name: string; text: st
     name: 'Cover Retreat',
     text: 'Attacks along its row or column. When adjacent Infantry retreats, blocks Second Pass and strikes the victor.',
   },
-  gatekeeper: { name: 'Brace', text: 'Double base HP, but only 2 Sergeants.' },
+  gatekeeper: { name: 'Brace', text: 'Once per game, its first battle doubles its base HP (men drawn from its Captain\u2019s reserve). Only 2 Sergeants.' },
   watchman: {
     name: 'Snipe',
     text: 'Next to a Gatekeeper: when either is attacked, hits the attacker with its strongest Sergeant before battle.',

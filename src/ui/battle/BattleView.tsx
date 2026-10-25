@@ -257,7 +257,13 @@ function Combatant({
   let hp = last ? last.hpAfter[role] : side.startHp;
   let alive: Sergeant[] = last ? last.sergeantsAfter[role] : side.startSergeants;
   // Before any clash is shown, apply the pre-battle strikes revealed so far.
-  if (!last) for (const p of preludes) if (p.type !== 'ambush' && p.targetId === side.knightId) hp = Math.max(0, hp - p.damage);
+  if (!last) {
+    for (const p of preludes) if ('damage' in p && p.targetId === side.knightId) hp = Math.max(0, hp - p.damage);
+    // Brace already counts in the starting HP; hold it back until it has been shown.
+    for (const p of duel.prelude) {
+      if (p.type === 'brace' && p.knightId === side.knightId && !preludes.includes(p)) hp -= p.amount;
+    }
+  }
   // Ambushed Sergeants sit out this battle once the Ambush has been shown.
   const ambushed = new Set(
     preludes.flatMap((p) => (p.type === 'ambush' && p.targetId === side.knightId ? p.sergeantIds : [])),
@@ -270,7 +276,8 @@ function Combatant({
       );
     }
   }
-  const preludeTarget = activePrelude?.type !== 'ambush' && activePrelude?.targetId === side.knightId;
+  const preludeTarget = !!activePrelude && 'damage' in activePrelude && activePrelude.targetId === side.knightId;
+  const bracing = activePrelude?.type === 'brace' && activePrelude.knightId === side.knightId;
   const passTarget =
     preludeTarget ||
     ((activeEffect?.type === 'secondPass' || activeEffect?.type === 'coverRetreat') && activeEffect.targetId === side.knightId);
@@ -282,7 +289,7 @@ function Combatant({
   const maxHp = Math.max(normalMax, side.startHp);
   const tookDamage =
     passTarget || (current && upTo > 0 && current === last && current.winner !== role && current.winner !== 'tie');
-  const struck = (activePrelude?.knightId === side.knightId) || passStriker || (current && upTo > 0 && current === last && current.winner === role);
+  const struck = (activePrelude?.type !== 'brace' && activePrelude?.knightId === side.knightId) || passStriker || (current && upTo > 0 && current === last && current.winner === role);
   const hitKey = preludeTarget ? `pre-${activePrelude?.knightId}` : passTarget ? 'pass' : `${upTo}`;
   const hudHost = useHudHost(side.player);
   const picking = (options?.size ?? 0) > 0;
@@ -339,7 +346,7 @@ function Combatant({
         <div className={`combatant__card${hp <= 0 ? ' combatant__card--fallen' : ''}`}>
           <div
             key={tookDamage ? `hit-${hitKey}` : struck ? `strike-${hitKey}` : 'idle'}
-            className={`combatant__motion${tookDamage ? ' combatant__motion--hit' : ''}${struck ? ' combatant__motion--strike' : ''}${regrouping ? ' combatant__motion--regroup' : ''}`}
+            className={`combatant__motion${tookDamage ? ' combatant__motion--hit' : ''}${struck ? ' combatant__motion--strike' : ''}${regrouping || bracing ? ' combatant__motion--regroup' : ''}`}
           >
             <span
               className="combatant__sprite"
@@ -403,6 +410,16 @@ interface CenterPanelProps {
 function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, myRole, effect, prelude }: CenterPanelProps) {
   if (phase === 'prelude' && prelude) {
     const actor = match.knights[prelude.knightId]!;
+    if (prelude.type === 'brace') {
+      return (
+        <div className="battle-msg battle-msg--ability">
+          <span className="battle-msg__ability">Gatekeeper · Brace!</span>
+          <span className="battle-msg__small battle-msg__verdict">
+            {knightName(actor)} braces behind the gate: +{prelude.amount} HP (once per game).
+          </span>
+        </div>
+      );
+    }
     const target = match.knights[prelude.targetId]!;
     if (prelude.type === 'ambush') {
       return (

@@ -83,7 +83,9 @@ export function BattleResults({ match, duel, myRole, onReturn }: BattleResultsPr
           <ul className="battle-results__abilities">
             {duel.prelude.map((e, i) => (
               <li key={`p${i}`}>
-                {e.type === 'ambush'
+                {e.type === 'brace'
+                  ? `Brace: ${knightName(match.knights[e.knightId]!)} gained ${e.amount} HP (once per game).`
+                  : e.type === 'ambush'
                   ? `Ambush: ${knightName(match.knights[e.knightId]!)} kept ${e.sergeantIds.length} of ${knightName(match.knights[e.targetId]!)}’s Sergeants out of the battle.`
                   : `${e.type === 'snipe' ? 'Snipe' : 'First Strike'}: ${knightName(match.knights[e.knightId]!)} hit ${knightName(match.knights[e.targetId]!)} for ${e.damage} before the battle${e.killed ? ', killing them' : ''}.`}
               </li>

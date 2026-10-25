@@ -12,6 +12,9 @@ import {
   SUBCLASS_SHORT,
 } from '../../data/names';
 import { Card } from '../components/Card';
+import { KnightDetails } from '../components/KnightDetails';
+import { useHoldPopover } from '../components/useHoldPopover';
+import type { ReactNode } from 'react';
 import { KnightSprite } from '../components/KnightSprite';
 import './companyView.css';
 
@@ -85,13 +88,15 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
             .filter(Boolean)
             .join(' ');
           return (
-            <li key={knight.id}>
-              <button
-                className={classes}
-                disabled={!pickable}
-                onClick={() => onSelectKnight(knight.id)}
-                aria-label={`${knightName(knight)}: ${STATUS_LABEL[knight.status]}${alive ? `, ${knight.hp} HP` : ''}`}
-              >
+            <HoldableToken
+              key={knight.id}
+              match={match}
+              knight={knight}
+              className={classes}
+              pickable={pickable}
+              onPick={() => onSelectKnight(knight.id)}
+              label={`${knightName(knight)}: ${STATUS_LABEL[knight.status]}${alive ? `, ${knight.hp} HP` : ''}. Press and hold for details.`}
+            >
                 <span className="knight-token__icon">
                   <KnightSprite owner={player} width={44} />
                   <span className="knight-token__number">{knight.number}</span>
@@ -106,11 +111,47 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
                       : STATUS_LABEL[knight.status]}
                   </span>
                 </span>
-              </button>
-            </li>
+            </HoldableToken>
           );
         })}
       </ul>
     </div>
+  );
+}
+
+/** A Knight token: click to choose (when allowed), press and hold for details. */
+function HoldableToken({
+  match,
+  knight,
+  className,
+  pickable,
+  onPick,
+  label,
+  children,
+}: {
+  match: MatchState;
+  knight: Knight;
+  className: string;
+  pickable: boolean;
+  onPick: () => void;
+  label: string;
+  children: ReactNode;
+}) {
+  const hold = useHoldPopover<HTMLButtonElement>();
+  return (
+    <li>
+      <button
+        ref={hold.ref}
+        className={className}
+        aria-disabled={!pickable}
+        onClick={() => pickable && onPick()}
+        onClickCapture={hold.guardClick}
+        aria-label={label}
+        {...hold.handlers}
+      >
+        {children}
+      </button>
+      <KnightDetails match={match} knight={knight} at={hold.at} root={hold.root()} />
+    </li>
   );
 }

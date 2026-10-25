@@ -2,6 +2,10 @@ import { attackTargets, knightAt, legalSquares, normalMaxHp } from '../../engine
 import { SQUARES, type MatchState, type RegionIndex, type SquareIndex } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, SUBCLASS_NAMES, captainName, knightName, knightPersonalName } from '../../data/names';
 import { KnightSprite } from '../components/KnightSprite';
+import { KnightDetails } from '../components/KnightDetails';
+import { useHoldPopover } from '../components/useHoldPopover';
+import type { ReactNode } from 'react';
+import type { Knight } from '../../engine/state';
 import type { Departure } from '../../store/matchStore';
 import './regionView.css';
 
@@ -59,8 +63,9 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
             <button
               key={square}
               className={classes}
-              disabled={!isLegal && !isTarget}
-              onClick={() => (isTarget ? onChooseTarget(knight.id) : onPlaceKnight(square))}
+              disabled={!isLegal && !isTarget && !knight}
+              aria-disabled={!isLegal && !isTarget}
+              onClick={() => (isTarget ? onChooseTarget(knight.id) : isLegal ? onPlaceKnight(square) : undefined)}
               aria-label={label}
             >
               {!knight && departure && departure.region === region && departure.square === square && (
@@ -82,18 +87,34 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
                 </span>
               )}
               {knight && (
-                <span className={`board-piece board-piece--${knight.owner}`}>
+                <HoldablePiece match={match} knight={knight}>
                   <KnightSprite owner={knight.owner} width={128} animate title={knightName(knight)} />
                   <span className={`hp-badge${knight.hp > normalMaxHp(knight) ? ' hp-badge--over' : ''}`}>{knight.hp}</span>
                   <span className="knight-plate">{knightPersonalName(knight)}</span>
                   {knight.subclass && <span className={`type-badge type-badge--${knight.subclass}`}>{SUBCLASS_NAMES[knight.subclass]}</span>}
                   {isTarget && <span className="attack-marker">Attack</span>}
-                </span>
+                </HoldablePiece>
               )}
             </button>
           );
         })}
       </div>
     </div>
+  );
+}
+
+/** A Knight standing on a square; press and hold for its details. */
+function HoldablePiece({ match, knight, children }: { match: MatchState; knight: Knight; children: ReactNode }) {
+  const hold = useHoldPopover<HTMLSpanElement>();
+  return (
+    <span
+      ref={hold.ref}
+      className={`board-piece board-piece--${knight.owner}`}
+      onClickCapture={hold.guardClick}
+      {...hold.handlers}
+    >
+      {children}
+      <KnightDetails match={match} knight={knight} at={hold.at} root={hold.root()} />
+    </span>
   );
 }

@@ -1,6 +1,7 @@
 // Read-only questions about a match. The UI and the computer player use these
 // to know what is legal; the rules use them to validate actions.
 import {
+  BRACE_BONUS,
   KNIGHT_HP,
   REGIONS,
   SUBCLASS_HP,
@@ -95,6 +96,7 @@ export function regionsOpenTo(state: MatchState, player: PlayerId): RegionIndex[
  * and then actually place a Knight.
  */
 export function captainCanAct(state: MatchState, captain: Captain): boolean {
+  if (captain.fallen) return false;
   if (reserveKnights(state, captain.id).length === 0) return false;
   if (captain.region === null) return regionsOpenTo(state, captain.owner).length > 0;
   return emptySquares(state, captain.region).length > 0;
@@ -126,7 +128,7 @@ export function commandOptions(state: MatchState): CommandOptions {
   if (!turn || turn.step !== 'command') return none;
   const player = turn.player;
   const lordCaptains = captainsOf(state, player, turn.lord);
-  const ready = lordCaptains.filter((c) => c.region === null && reserveKnights(state, c.id).length > 0);
+  const ready = lordCaptains.filter((c) => c.region === null && !c.fallen && reserveKnights(state, c.id).length > 0);
   const route = state.route;
 
   if (ready.length === 0) {
@@ -179,7 +181,7 @@ export function actionableCaptains(state: MatchState): Captain[] {
   const deployers =
     options.deployRegions.length > 0
       ? captainsOf(state, turn.player, turn.lord).filter(
-          (c) => c.region === null && reserveKnights(state, c.id).length > 0,
+          (c) => c.region === null && !c.fallen && reserveKnights(state, c.id).length > 0,
         )
       : [];
   const resumers = options.resumeCaptainIds.map((id) => state.captains[id]!);
@@ -294,7 +296,7 @@ export function playerMilitia(state: MatchState, player: PlayerId): number {
   return order.reduce((sum, lord) => sum + lordMilitia(state, player, lord), 0);
 }
 
-/** A Knight's normal maximum HP: their type's base HP (Gatekeepers Brace to 100), else KNIGHT_HP. */
-export function normalMaxHp(knight: Pick<Knight, 'subclass'>): number {
-  return (knight.subclass && SUBCLASS_HP[knight.subclass]) ?? KNIGHT_HP;
+/** A Knight's normal maximum HP: their type's base HP, plus Brace once a Gatekeeper has used it. */
+export function normalMaxHp(knight: Pick<Knight, 'subclass' | 'braced'>): number {
+  return ((knight.subclass && SUBCLASS_HP[knight.subclass]) ?? KNIGHT_HP) + (knight.braced ? BRACE_BONUS : 0);
 }
