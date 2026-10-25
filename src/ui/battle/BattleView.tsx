@@ -212,7 +212,10 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
             {tookDamage && <span className="combatant__slash" aria-hidden="true" />}
           </div>
         </div>
-        <div className="combatant__info">
+        <div
+          key={struck ? `strike-info-${upTo}` : 'info'}
+          className={`combatant__info${struck ? ' combatant__info--strike' : ''}`}
+        >
           <span className="combatant__name">{knightName(knight)}</span>
           <span className="combatant__sub">
             {PLAYER_NAMES[side.player]} · {captainName(captain)}
