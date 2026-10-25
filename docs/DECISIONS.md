@@ -38,7 +38,8 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - Ultimate Tic-Tac-Toe routing (settled):
   - The square a Knight is placed on sends the opponent to the Region in the same position next turn. The first turn of the match is a free choice.
   - While the current Lord has a Ready Captain, they must play in the routed Region: deploy a Ready Captain there. They cannot revisit other Regions.
-  - If the player already has a Captain (of any Lord) stationed in the routed Region who can act, that Captain takes the turn there instead (one Captain per player per Region).
+  - If the routed Region holds the current Lord's own stationed Captain, that Captain must take the turn there.
+  - If it holds a Captain of a different Lord, routing is not mandatory: the current Lord may deploy a Ready Captain to any open Region, or give that other Captain orders in the routed Region. If no other Region is open, it becomes must-play-here (that Captain takes the turn).
   - Once the current Lord has deployed both Captains, routing is ignored and the player chooses one of that Lord's stationed Captains. Their placement still routes the opponent.
   - If the routed Region is closed to them (no room, or nobody able to act), they deploy to any open Region; if none is open, any stationed Captain may act.
   - The routed Region is highlighted on the Region board ("Must play here") and named in the turn banner; each empty square in the Region view shows where it would send the opponent.

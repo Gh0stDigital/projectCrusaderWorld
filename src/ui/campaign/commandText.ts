@@ -14,6 +14,10 @@ export function commandSummary(match: MatchState): string {
     return `Sent to ${where}: deploy a Captain there`;
   }
   if (o.mode === 'lordCaptains') return 'All this Lord’s Captains are deployed: choose one of their Regions';
+  if (o.route !== null && o.resumeCaptainIds.length > 0) {
+    const other = match.captains[o.resumeCaptainIds[0]!]!;
+    return `Sent to ${REGION_NAMES[o.route]} (${captainName(other)}): deploy anywhere, or command them there`;
+  }
   if (o.route !== null) return `${REGION_NAMES[o.route]} is closed: deploy to any open Region`;
   return 'Deploy a Captain to any Region';
 }

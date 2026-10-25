@@ -184,16 +184,45 @@ describe('Routing', () => {
     expect(next.captains['p2-garrison-1']!.region).toBe(7);
   });
 
-  it('hands the turn to a Captain already stationed in the routed Region, from any Lord', () => {
+  it('is not mandatory when the routed Region holds another Lord\u2019s Captain: deploy elsewhere or command them', () => {
     let s = deployAndPlace(startedMatch(), 'p1-raiders-1', 4, 0); // p2 -> Region 0
     s = deployAndPlace(s, 'p2-garrison-1', 0, 4); // p1 -> Region 4, where Raiders Captain I stands
     expect(s.turn!.lord).toBe('army');
-    expect(commandOptions(s)).toMatchObject({ mode: 'routed', route: 4, deployRegions: [], resumeCaptainIds: ['p1-raiders-1'] });
-    expect(rejected(s, { type: 'deployCaptain', player: 'p1', captainId: 'p1-army-1', region: 4 })).toMatch(
-      /stationed Captain/,
-    );
-    s = act(s, { type: 'resumeCaptain', player: 'p1', captainId: 'p1-raiders-1' });
-    expect(legalSquares(s)).toEqual(emptySquares(s, 4));
+    const o = commandOptions(s);
+    expect(o).toMatchObject({ mode: 'free', route: 4, resumeCaptainIds: ['p1-raiders-1'] });
+    expect(o.deployRegions).not.toContain(4);
+    expect(o.deployRegions).toContain(7);
+    // Either choice is allowed.
+    const deployed = act(s, { type: 'deployCaptain', player: 'p1', captainId: 'p1-army-1', region: 7 });
+    expect(deployed.captains['p1-army-1']!.region).toBe(7);
+    const resumed = act(s, { type: 'resumeCaptain', player: 'p1', captainId: 'p1-raiders-1' });
+    expect(legalSquares(resumed)).toEqual(emptySquares(resumed, 4));
+  });
+
+  it('becomes must-play-here when nowhere else is open', () => {
+    let s = deployAndPlace(startedMatch(), 'p1-raiders-1', 4, 0);
+    s = deployAndPlace(s, 'p2-garrison-1', 0, 4); // p1 Army routed to Region 4
+    // Fill every other Region so a Ready Captain has nowhere to go.
+    let n = 0;
+    const fillers = Object.values(s.knights).filter((k) => k.owner === 'p2' && k.status === 'unmanned');
+    for (const region of [0, 1, 2, 3, 5, 6, 7, 8] as RegionIndex[]) {
+      for (let sq = 0; sq < 9; sq++) {
+        const k = fillers[n++ % fillers.length]!;
+        const id = `${k.id}-fill-${region}-${sq}`;
+        s.knights[id] = { ...k, id, status: 'fielded', position: { region, square: sq as SquareIndex } };
+      }
+    }
+    s = { ...s, knights: { ...s.knights } };
+    const o = commandOptions(s);
+    expect(o).toMatchObject({ mode: 'routed', route: 4, deployRegions: [], resumeCaptainIds: ['p1-raiders-1'] });
+  });
+
+  it('stays mandatory when the routed Region holds the current Lord\u2019s own Captain', () => {
+    let s = startedMatch();
+    s.captains['p1-raiders-1'] = { ...s.captains['p1-raiders-1']!, region: 4 };
+    s = { ...s, route: 4 };
+    const o = commandOptions(s);
+    expect(o).toMatchObject({ mode: 'routed', route: 4, deployRegions: [], resumeCaptainIds: ['p1-raiders-1'] });
   });
 
   it('does not let a Lord with a Ready Captain revisit other Regions', () => {

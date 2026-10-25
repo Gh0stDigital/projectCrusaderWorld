@@ -141,6 +141,17 @@ export function commandOptions(state: MatchState): CommandOptions {
   if (route !== null) {
     const stationed = captainInRegion(state, route, player);
     if (stationed && captainCanAct(state, stationed)) {
+      // The current Lord's own Captain is there: they must play it.
+      if (stationed.lord === turn.lord) {
+        return { mode: 'routed', route, deployRegions: [], resumeCaptainIds: [stationed.id] };
+      }
+      // Another Lord's Captain is there: not mandatory. Deploy a Ready Captain
+      // anywhere open, or command that Captain there. With nowhere else open,
+      // it becomes a must-play-here.
+      const elsewhere = regionsOpenTo(state, player);
+      if (elsewhere.length > 0) {
+        return { mode: 'free', route, deployRegions: elsewhere, resumeCaptainIds: [stationed.id] };
+      }
       return { mode: 'routed', route, deployRegions: [], resumeCaptainIds: [stationed.id] };
     }
     if (!stationed && emptySquares(state, route).length > 0) {
