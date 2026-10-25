@@ -4,8 +4,8 @@ import { availableSergeants, duelRoleOf } from '../../engine/queries';
 import { KNIGHT_HP, type Clash, type Duel, type DuelRole, type MatchState, type PlayerId, type Sergeant } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, TACTIC_NAMES, captainName, knightArt, knightName } from '../../data/names';
 import { Card } from '../components/Card';
-import knightBattle from '../../assets/sprites/knight-battle.png';
-import enemyKnightBattle from '../../assets/sprites/enemy-knight-battle.png';
+import knightBattle from '../../assets/sprites/knight-battle-anim.png';
+import enemyKnightBattle from '../../assets/sprites/enemy-knight-battle-anim.png';
 import { SergeantBox, TacticLegend, type SergeantBoxState } from '../components/SergeantBox';
 import { TacticIcon } from '../components/TacticIcon';
 import './battleView.css';
@@ -151,6 +151,7 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
   const chosenId = current?.[role]?.sergeantId;
   const maxHp = Math.max(KNIGHT_HP, side.startHp);
   const tookDamage = current && upTo > 0 && current === last && current.winner !== role && current.winner !== 'tie';
+  const struck = current && upTo > 0 && current === last && current.winner === role;
   const hudHost = useHudHost(side.player);
   const picking = (options?.size ?? 0) > 0;
 
@@ -197,17 +198,19 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
       {hudHost && createPortal(hud, hudHost)}
 
       <div className="combatant__body">
-        <div
-          key={tookDamage ? `hit-${upTo}` : 'idle'}
-          className={`combatant__card${hp <= 0 ? ' combatant__card--fallen' : ''}${tookDamage ? ' combatant__card--hit' : ''}`}
-        >
-          {tookDamage && <span className="combatant__slash" aria-hidden="true" />}
-          <img
-            className="combatant__sprite"
-            src={side.player === 'p1' ? knightBattle : enemyKnightBattle}
-            alt={knightName(knight)}
-            draggable={false}
-          />
+        <div className={`combatant__card${hp <= 0 ? ' combatant__card--fallen' : ''}`}>
+          <div
+            key={tookDamage ? `hit-${upTo}` : struck ? `strike-${upTo}` : 'idle'}
+            className={`combatant__motion${tookDamage ? ' combatant__motion--hit' : ''}${struck ? ' combatant__motion--strike' : ''}`}
+          >
+            <span
+              className="combatant__sprite"
+              role="img"
+              aria-label={knightName(knight)}
+              style={{ backgroundImage: `url(${side.player === 'p1' ? knightBattle : enemyKnightBattle})` }}
+            />
+            {tookDamage && <span className="combatant__slash" aria-hidden="true" />}
+          </div>
         </div>
         <div className="combatant__info">
           <span className="combatant__name">{knightName(knight)}</span>

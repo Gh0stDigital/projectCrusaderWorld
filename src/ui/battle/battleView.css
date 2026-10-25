@@ -312,14 +312,24 @@
 }
 
 .combatant__card { top: var(--top); }
-.combatant__info { top: calc(var(--top) + 344px); width: 420px; }
+.combatant__info { top: calc(var(--top) + 318px); width: 420px; z-index: 2; }
 
+/* Battle avatar: two frames side by side, alternating at 1 frame per second. */
 .combatant__sprite {
   display: block;
-  height: 330px;
-  width: auto;
+  width: 330px;
+  height: 326px;
+  background-repeat: no-repeat;
+  background-size: 660px 100%;
+  background-position: 0 0;
   image-rendering: pixelated;
   filter: drop-shadow(0 10px 6px rgba(0, 0, 0, 0.55));
+  animation: battle-idle 2s steps(2, end) infinite;
+}
+
+@keyframes battle-idle {
+  from { background-position: 0 0; }
+  to { background-position: -660px 0; }
 }
 
 .combatant__card--fallen .combatant__sprite {
@@ -338,9 +348,28 @@
   max-width: 500px;
 }
 
-/* ---- Hit: a slash sweeps across the Knight and it shakes ---- */
-.combatant__card--hit .combatant__sprite {
-  animation: knight-shake 420ms ease-in-out 1;
+/* ---- Strike: the clash winner lunges at the opponent ---- */
+.combatant--bottom { --lunge: translate(46px, -22px); }
+.combatant--top { --lunge: translate(-46px, 22px); }
+
+.combatant__motion {
+  position: relative;
+}
+
+.combatant__motion--strike {
+  animation: knight-strike 520ms cubic-bezier(0.3, 0, 0.2, 1) 1;
+}
+
+@keyframes knight-strike {
+  0% { transform: none; }
+  35% { transform: var(--lunge) scale(1.04); }
+  60% { transform: var(--lunge); }
+  100% { transform: none; }
+}
+
+/* ---- Hit: a slash streaks across the Knight and it shakes ---- */
+.combatant__motion--hit {
+  animation: knight-shake 420ms ease-in-out 220ms 1 both;
 }
 
 @keyframes knight-shake {
@@ -354,29 +383,29 @@
 
 .combatant__slash {
   position: absolute;
-  inset: 0;
-  z-index: 2;
+  left: 15%;
+  top: 48%;
+  width: 70%;
+  height: 7px;
+  border-radius: 4px;
   pointer-events: none;
-  background: linear-gradient(
-    125deg,
-    transparent 44%,
-    rgba(255, 255, 255, 0.95) 48%,
-    rgba(255, 210, 210, 0.9) 50%,
-    transparent 54%
-  );
-  background-size: 300% 300%;
-  animation: slash-sweep 360ms ease-out 1 forwards;
+  background: linear-gradient(90deg, transparent, #fff 20%, #ffe0e0 80%, transparent);
+  box-shadow: 0 0 10px 3px rgba(255, 255, 255, 0.85), 0 0 22px 6px rgba(255, 90, 70, 0.6);
+  transform: rotate(-38deg) scaleX(0);
+  transform-origin: left center;
+  animation: slash-streak 380ms ease-out 200ms 1 both;
 }
 
-@keyframes slash-sweep {
-  0% { background-position: 100% 100%; opacity: 1; }
-  70% { opacity: 1; }
-  100% { background-position: 0% 0%; opacity: 0; }
+@keyframes slash-streak {
+  0% { transform: rotate(-38deg) scaleX(0); opacity: 1; }
+  45% { transform: rotate(-38deg) scaleX(1); opacity: 1; }
+  100% { transform: rotate(-38deg) scaleX(1); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .combatant__card--hit .combatant__sprite,
-  .combatant__slash { animation: none; }
+  .combatant__sprite,
+  .combatant__motion--hit,
+  .combatant__motion--strike { animation: none; }
   .combatant__slash { display: none; }
 }
 

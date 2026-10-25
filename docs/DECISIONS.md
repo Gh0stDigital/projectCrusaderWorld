@@ -48,7 +48,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 
 - Knights on a Region's 3×3 board are a pixel-art Knight sprite (`src/assets/sprites`), not cards: blue for Player 1, red and mirrored for the enemy. It idles between its two frames at 1 frame per second (off with reduced motion).
 - The Captain panel's Knight tokens use the same sprite, still and slightly greyed out (darker when in the field, faint when unmanned, sepia when fallen).
-- Battles use a full-body pixel Knight (`knight-battle.png`; the enemy's is red and mirrored) instead of cards.
+- Battles use a pixel Knight bust (`knight-battle-anim.png`, two frames idling at 1 frame per second; the enemy's is red and mirrored). The clash winner lunges at its opponent; a Knight that takes damage shakes with a slash streak across it.
 - Knight cards are still used in the attack preview.
 
 ## Region board skin — Settled
