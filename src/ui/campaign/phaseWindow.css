@@ -56,3 +56,16 @@
   font-size: 14px;
   padding: 18px 48px;
 }
+
+/* Fated Move (routing decides where) or Control Move (the Lord chooses). */
+.move-type {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 9px;
+  color: var(--ink);
+}
+
+.move-type--fated { background: var(--gold); }
+.move-type--control { background: #6fcf6a; }

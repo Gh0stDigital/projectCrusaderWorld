@@ -1,5 +1,5 @@
-import { actingCaptain, actionableCaptains, attackTargets, canEndTurn, commandOptions } from '../../engine/queries';
-import { commandSummary } from './commandText';
+import { actingCaptain, actionableCaptains, attackTargets, canEndTurn, commandOptions, moveType } from '../../engine/queries';
+import { MOVE_TYPE_NAMES, commandSummary } from './commandText';
 import type { MatchState, RegionIndex } from '../../engine/state';
 import { LORD_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
 import './phaseWindow.css';
@@ -64,6 +64,9 @@ export function PhaseWindow({
       </ol>
 
       <div className="phase-window__orders">
+        {!busy && !battleOpen && moveType(match) && (
+          <span className={`move-type move-type--${moveType(match)}`}>{MOVE_TYPE_NAMES[moveType(match)!]}</span>
+        )}
         <p className="phase-window__instruction">
           {busy
             ? 'Orders complete.'

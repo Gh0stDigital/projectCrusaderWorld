@@ -42,7 +42,12 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
   - If it holds a Captain of a different Lord, routing is not mandatory: the current Lord may deploy a Ready Captain to any open Region, or give that other Captain orders in the routed Region. If no other Region is open, it becomes must-play-here (that Captain takes the turn).
   - Once the current Lord has deployed both Captains, routing is ignored and the player chooses one of that Lord's stationed Captains. Their placement still routes the opponent.
   - If the routed Region is closed to them (no room, or nobody able to act), they deploy to any open Region; if none is open, any stationed Captain may act.
-  - The routed Region is highlighted on the Region board ("Must play here") and named in the turn banner; each empty square in the Region view shows where it would send the opponent.
+  - The routed Region is highlighted on the Region board ("Fated Move · play here") and named in the turn banner; each empty square in the Region view shows where it would send the opponent.
+- Move types (named in the turn instructions during the command step):
+  - **Fated Move:** routing forces where the Lord plays (deploy in the routed Region, or command their own Captain there).
+  - **Control Move:** the Lord chooses where to deploy a Captain or which deployed Captain to command (first turn, routing not mandatory, routed Region closed, or both of the Lord's Captains already deployed).
+  - With both of the Lord's Captains deployed, both of their Regions are highlighted green ("Playable") on the Region board.
+  - The selected Captain's icon turns green when it can play this turn.
 - Exhibition is against the computer: the human plays Player 1 (blue); the computer plays Player 2 (red).
 
 ## Knight sprite — Settled

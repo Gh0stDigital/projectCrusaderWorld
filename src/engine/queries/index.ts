@@ -188,6 +188,26 @@ export function actionableCaptains(state: MatchState): Captain[] {
   return [...deployers, ...resumers];
 }
 
+/**
+ * Fated Move: routing forces where the Lord plays this turn.
+ * Control Move: the Lord chooses where to deploy or which deployed Captain to command.
+ * Null outside the command step or when the Lord has no orders to give.
+ */
+export type MoveType = 'fated' | 'control';
+export function moveType(state: MatchState): MoveType | null {
+  if (actionableCaptains(state).length === 0) return null;
+  return commandOptions(state).mode === 'routed' ? 'fated' : 'control';
+}
+
+/** With both of the Lord's Captains deployed, the Regions where they can be commanded this turn. */
+export function commandableRegions(state: MatchState): RegionIndex[] {
+  const options = commandOptions(state);
+  if (options.mode !== 'lordCaptains') return [];
+  return options.resumeCaptainIds
+    .map((id) => state.captains[id]!.region)
+    .filter((r): r is RegionIndex => r !== null);
+}
+
 /** The Captain acting this turn, once chosen. */
 export function actingCaptain(state: MatchState): Captain | null {
   const id = state.turn?.captainId;

@@ -17,6 +17,8 @@ interface RegionBoardProps {
   active: RegionIndex | null;
   /** The Region the opponent's last placement sent this player to, if routing applies. */
   required?: RegionIndex | null;
+  /** Control Move with both Captains deployed: the Regions the Lord can play in. */
+  playable?: ReadonlySet<RegionIndex>;
   /** Whether the player is choosing a Region; dims the ones they can't pick. */
   choosing: boolean;
   onClickRegion: (region: RegionIndex) => void;
@@ -28,7 +30,7 @@ interface RegionBoardProps {
  * portraits, and a large map of its own 3×3 board marked X (Player 1, blue) and
  * O (Player 2, red) so occupied squares read at a glance.
  */
-export function RegionBoard({ match, clickable, active, required = null, choosing, onClickRegion, labelFor }: RegionBoardProps) {
+export function RegionBoard({ match, clickable, active, required = null, playable, choosing, onClickRegion, labelFor }: RegionBoardProps) {
   return (
     <div className={`region-board${choosing ? ' region-board--choosing' : ''}`}>
       {REGIONS.map((region) => {
@@ -38,6 +40,7 @@ export function RegionBoard({ match, clickable, active, required = null, choosin
           isClickable && 'region--open',
           active === region && 'region--active',
           required === region && 'region--required',
+          playable?.has(region) && 'region--playable',
           match.secured[region] && `region--secured region--secured-${match.secured[region]!.player}`,
         ]
           .filter(Boolean)
@@ -68,7 +71,8 @@ export function RegionBoard({ match, clickable, active, required = null, choosin
             </span>
 
             {match.secured[region] && <SecuredMarker match={match} region={region} />}
-            {required === region && <span className="region__required">Must play here</span>}
+            {required === region && <span className="region__required">Fated Move · play here</span>}
+            {playable?.has(region) && <span className="region__required region__required--playable">Playable</span>}
             {isClickable && <span className="region__action">{labelFor(region)}</span>}
           </button>
         );

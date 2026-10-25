@@ -5,7 +5,9 @@ import {
   actionableCaptains,
   canEndTurn,
   commandOptions,
+  commandableRegions,
   emptySquares,
+  moveType,
   legalSquares,
   nextLordFor,
   regionsOpenTo,
@@ -171,12 +173,14 @@ describe('Routing', () => {
     const o = commandOptions(startedMatch());
     expect(o).toMatchObject({ mode: 'free', route: null });
     expect(o.deployRegions).toHaveLength(9);
+    expect(moveType(startedMatch())).toBe('control');
   });
 
   it('sends the opponent to the Region matching the square played', () => {
     const s = deployAndPlace(startedMatch(), 'p1-raiders-1', 2, 7);
     expect(s.route).toBe(7);
     expect(commandOptions(s)).toMatchObject({ mode: 'routed', route: 7, deployRegions: [7], resumeCaptainIds: [] });
+    expect(moveType(s)).toBe('fated');
     expect(rejected(s, { type: 'deployCaptain', player: 'p2', captainId: 'p2-garrison-1', region: 3 })).toMatch(
       /sent you to/,
     );
@@ -248,6 +252,8 @@ describe('Routing', () => {
     const o = commandOptions(s);
     expect(o).toMatchObject({ mode: 'lordCaptains', deployRegions: [] });
     expect(o.resumeCaptainIds.sort()).toEqual(['p1-raiders-1', 'p1-raiders-2']);
+    expect(moveType(s)).toBe('control');
+    expect(commandableRegions(s).sort()).toEqual([2, 6]);
     expect(rejected(s, { type: 'resumeCaptain', player: 'p1', captainId: 'p1-army-1' })).toMatch(/current Lord/);
     s = act(s, { type: 'resumeCaptain', player: 'p1', captainId: 'p1-raiders-2' });
     expect(legalSquares(s)).toEqual(emptySquares(s, 6));

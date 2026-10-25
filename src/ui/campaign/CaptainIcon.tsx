@@ -88,6 +88,7 @@ export function CaptainIcon({ match, captain, pickable, selected, onPick }: Capt
     `captain-icon--${captain.owner}`,
     pickable && 'captain-icon--pickable',
     selected && 'captain-icon--selected',
+    selected && pickable && 'captain-icon--playable',
   ]
     .filter(Boolean)
     .join(' ');
