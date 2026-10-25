@@ -1,0 +1,125 @@
+/*
+ * Wireframe look: used while the board artwork is switched off (USE_BOARD_ART
+ * in MatchScreen). Flat zones with outlines, in the same positions the art used.
+ */
+.match--wireframe {
+  --wf-bg: #15110d;
+  --wf-zone: #241d16;
+  --wf-bar: #1c1712;
+  --wf-slot: #2e261d;
+  --wf-line: #3a3026;
+  --wf-edge: #4a3d2f;
+  --wf-tile: #26261a;
+  --wf-tile-edge: #46412c;
+  --wf-btn: #6b5636;
+  background: var(--wf-bg);
+}
+
+.match--wireframe .match__top-bar,
+.match--wireframe .phase-window {
+  background: var(--wf-bar);
+  border: 2px solid var(--wf-line);
+}
+
+.match--wireframe .player-panel {
+  background: var(--wf-zone);
+  border: 2px solid var(--wf-line);
+}
+
+.match--wireframe .player-panel--p1 { border-top: 6px solid #2f4a6e; }
+.match--wireframe .player-panel--p2 { border-top: 6px solid #6e2f2a; }
+
+.match--wireframe .board-stage,
+.match--wireframe .board-stage__regions,
+.match--wireframe .board-stage__region {
+  background: var(--wf-zone);
+}
+
+/* Side panel boxes */
+.match--wireframe .lord-row,
+.match--wireframe .company__captain,
+.match--wireframe .knight-token {
+  background: var(--wf-slot);
+  border: 2px solid var(--wf-edge);
+  border-radius: 8px;
+}
+
+.match--wireframe .captain-chip {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--wf-edge);
+}
+
+.match--wireframe .company__stats {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.match--wireframe .lord-row--active,
+.match--wireframe .company__captain--acting {
+  border-color: var(--gold);
+}
+
+.match--wireframe .knight-token--pickable { border-color: var(--gold-dim); }
+.match--wireframe .knight-token--selected { border-color: var(--gold); }
+
+/* Region board tiles and their mini boards */
+.match--wireframe .region,
+.match--wireframe .region:disabled {
+  background: var(--wf-tile);
+  border: 2px solid var(--wf-tile-edge);
+}
+
+.match--wireframe .region--open { border-color: var(--gold-dim); }
+
+.match--wireframe .region__map {
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.match--wireframe .region__map-square {
+  background: #33331f;
+}
+
+.match--wireframe .region__captain-empty {
+  border: 1px dashed var(--wf-edge);
+}
+
+/* Inner board squares */
+.match--wireframe .inner-board__square {
+  background: var(--wf-slot);
+  border: 2px dashed var(--wf-edge);
+}
+
+.match--wireframe .inner-board__square:has(.board-piece) {
+  border-style: solid;
+}
+
+.match--wireframe .inner-board__square--legal {
+  border-color: var(--gold-dim);
+}
+
+/* Bottom bar plaques */
+.match--wireframe .phase-list__item {
+  background: #2a231b;
+  border: 2px solid var(--wf-edge) !important;
+}
+
+.match--wireframe .phase-list__item--current {
+  background: rgba(217, 169, 58, 0.85);
+}
+
+.match--wireframe .phase-window__instruction {
+  padding: 6px 0;
+  border-radius: 4px;
+  background: var(--wf-line);
+}
+
+.match--wireframe .phase-window__end-turn {
+  border: 2px solid var(--wf-btn) !important;
+  background: var(--wf-slot) !important;
+}
+
+.match--wireframe .top-bar__button {
+  border-color: var(--wf-btn);
+}
+
+/* Battle HUD host keeps its own look; the battlefield art is unchanged. */

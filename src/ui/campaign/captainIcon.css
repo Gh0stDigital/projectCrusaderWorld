@@ -1,0 +1,144 @@
+/* Two Captain icons side by side under each Lord. */
+.player-panel .lord-row__captains {
+  flex-direction: row;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.captain-icon__item {
+  position: relative;
+}
+
+.captain-icon {
+  position: relative;
+  width: 84px;
+  height: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 6px 0 0;
+  border: 2px solid var(--wood-light);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  cursor: help;
+  user-select: none;
+  touch-action: none;
+}
+
+.captain-icon--pickable {
+  cursor: pointer;
+  border-color: var(--gold-dim);
+}
+
+.captain-icon--pickable:hover {
+  border-color: var(--gold);
+}
+
+.captain-icon--selected {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold), 0 0 14px rgba(217, 169, 58, 0.45);
+}
+
+/* Status ribbon across the bottom of the icon. */
+.captain-icon__status {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  padding: 2px 0;
+  border-radius: 3px;
+  background: rgba(20, 15, 11, 0.9);
+  font-size: 8px;
+  text-align: center;
+  color: var(--parchment);
+}
+
+.captain-icon--standby .captain-icon__status { color: var(--parchment-dim); }
+.captain-icon--deployed .captain-icon__status { color: #9cc4f5; }
+.captain-icon--p2.captain-icon--deployed .captain-icon__status { color: #f0a08f; }
+.captain-icon--stationed .captain-icon__status { color: var(--ink); background: var(--gold); }
+.captain-icon--dead .captain-icon__status { color: #e0715f; }
+
+.captain-icon--dead .portrait {
+  filter: grayscale(1) brightness(0.45);
+}
+
+.captain-icon--standby .portrait {
+  filter: grayscale(0.35) brightness(0.85);
+}
+
+/* Press-and-hold details. */
+.captain-details {
+  position: absolute;
+  z-index: 60;
+  display: flex;
+  gap: 14px;
+  width: 400px;
+  padding: 14px;
+  border-radius: 10px;
+  background: rgba(14, 11, 8, 0.97);
+  border: 2px solid var(--gold);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  animation: details-in 140ms ease-out both;
+}
+
+
+.captain-details__info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.captain-details__name {
+  margin: 0;
+  font-size: 12px;
+  color: var(--gold);
+}
+
+.captain-details__line {
+  margin: 0;
+  font-size: 9px;
+  color: var(--parchment-dim);
+}
+
+.captain-details__status {
+  align-self: flex-start;
+  margin: 0;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--wood);
+  font-size: 9px;
+}
+
+.captain-details__status--stationed { background: var(--gold); color: var(--ink); }
+.captain-details__status--dead { color: #e0715f; }
+
+.captain-details__knights {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.captain-details__knight {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 8px;
+}
+
+.captain-details__knight--dead,
+.captain-details__knight--captured {
+  color: #b9776c;
+}
+
+@keyframes details-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}

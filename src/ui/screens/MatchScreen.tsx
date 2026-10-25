@@ -18,6 +18,13 @@ import regionBoardSkin from '../../assets/ui/region-board-skin.webp';
 import regionViewSkin from '../../assets/ui/region-view-skin.webp';
 import './match.css';
 import './skin.css';
+import './wireframe.css';
+
+/**
+ * Board artwork on/off. Off draws the plain wireframe look in the same layout,
+ * for working on adjustments. Set back to true to restore the art.
+ */
+const USE_BOARD_ART = false;
 
 /**
  * Exhibition against the computer: the human plays Player 1 (blue); the
@@ -120,8 +127,14 @@ export function MatchScreen() {
 
   return (
     <div
-      className={`match${focusedRegion !== null ? ' match--zoomed' : ''}${battleOpen ? ' match--battle' : ''}`}
-      style={{ '--skin': `url(${regionBoardSkin})`, '--skin-zoomed': `url(${regionViewSkin})` } as CSSProperties}
+      className={`match${focusedRegion !== null ? ' match--zoomed' : ''}${battleOpen ? ' match--battle' : ''}${
+        USE_BOARD_ART ? '' : ' match--wireframe'
+      }`}
+      style={
+        (USE_BOARD_ART
+          ? { '--skin': `url(${regionBoardSkin})`, '--skin-zoomed': `url(${regionViewSkin})` }
+          : { '--skin': 'none', '--skin-zoomed': 'none' }) as CSSProperties
+      }
     >
       <header className="match__top-bar">
         <button className="top-bar__button" onClick={leave}>

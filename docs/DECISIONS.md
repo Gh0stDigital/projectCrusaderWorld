@@ -56,7 +56,8 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - The match screen uses the owner's 16:9 artwork `src/assets/ui/region-board-skin.webp` (built over the layout wireframe in `design/templates`). Each area (top bar, side panels, Region board, phase window) shows its own slice of it, so the game's boxes sit on the art's frames; the Region board slice zooms with the camera.
 - When zoomed into a Region, the frame, side panels and board switch to the Region view artwork `src/assets/ui/region-view-skin.webp`; its board slice zooms in from the tile. Its board squares are 175×250. The Captain panel shows "In <Region>" on the third header bar, the Captain's name and Lord on the plaques beside the portrait, and militia and reserve on the stats plaque.
 - Battles take place on the field artwork `src/assets/ui/battle-field.webp` (sky, mountains and grass), scaled to cover the battle area.
-- Styles live in `src/ui/screens/skin.css`. Any new skin must keep the wireframe's zone positions and sizes.
+- Styles live in `src/ui/screens/skin.css`.
+- The board art can be switched off (`USE_BOARD_ART` in `MatchScreen.tsx`), which draws a plain wireframe look in the same layout (`wireframe.css`). It is currently off while the layout is being adjusted. Any new skin must keep the wireframe's zone positions and sizes.
 
 ## Region view and turn flow on screen — Settled
 
@@ -65,6 +66,8 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - On the Region board, each tile shows the stationed Captains as small square face portraits (Player 1 left of the name, Player 2 right) and a large 3×3 map where occupied squares show a blue X (Player 1) or a red O (Player 2).
 - The player can zoom out to view the Region board at any time without changing orders, and return to their Region.
 - During a turn, every Lord row except the acting Lord is greyed and darkened in both side panels.
+- Each Lord's two Captains show as small face icons with a status ribbon: Standby (with their Lord), Deployed (in a contested Region), Stationed (holds a Region they secured), Dead (all their staffed Knights killed or captured). Click to choose a Captain when allowed; press and hold to see their card, Lord, status, Region, militia, reserve and Knights.
+- Status is display-only for now. Still open: a Captain returning to Standby after losing a Region, and what being Dead changes in the rules.
 - After End Turn: about 1 second of "orders complete" confirmation, zoom out to the Region board, about 1 second pause, then the next turn's announcement.
 
 ## Project and platform — Settled

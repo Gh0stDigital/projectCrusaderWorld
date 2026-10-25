@@ -1,7 +1,8 @@
-import { actionableCaptains, captainsOf, lordMilitia, playerMilitia, reserveKnights } from '../../engine/queries';
+import { actionableCaptains, captainsOf, lordMilitia, playerMilitia } from '../../engine/queries';
 import type { LordClass, MatchState, PlayerId, RegionIndex } from '../../engine/state';
-import { LORD_TITLES, captainName, lordPersona, PLAYER_NAMES, REGION_NAMES, formatMilitia } from '../../data/names';
+import { LORD_TITLES, lordPersona, PLAYER_NAMES, formatMilitia } from '../../data/names';
 import { LordCard } from '../components/LordCard';
+import { CaptainIcon } from './CaptainIcon';
 import { CompanyView } from './CompanyView';
 import './playerPanel.css';
 
@@ -104,38 +105,16 @@ export function PlayerPanel({
                 {active && <span className="lord-row__badge">Taking this turn</span>}
                 {match.phase === 'turns' && (
                   <ul className="lord-row__captains">
-                    {captainsOf(match, player, lord).map((captain) => {
-                      const label = captainName(captain);
-                      const waiting = reserveKnights(match, captain.id).length;
-                      const where =
-                        captain.region === null
-                          ? 'Ready'
-                          : `${REGION_NAMES[captain.region]}: ${waiting} ready`;
-                      const content = (
-                        <>
-                          <span>{label}</span>
-                          <span className="captain-chip__where">{where}</span>
-                        </>
-                      );
-                      return (
-                        <li key={captain.id}>
-                          {selectable.has(captain.id) ? (
-                            <button
-                              className={`captain-chip captain-chip--pickable${
-                                selectedCaptainId === captain.id ? ' captain-chip--selected' : ''
-                              }`}
-                              onClick={() => onSelectCaptain(captain.id)}
-                            >
-                              {content}
-                            </button>
-                          ) : (
-                            <span className={`captain-chip${captain.region === null ? '' : ' captain-chip--deployed'}`}>
-                              {content}
-                            </span>
-                          )}
-                        </li>
-                      );
-                    })}
+                    {captainsOf(match, player, lord).map((captain) => (
+                      <CaptainIcon
+                        key={captain.id}
+                        match={match}
+                        captain={captain}
+                        pickable={selectable.has(captain.id)}
+                        selected={selectedCaptainId === captain.id}
+                        onPick={() => onSelectCaptain(captain.id)}
+                      />
+                    ))}
                   </ul>
                 )}
               </div>
