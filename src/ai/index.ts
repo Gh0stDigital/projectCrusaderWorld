@@ -1,15 +1,39 @@
 // Computer player. Gets the same information as a human, asks the engine what
-// is legal, and sends normal actions. Only duel choices exist so far.
+// is legal, and sends normal actions. It never looks at the other side's
+// hidden Sergeant choice.
 import type { MatchAction } from '../engine/actions';
-import { availableSergeants, duelRoleOf } from '../engine/queries';
-import type { MatchState, PlayerId } from '../engine/state';
+import {
+  LINES,
+  actingCaptain,
+  actionableCaptains,
+  attackTargets,
+  availableSergeants,
+  canEndTurn,
+  commandOptions,
+  duelRoleOf,
+  knightAt,
+  knightMilitia,
+  legalSquares,
+  reserveKnights,
+} from '../engine/queries';
+import {
+  LORD_CLASSES,
+  otherPlayer,
+  type Knight,
+  type LordClass,
+  type MatchState,
+  type PlayerId,
+  type RegionIndex,
+  type SquareIndex,
+} from '../engine/state';
+
+type Random = () => number;
 
 /**
  * The computer's Sergeant for the current clash, or null when it has nothing
- * to commit. Picks at random among its own available Sergeants; it never looks
- * at the other side's pending choice.
+ * to commit. Picks at random among its own available Sergeants.
  */
-export function chooseSergeant(state: MatchState, player: PlayerId, random = Math.random): MatchAction | null {
+export function chooseSergeant(state: MatchState, player: PlayerId, random: Random = Math.random): MatchAction | null {
   const duel = state.duel;
   if (!duel || duel.outcome) return null;
   const role = duelRoleOf(duel, player);
@@ -18,4 +42,147 @@ export function chooseSergeant(state: MatchState, player: PlayerId, random = Mat
   if (options.length === 0) return null;
   const pick = options[Math.floor(random() * options.length)]!;
   return { type: 'commitSergeant', player, sergeantId: pick.id };
+}
+
+/** A random turn order for the computer's three Lords. */
+export function chooseLordOrder(random: Random = Math.random): LordClass[] {
+  const order = [...LORD_CLASSES];
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [order[i], order[j]] = [order[j]!, order[i]!];
+  }
+  return order;
+}
+
+// --- Board reading ---
+
+/** Who stands on each square of a Region (null for empty). */
+function occupancy(state: MatchState, region: RegionIndex): (PlayerId | null)[] {
+  return [0, 1, 2, 3, 4, 5, 6, 7, 8].map((sq) => knightAt(state, region, sq as SquareIndex)?.owner ?? null);
+}
+
+/** Whether placing `player` on `square` completes a line of three. */
+function completesLine(board: (PlayerId | null)[], square: number, player: PlayerId): boolean {
+  return LINES.some(
+    (line) => line.includes(square as SquareIndex) && line.every((sq) => sq === square || board[sq] === player),
+  );
+}
+
+/** Whether a player has two in a line with the third square empty somewhere in a Region. */
+function threatens(state: MatchState, region: RegionIndex, player: PlayerId): boolean {
+  if (state.secured[region]) return false;
+  const board = occupancy(state, region);
+  return LINES.some(
+    (line) => line.filter((sq) => board[sq] === player).length === 2 && line.some((sq) => board[sq] === null),
+  );
+}
+
+/** How good a square is for the computer to place on. */
+function scoreSquare(state: MatchState, region: RegionIndex, square: SquareIndex, player: PlayerId, random: Random) {
+  const board = occupancy(state, region);
+  const enemy = otherPlayer(player);
+  let score = random() * 2;
+  if (completesLine(board, square, player)) score += 100; // win the Region
+  if (completesLine(board, square, enemy)) score += 50; // block their win
+  // Where this square sends the enemy next turn: avoid Regions they can win.
+  if (threatens(state, square, enemy)) score -= 30;
+  if (state.secured[square]) score -= 5; // a closed Region gives them a free choice
+  if (square === 4) score += 6;
+  else if (square % 2 === 0) score += 3; // corners
+  return score;
+}
+
+function strength(knight: Knight): number {
+  return knightMilitia(knight);
+}
+
+// --- Turn decisions ---
+
+/** Command step: which Captain to deploy (and where) or resume. */
+export function chooseCommand(state: MatchState, random: Random = Math.random): MatchAction | null {
+  const turn = state.turn;
+  if (!turn || turn.step !== 'command') return null;
+  const player = turn.player;
+  const options = commandOptions(state);
+  const captains = actionableCaptains(state);
+  if (captains.length === 0) return null;
+
+  if (options.deployRegions.length > 0) {
+    const captain = captains.find((c) => c.region === null)!;
+    // Prefer Regions the enemy is contesting, then the center, with some variety.
+    const scored = options.deployRegions.map((region) => {
+      const enemyThere = occupancy(state, region).filter((o) => o === otherPlayer(player)).length;
+      return { region, score: enemyThere * 2 + (region === 4 ? 1.5 : 0) + random() * 2 };
+    });
+    scored.sort((a, b) => b.score - a.score);
+    return { type: 'deployCaptain', player, captainId: captain.id, region: scored[0]!.region };
+  }
+
+  // Resume: pick the stationed Captain whose Region offers the best square.
+  const resumable = options.resumeCaptainIds.map((id) => state.captains[id]!);
+  let best = resumable[0]!;
+  let bestScore = -Infinity;
+  for (const c of resumable) {
+    const squares = [0, 1, 2, 3, 4, 5, 6, 7, 8].filter((sq) => !knightAt(state, c.region!, sq as SquareIndex));
+    const top = Math.max(...squares.map((sq) => scoreSquare(state, c.region!, sq as SquareIndex, player, random)));
+    if (top > bestScore) {
+      bestScore = top;
+      best = c;
+    }
+  }
+  return { type: 'resumeCaptain', player, captainId: best.id };
+}
+
+/** Placement step: the strongest waiting Knight on the best square. */
+export function choosePlacement(state: MatchState, random: Random = Math.random): MatchAction | null {
+  const turn = state.turn;
+  const captain = actingCaptain(state);
+  if (!turn || turn.step !== 'placement' || !captain || captain.region === null) return null;
+  const squares = legalSquares(state);
+  const knights = reserveKnights(state, captain.id);
+  if (squares.length === 0 || knights.length === 0) return null;
+  const knight = [...knights].sort((a, b) => strength(b) - strength(a))[0]!;
+  const region = captain.region;
+  const square = [...squares].sort(
+    (a, b) => scoreSquare(state, region, b, turn.player, random) - scoreSquare(state, region, a, turn.player, random),
+  )[0]!;
+  return { type: 'placeKnight', player: turn.player, knightId: knight.id, square };
+}
+
+/** Attack step: attack the weakest adjacent enemy if the odds look fair. */
+export function chooseAttack(state: MatchState): MatchAction | null {
+  const turn = state.turn;
+  if (!turn || turn.step !== 'attack' || !turn.placedKnightId) return null;
+  const attacker = state.knights[turn.placedKnightId]!;
+  const targets = [...attackTargets(state)].sort((a, b) => strength(a) - strength(b));
+  const target = targets[0];
+  if (!target) return null;
+  if (strength(attacker) < strength(target) * 0.9) return null;
+  return { type: 'declareAttack', player: turn.player, targetKnightId: target.id };
+}
+
+/**
+ * The computer's next action as `player`, or null when it is waiting (not its
+ * turn, or a battle needs the other side). Ends its own turns.
+ */
+export function nextComputerAction(state: MatchState, player: PlayerId, random: Random = Math.random): MatchAction | null {
+  if (state.phase === 'lordOrder') {
+    return state.orderingPlayer === player ? { type: 'setLordOrder', player, order: chooseLordOrder(random) } : null;
+  }
+  const turn = state.turn;
+  if (!turn) return null;
+  if (state.duel && !state.duel.outcome) return chooseSergeant(state, player, random);
+  if (turn.player !== player) return null;
+  switch (turn.step) {
+    case 'command':
+      return chooseCommand(state, random) ?? (canEndTurn(state) ? { type: 'endTurn', player } : null);
+    case 'placement':
+      return choosePlacement(state, random);
+    case 'attack':
+      return chooseAttack(state) ?? { type: 'endTurn', player };
+    case 'end':
+      return { type: 'endTurn', player };
+    default:
+      return null;
+  }
 }

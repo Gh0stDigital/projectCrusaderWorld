@@ -1,4 +1,5 @@
-import type { Knight, MatchState } from '../../engine/state';
+import { useState } from 'react';
+import { KNIGHT_HP, type Knight, type MatchState } from '../../engine/state';
 import { PLAYER_NAMES, captainName, knightArt, knightName } from '../../data/names';
 import { sergeantMilitia } from '../../engine/queries';
 import { Card } from '../components/Card';
@@ -9,24 +10,78 @@ interface AttackPreviewProps {
   match: MatchState;
   attacker: Knight;
   defender: Knight;
-  onCancel: () => void;
-  onCommence: () => void;
+  /** attack: the human is attacking. defend: the human is being attacked and may reinforce. */
+  mode?: 'attack' | 'defend';
+  onCancel?: () => void;
+  /** Called when the battle should begin; in defend mode with the reinforcements chosen. */
+  onCommence: (reinforcements: number) => void;
 }
 
-/** Both Knights side by side before the player commits to an attack. */
-export function AttackPreview({ match, attacker, defender, onCancel, onCommence }: AttackPreviewProps) {
+const STEP = 10;
+
+/** Both Knights side by side before a battle, with reinforcements when defending. */
+export function AttackPreview({ match, attacker, defender, mode = 'attack', onCancel, onCommence }: AttackPreviewProps) {
+  const defending = mode === 'defend';
+  const reserve = match.captains[defender.captainId]!.reserve;
+  const [amount, setAmount] = useState(0);
+  const newHp = defender.hp + amount;
+  const over = newHp - KNIGHT_HP;
+
   return (
     <div className="attack-preview" role="dialog" aria-modal="true" aria-labelledby="attack-preview-title">
-      <div className="attack-preview__window">
+      <div className={`attack-preview__window${defending ? ' attack-preview__window--defend' : ''}`}>
         <h2 id="attack-preview-title" className="attack-preview__title">
-          Attack?
+          {defending ? `${PLAYER_NAMES[attacker.owner]} is attacking you! Deploy reinforcements?` : 'Attack?'}
         </h2>
 
         <div className="attack-preview__sides">
-          <KnightSummary match={match} knight={attacker} role="Your Knight" />
+          <KnightSummary match={match} knight={attacker} role={defending ? 'Enemy Knight' : 'Your Knight'} />
           <span className="attack-preview__versus">vs</span>
-          <KnightSummary match={match} knight={defender} role="Enemy Knight" />
+          <KnightSummary
+            match={match}
+            knight={defending ? { ...defender, hp: newHp } : defender}
+            role={defending ? 'Your Knight' : 'Enemy Knight'}
+          />
         </div>
+
+        {defending && (
+          <div className="reinforce">
+            <p className="reinforce__line">
+              {captainName(match.captains[defender.captainId]!)} has <strong>{reserve}</strong> militia in reserve.
+            </p>
+            <div className="reinforce__controls">
+              <button className="btn reinforce__step" onClick={() => setAmount(0)} disabled={amount === 0}>
+                None
+              </button>
+              <button className="btn reinforce__step" onClick={() => setAmount(Math.max(0, amount - STEP))} disabled={amount === 0}>
+                −{STEP}
+              </button>
+              <span className="reinforce__amount">
+                {amount}
+                <span className="reinforce__unit">men</span>
+              </span>
+              <button
+                className="btn reinforce__step"
+                onClick={() => setAmount(Math.min(reserve, amount + STEP))}
+                disabled={amount >= reserve}
+              >
+                +{STEP}
+              </button>
+              <button className="btn reinforce__step" onClick={() => setAmount(reserve)} disabled={amount >= reserve}>
+                All
+              </button>
+            </div>
+            <p className="reinforce__line">
+              {knightName(defender)}: {defender.hp} → <strong>{newHp} HP</strong>
+              {over > 0 && (
+                <span className="reinforce__over">
+                  {' '}
+                  ({over} above normal max of {KNIGHT_HP}; lasts the rest of the game)
+                </span>
+              )}
+            </p>
+          </div>
+        )}
 
         <p className="attack-preview__rules">
           Up to five clashes. Each side secretly sends one Sergeant per clash; the winning tactic deals its men as
@@ -35,12 +90,25 @@ export function AttackPreview({ match, attacker, defender, onCancel, onCommence 
         <TacticLegend />
 
         <div className="attack-preview__actions">
-          <button className="btn" onClick={onCancel}>
-            Cancel
-          </button>
-          <button className="btn btn--primary" onClick={onCommence} autoFocus>
-            Commence attack
-          </button>
+          {defending ? (
+            <>
+              <button className="btn" onClick={() => onCommence(0)}>
+                Fight without reinforcements
+              </button>
+              <button className="btn btn--primary" onClick={() => onCommence(amount)} disabled={amount === 0} autoFocus>
+                Deploy {amount > 0 ? amount : ''} and fight
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="btn" onClick={onCancel}>
+                Cancel
+              </button>
+              <button className="btn btn--primary" onClick={() => onCommence(0)} autoFocus>
+                Commence attack
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

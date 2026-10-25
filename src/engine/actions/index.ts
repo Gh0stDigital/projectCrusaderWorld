@@ -7,5 +7,6 @@ export type MatchAction =
   | { type: 'resumeCaptain'; player: PlayerId; captainId: string }
   | { type: 'placeKnight'; player: PlayerId; knightId: string; square: SquareIndex }
   | { type: 'declareAttack'; player: PlayerId; targetKnightId: string }
+  | { type: 'reinforceKnight'; player: PlayerId; knightId: string; amount: number }
   | { type: 'commitSergeant'; player: PlayerId; sergeantId: string }
   | { type: 'endTurn'; player: PlayerId };

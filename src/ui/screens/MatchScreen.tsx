@@ -20,14 +20,14 @@ import './match.css';
 import './skin.css';
 
 /**
- * Pass-and-play for now: you control both players. The computer opponent
- * comes in a later step.
+ * Exhibition against the computer: the human plays Player 1 (blue); the
+ * computer plays Player 2 (red) and takes its own turns.
  */
 export function MatchScreen() {
   const goTo = useAppStore((s) => s.goTo);
   const store = useMatchStore();
   const { match, selectedCaptainId, selectedKnightId, focusedRegion, busy, notice, error, announcement } = store;
-  const { attackPreviewId, battleOpen, battleSnapshot } = store;
+  const { attackPreviewId, battleOpen, battleSnapshot, defensePromptOpen } = store;
   // During a battle the side panels hold still until the battle screen has shown the result.
   const panelMatch = battleOpen && battleSnapshot ? battleSnapshot : match;
   const [draft, setDraft] = useState<LordClass[]>([]);
@@ -35,6 +35,9 @@ export function MatchScreen() {
   const ordering = match.phase === 'lordOrder' ? match.orderingPlayer : null;
   const turn = match.turn;
   const acting = actingCaptain(match);
+  // The human only acts on their own turn; the computer plays Player 2.
+  const humanTurn = turn?.player === 'p1';
+  const locked = busy || !humanTurn;
 
   // --- Lord order setup ---
   const draftControls = { order: draft, remove: (lord: LordClass) => setDraft(draft.filter((d) => d !== lord)) };
@@ -46,7 +49,7 @@ export function MatchScreen() {
   const selected = selectedCaptainId ? match.captains[selectedCaptainId] : undefined;
   const clickable = new Set<RegionIndex>();
   let regionAction = '';
-  if (turn && !busy) {
+  if (turn && !locked) {
     if (turn.step === 'command' && selected) {
       if (selected.region === null) {
         commandOptions(match).deployRegions.forEach((r) => clickable.add(r));
@@ -62,7 +65,7 @@ export function MatchScreen() {
   }
 
   const clickRegion = (region: RegionIndex) => {
-    if (!turn || busy) return;
+    if (!turn || locked) return;
     if (turn.step === 'command' && selected) {
       if (selected.region === null) {
         store.dispatch({ type: 'deployCaptain', player: turn.player, captainId: selected.id, region });
@@ -77,7 +80,7 @@ export function MatchScreen() {
   // While zoomed into a Region, the side panels show each player's Captain and Knights there.
   const companyControls =
     focusedRegion !== null
-      ? { region: focusedRegion, selectedKnightId, onSelectKnight: (id: string) => !busy && store.selectKnight(id) }
+      ? { region: focusedRegion, selectedKnightId, onSelectKnight: (id: string) => !locked && store.selectKnight(id) }
       : undefined;
 
   const leave = () => {
@@ -110,6 +113,10 @@ export function MatchScreen() {
   const previewAttacker = turn?.placedKnightId ? match.knights[turn.placedKnightId] : undefined;
   const attackPreview =
     previewTarget && previewAttacker ? { attacker: previewAttacker, defender: previewTarget } : null;
+  const incoming =
+    defensePromptOpen && match.duel
+      ? { attacker: match.knights[match.duel.attacker.knightId]!, defender: match.knights[match.duel.defender.knightId]! }
+      : null;
 
   return (
     <div
@@ -128,7 +135,7 @@ export function MatchScreen() {
               : 'Exhibition'}
         </span>
         <span className="top-bar__right">
-          {focusedRegion !== null && !busy && !battleOpen && (
+          {focusedRegion !== null && !locked && !battleOpen && (
             <button className="top-bar__button" onClick={() => store.focusRegion(null)}>
               View Region board
             </button>
@@ -141,7 +148,7 @@ export function MatchScreen() {
         match={panelMatch}
         player="p1"
         selectedCaptainId={selectedCaptainId}
-        onSelectCaptain={(id) => !busy && store.selectCaptain(id)}
+        onSelectCaptain={(id) => !locked && store.selectCaptain(id)}
         draft={ordering === 'p1' ? draftControls : undefined}
         company={companyControls}
         battleHud={battleOpen}
@@ -150,7 +157,9 @@ export function MatchScreen() {
       <BoardStage
         focusedRegion={focusedRegion}
         regionBoard={
-          ordering ? (
+          ordering === 'p2' ? (
+            <div className="enemy-ordering">The enemy is placing their Lords…</div>
+          ) : ordering ? (
             <LordOrderSetup
               player={ordering}
               draft={draft}
@@ -175,10 +184,10 @@ export function MatchScreen() {
             match={match}
             region={region}
             selectedKnightId={selectedKnightId}
-            onChooseTarget={(id) => !busy && store.openAttackPreview(id)}
+            onChooseTarget={(id) => !locked && store.openAttackPreview(id)}
             onPlaceKnight={(square) =>
               turn &&
-              !busy &&
+              !locked &&
               selectedKnightId &&
               store.dispatch({ type: 'placeKnight', player: turn.player, knightId: selectedKnightId, square })
             }
@@ -193,6 +202,15 @@ export function MatchScreen() {
                 defender={attackPreview.defender}
                 onCancel={() => store.openAttackPreview(null)}
                 onCommence={store.commenceAttack}
+              />
+            )}
+            {incoming && (
+              <AttackPreview
+                match={match}
+                attacker={incoming.attacker}
+                defender={incoming.defender}
+                mode="defend"
+                onCommence={store.confirmDefense}
               />
             )}
             {battleOpen && match.duel && turn && (
@@ -213,8 +231,8 @@ export function MatchScreen() {
         match={panelMatch}
         player="p2"
         selectedCaptainId={selectedCaptainId}
-        onSelectCaptain={(id) => !busy && store.selectCaptain(id)}
-        draft={ordering === 'p2' ? draftControls : undefined}
+        onSelectCaptain={(id) => !locked && store.selectCaptain(id)}
+        draft={undefined}
         company={companyControls}
         battleHud={battleOpen}
       />

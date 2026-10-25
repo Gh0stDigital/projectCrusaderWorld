@@ -165,8 +165,8 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
         <div className="hp-bar" aria-hidden="true">
           <div className="hp-bar__fill" style={{ width: `${(hp / maxHp) * 100}%` }} />
         </div>
-        <span>
-          {hp} / {maxHp} HP
+        <span className={hp > KNIGHT_HP ? 'hp--over' : undefined}>
+          {hp} / {KNIGHT_HP} HP{hp > KNIGHT_HP ? ` (+${hp - KNIGHT_HP})` : ''}
         </span>
       </div>
       <div className="battle-hud__label">{picking ? 'Choose a Sergeant' : 'Sergeants'}</div>
@@ -224,7 +224,9 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
             <div className="hp-bar__fill" style={{ width: `${(hp / maxHp) * 100}%` }} />
           </div>
           <span className="combatant__hp">
-            {hp} / {maxHp} HP
+            <span className={hp > KNIGHT_HP ? 'hp--over' : undefined}>
+              {hp} / {KNIGHT_HP} HP{hp > KNIGHT_HP ? ` (+${hp - KNIGHT_HP})` : ''}
+            </span>
             {tookDamage && <span className="combatant__damage">−{current.damage}</span>}
           </span>
         </div>

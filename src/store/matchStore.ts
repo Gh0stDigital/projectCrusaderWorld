@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { MatchAction } from '../engine/actions';
 import type { MatchEvent } from '../engine/events';
 import { applyAction } from '../engine/match';
-import { chooseSergeant } from '../ai';
+import { chooseAttack, chooseCommand, chooseLordOrder, choosePlacement, chooseSergeant } from '../ai';
 import { commandSummary } from '../ui/campaign/commandText';
 import { actionableCaptains, canEndTurn, reserveKnights } from '../engine/queries';
 import { createMatch } from '../engine/setup';
@@ -16,6 +16,11 @@ export interface TurnAnnouncement {
   /** Where the player must (or may) play this turn. */
   task: string;
 }
+
+/** The computer plays Player 2. */
+export const COMPUTER: PlayerId = 'p2';
+/** Pause between the computer's steps, so its turn can be followed. */
+const COMPUTER_STEP_MS = 900;
 
 /** Timing of the end-of-turn sequence, in milliseconds. */
 export const CONFIRM_MS = 1000;
@@ -42,6 +47,8 @@ interface MatchStore {
    * battle plays, so they don't reveal results before the battle screen does.
    */
   battleSnapshot: MatchState | null;
+  /** The computer has attacked the human: the pre-battle window offers reinforcements. */
+  defensePromptOpen: boolean;
   /** "Orders complete" confirmation shown at the end of a turn. */
   notice: { player: PlayerId } | null;
   error: string | null;
@@ -55,6 +62,8 @@ interface MatchStore {
   openAttackPreview: (knightId: string | null) => void;
   commenceAttack: () => void;
   closeBattle: () => void;
+  /** The human, under attack, sends `amount` reserve militia (0 for none) and the battle begins. */
+  confirmDefense: (amount: number) => void;
   dismissAnnouncement: () => void;
   newMatch: () => void;
 }
@@ -70,7 +79,14 @@ const freshScreenState = {
   attackPreviewId: null,
   battleOpen: false,
   battleSnapshot: null,
+  defensePromptOpen: false,
 };
+
+let computerTimer: number | null = null;
+function clearComputer() {
+  if (computerTimer !== null) window.clearTimeout(computerTimer);
+  computerTimer = null;
+}
 
 let sequenceTimers: number[] = [];
 function clearSequence() {
@@ -94,10 +110,11 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
     if (result.events.some((e) => e.type === 'duelStarted' || e.type === 'clashResolved')) {
       const duel = result.state.duel;
       if (duel && !duel.outcome) {
-        const reply = chooseSergeant(result.state, 'p2');
+        const reply = chooseSergeant(result.state, COMPUTER);
         if (reply) get().dispatch(reply);
       }
     }
+    scheduleComputer();
     return true;
   },
 
@@ -144,14 +161,99 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
     }
   },
 
-  closeBattle: () => set({ battleOpen: false, battleSnapshot: null }),
+  closeBattle: () => {
+    set({ battleOpen: false, battleSnapshot: null });
+    scheduleComputer();
+  },
 
-  dismissAnnouncement: () => set({ announcement: null }),
+  confirmDefense: (amount) => {
+    const duel = get().match.duel;
+    if (!duel) return;
+    if (amount > 0) {
+      get().dispatch({ type: 'reinforceKnight', player: duel.defender.player, knightId: duel.defender.knightId, amount });
+    }
+    set({ defensePromptOpen: false, battleOpen: true, battleSnapshot: get().match });
+  },
+
+  dismissAnnouncement: () => {
+    set({ announcement: null });
+    scheduleComputer();
+  },
   newMatch: () => {
     clearSequence();
+    clearComputer();
     set({ match: createMatch(), ...freshScreenState });
   },
 }));
+
+/** Queue the computer's next step, if it isn't already queued. */
+function scheduleComputer() {
+  if (computerTimer !== null) return;
+  computerTimer = window.setTimeout(() => {
+    computerTimer = null;
+    runComputerStep();
+  }, COMPUTER_STEP_MS);
+}
+
+/**
+ * One step of the computer's turn. It waits while anything is on screen for
+ * the human (banner, end-of-turn sequence, battle, reinforcement prompt) and
+ * is queued again whenever the game moves on.
+ */
+function runComputerStep() {
+  const store = useMatchStore.getState();
+  const { match, busy, announcement, battleOpen, defensePromptOpen, focusedRegion } = store;
+  if (busy || announcement || battleOpen || defensePromptOpen) return;
+
+  if (match.phase === 'lordOrder') {
+    if (match.orderingPlayer === COMPUTER) {
+      store.dispatch({ type: 'setLordOrder', player: COMPUTER, order: chooseLordOrder() });
+    }
+    return;
+  }
+
+  const turn = match.turn;
+  if (!turn || turn.player !== COMPUTER) return;
+  if (match.duel && !match.duel.outcome) return;
+
+  switch (turn.step) {
+    case 'command': {
+      const action = chooseCommand(match);
+      if (!action) {
+        store.requestEndTurn();
+        return;
+      }
+      if (store.dispatch(action)) {
+        const captain = useMatchStore.getState().match.captains[(action as { captainId: string }).captainId];
+        if (captain?.region != null) store.focusRegion(captain.region);
+      }
+      return;
+    }
+    case 'placement': {
+      const region = turn.captainId ? match.captains[turn.captainId]?.region : null;
+      if (region != null && focusedRegion !== region) {
+        store.focusRegion(region);
+        scheduleComputer();
+        return;
+      }
+      const action = choosePlacement(match);
+      if (action) store.dispatch(action);
+      return;
+    }
+    case 'attack': {
+      const action = chooseAttack(match);
+      if (action && store.dispatch(action)) {
+        useMatchStore.setState({ defensePromptOpen: true });
+        return;
+      }
+      store.requestEndTurn();
+      return;
+    }
+    case 'end':
+      store.requestEndTurn();
+      return;
+  }
+}
 
 function screenUpdatesFor(state: MatchState, events: MatchEvent[]): Partial<MatchStore> {
   const updates: Partial<MatchStore> = {};

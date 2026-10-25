@@ -154,3 +154,13 @@
 .combatant__sergeants .sergeant-box--pickable:focus-visible {
   transform: skewX(-14deg) translateY(-4px);
 }
+
+/* HP reinforced above a Knight's normal maximum. */
+.hp--over,
+.hp-badge--over {
+  color: var(--gold) !important;
+}
+
+.hp-badge--over {
+  border-color: var(--gold) !important;
+}

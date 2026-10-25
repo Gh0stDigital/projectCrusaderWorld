@@ -49,7 +49,7 @@ export function PhaseWindow({
             key={phase.id}
             className={`phase-list__item phase-list__item--${phase.id}${current === phase.id ? ' phase-list__item--current' : ''}`}
           >
-            {phase.id === 'end' && turn && !busy && !battleOpen ? (
+            {phase.id === 'end' && turn && turn.player === 'p1' && !busy && !battleOpen ? (
               <button className="phase-list__end" onClick={onEndTurn} title="End turn">
                 {phase.label}
               </button>
@@ -64,6 +64,8 @@ export function PhaseWindow({
         <p className="phase-window__instruction">
           {busy
             ? 'Orders complete.'
+            : turn && turn.player !== 'p1' && !battleOpen
+              ? 'The enemy is taking their turn…'
             : battleOpen
               ? match.duel?.outcome
                 ? 'The battle is over. Return to the Region.'
@@ -73,7 +75,7 @@ export function PhaseWindow({
         {error && !busy && <p className="phase-window__error">{error}</p>}
       </div>
 
-      {turn && !busy && !battleOpen && (
+      {turn && turn.player === 'p1' && !busy && !battleOpen && (
         <div className="phase-window__buttons">
           {enterTarget !== null && (
             <button

@@ -122,3 +122,66 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* ---- Defending: reinforcements from the Captain's reserve ---- */
+.attack-preview__window--defend {
+  border-color: #d9583f;
+}
+
+.attack-preview__window--defend .attack-preview__title {
+  color: #f0a08f;
+  font-size: 14px;
+  text-align: center;
+}
+
+.reinforce {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 8px;
+  background: rgba(217, 169, 58, 0.08);
+  border: 1px solid var(--gold-dim);
+}
+
+.reinforce__line {
+  margin: 0;
+  font-size: 10px;
+  text-align: center;
+}
+
+.reinforce__line strong {
+  color: var(--gold);
+  font-weight: normal;
+}
+
+.reinforce__over {
+  color: var(--gold);
+}
+
+.reinforce__controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reinforce__step {
+  padding: 8px 14px;
+  font-size: 10px;
+}
+
+.reinforce__amount {
+  min-width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 22px;
+  color: var(--gold);
+}
+
+.reinforce__unit {
+  font-size: 9px;
+  color: var(--parchment-dim);
+}

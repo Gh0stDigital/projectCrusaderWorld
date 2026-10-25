@@ -42,7 +42,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
   - Once the current Lord has deployed both Captains, routing is ignored and the player chooses one of that Lord's stationed Captains. Their placement still routes the opponent.
   - If the routed Region is closed to them (no room, or nobody able to act), they deploy to any open Region; if none is open, any stationed Captain may act.
   - The routed Region is highlighted on the Region board ("Must play here") and named in the turn banner; each empty square in the Region view shows where it would send the opponent.
-- For now both sides are controlled by the person at the computer (pass-and-play). The computer opponent comes later.
+- Exhibition is against the computer: the human plays Player 1 (blue); the computer plays Player 2 (red).
 
 ## Knight sprite — Settled
 
@@ -138,6 +138,19 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - Clashes are revealed one at a time with pauses (intro, reveal, result) so the information is easy to follow. After the result the player returns to the Region and ends the turn manually.
 - Side panels hold their numbers during a battle and update when the player returns, so they never reveal a result early.
 - During a battle each side panel shows that player's fighting Knight: card, name, HP, and their Sergeants listed below as slanted blocks. The human picks from the left panel. The field shows the two Knight sprites, HP boxes and clash results.
+
+## Computer opponent — Settled
+
+- The computer sets its own Lord order and plays its whole turn by itself at a watchable pace (about a second per step), zooming into the Region it plays in, and ends its own turns.
+- It waits for the human when needed: the reinforcement prompt when it attacks, Sergeant picks, and Return after a battle. The human's controls are locked during its turn.
+- Choices: complete three in a row if possible, block the human's two-in-a-row, avoid routing the human into a Region they can win, prefer center then corners, place its strongest ready Knight, attack the weakest adjacent enemy only when its Knight is at least about 90% as strong. Sergeants are picked at random, committed first, never looking at the human's pick.
+- Not yet: the computer does not reinforce when defending.
+
+## Reinforcements — Settled
+
+- When the human is attacked, the pre-battle window says "<Player> is attacking you! Deploy reinforcements?" and offers militia from the defending Knight's Captain reserve, in steps of 10 up to the whole reserve, or none.
+- Reinforced men join the Knight's HP and may take it above the normal maximum of 50; the window says so, and battle HP shows the bonus in gold (e.g. 70 / 50 HP (+20)). The extra is permanent for the rest of the game (it can be lost in battle; nothing restores it).
+- Only the defender reinforces, only before the first clash. Attackers cannot reinforce (not requested).
 
 ## Battles — Provisional (my choices, open to change)
 

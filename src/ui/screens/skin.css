@@ -586,3 +586,12 @@
   text-align: center;
   line-height: 1.6;
 }
+
+.enemy-ordering {
+  padding: 22px 36px;
+  border-radius: 8px;
+  background: rgba(20, 15, 11, 0.92);
+  border: 2px solid var(--p2);
+  font-size: 14px;
+  color: var(--parchment);
+}
