@@ -69,6 +69,20 @@
   filter: grayscale(0.35) brightness(0.85);
 }
 
+/* Deployed Captains are away from their Lord: greyed out in the Lord's row. */
+.captain-icon--deployed {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.captain-icon--deployed .portrait {
+  filter: grayscale(1) brightness(0.5);
+}
+
+/* Still clearly selectable when the turn lets them act. */
+.captain-icon--deployed.captain-icon--pickable .portrait {
+  filter: grayscale(1) brightness(0.75);
+}
+
 /* Press-and-hold details. */
 .captain-details {
   position: absolute;
