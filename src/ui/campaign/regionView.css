@@ -279,3 +279,16 @@
   .board-piece--killed .knight-sprite,
   .board-piece__x { animation-duration: 1ms; }
 }
+
+/* Knight type on board pieces. */
+.type-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: rgba(20, 15, 11, 0.92);
+  border: 1px solid var(--gold-dim);
+  font-size: 8px;
+  color: var(--gold);
+}

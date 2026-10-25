@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { KNIGHT_HP, type Knight, type MatchState } from '../../engine/state';
-import { PLAYER_NAMES, captainName, knightArt, knightName } from '../../data/names';
+import { PLAYER_NAMES, SUBCLASS_ABILITIES, SUBCLASS_NAMES, captainName, knightArt, knightName } from '../../data/names';
 import { sergeantMilitia } from '../../engine/queries';
 import { Card } from '../components/Card';
 import { SergeantBox, TacticLegend } from '../components/SergeantBox';
@@ -124,6 +124,11 @@ function KnightSummary({ match, knight, role }: { match: MatchState; knight: Kni
         <Card art={knightArt(knight.owner)} size="roster" owner={knight.owner} />
         <div className="knight-summary__info">
           <h3 className="knight-summary__name">{knightName(knight)}</h3>
+          {knight.subclass && (
+            <p className="knight-summary__line knight-summary__type">
+              {SUBCLASS_NAMES[knight.subclass]} · {SUBCLASS_ABILITIES[knight.subclass].name}
+            </p>
+          )}
           <p className="knight-summary__line">{PLAYER_NAMES[knight.owner]}</p>
           <p className="knight-summary__line">{captainName(captain)}</p>
           <p className="knight-summary__hp">

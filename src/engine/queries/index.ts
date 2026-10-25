@@ -208,9 +208,18 @@ export function attackTargets(state: MatchState): Knight[] {
   const attacker = state.knights[turn.placedKnightId];
   if (!attacker?.position) return [];
   const { region, square } = attacker.position;
-  return adjacentSquares(square)
+  // Archers shoot along their row or column at any distance; others strike adjacent squares.
+  const squares = attacker.subclass === 'archers' ? lineSquares(square) : adjacentSquares(square);
+  return squares
     .map((s) => knightAt(state, region, s))
     .filter((k): k is Knight => k !== null && k.owner !== attacker.owner);
+}
+
+/** Every other square in the same row or column. */
+export function lineSquares(square: SquareIndex): SquareIndex[] {
+  const row = Math.floor(square / 3);
+  const col = square % 3;
+  return SQUARES.filter((s) => s !== square && (Math.floor(s / 3) === row || s % 3 === col));
 }
 
 export function canEndTurn(state: MatchState): boolean {

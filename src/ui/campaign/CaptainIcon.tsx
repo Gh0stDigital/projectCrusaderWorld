@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { captainMilitia, knightsOf } from '../../engine/queries';
 import type { Captain, MatchState } from '../../engine/state';
-import { REGION_NAMES, captainArt, captainName, knightPersonalName, lordPersona } from '../../data/names';
+import { REGION_NAMES, SUBCLASS_SHORT, captainArt, captainName, knightPersonalName, lordPersona } from '../../data/names';
 import { Card } from '../components/Card';
 import { Portrait } from '../components/Portrait';
 import './captainIcon.css';
@@ -149,7 +149,10 @@ function CaptainDetails({
         <ul className="captain-details__knights">
           {knights.map((k) => (
             <li key={k.id} className={`captain-details__knight captain-details__knight--${k.status}`}>
-              <span>{knightPersonalName(k)}</span>
+              <span>
+                {knightPersonalName(k)}
+                {k.subclass ? ` (${SUBCLASS_SHORT[k.subclass]})` : ''}
+              </span>
               <span>{k.status === 'dead' ? 'Fallen' : k.status === 'captured' ? 'Captured' : `${k.hp} HP`}</span>
             </li>
           ))}

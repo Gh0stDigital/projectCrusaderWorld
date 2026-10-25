@@ -227,3 +227,21 @@
   from { opacity: 0; transform: scale(0.94); }
   to { opacity: 1; transform: scale(1); }
 }
+
+.battle-results__abilities {
+  margin: 0;
+  padding: 10px 16px;
+  list-style: none;
+  border-radius: 6px;
+  background: rgba(217, 169, 58, 0.1);
+  border: 1px solid var(--gold-dim);
+  font-size: 10px;
+  color: var(--gold);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.knight-summary__type {
+  color: var(--gold) !important;
+}

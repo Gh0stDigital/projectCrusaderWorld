@@ -1,6 +1,6 @@
 import { attackTargets, knightAt, legalSquares } from '../../engine/queries';
 import { KNIGHT_HP, SQUARES, type MatchState, type RegionIndex, type SquareIndex } from '../../engine/state';
-import { PLAYER_NAMES, REGION_NAMES, captainName, knightName, knightPersonalName } from '../../data/names';
+import { PLAYER_NAMES, REGION_NAMES, SUBCLASS_NAMES, captainName, knightName, knightPersonalName } from '../../data/names';
 import { KnightSprite } from '../components/KnightSprite';
 import type { Departure } from '../../store/matchStore';
 import './regionView.css';
@@ -86,6 +86,7 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
                   <KnightSprite owner={knight.owner} width={128} animate title={knightName(knight)} />
                   <span className={`hp-badge${knight.hp > KNIGHT_HP ? ' hp-badge--over' : ''}`}>{knight.hp}</span>
                   <span className="knight-plate">{knightPersonalName(knight)}</span>
+                  {knight.subclass && <span className={`type-badge type-badge--${knight.subclass}`}>{SUBCLASS_NAMES[knight.subclass]}</span>}
                   {isTarget && <span className="attack-marker">Attack</span>}
                 </span>
               )}

@@ -9,6 +9,7 @@ import {
   knightName,
   knightPersonalName,
   lordPersona,
+  SUBCLASS_SHORT,
 } from '../../data/names';
 import { Card } from '../components/Card';
 import { KnightSprite } from '../components/KnightSprite';
@@ -100,7 +101,9 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
                     {knight.status === 'unmanned' ? 'Empty slot' : knightPersonalName(knight)}
                   </span>
                   <span className="knight-token__detail">
-                    {alive ? `${knight.hp} HP${knight.status === 'fielded' ? ' · fld' : ''}` : STATUS_LABEL[knight.status]}
+                    {alive
+                      ? `${knight.hp} HP${knight.subclass ? ` · ${SUBCLASS_SHORT[knight.subclass]}` : knight.status === 'fielded' ? ' · fld' : ''}`
+                      : STATUS_LABEL[knight.status]}
                   </span>
                 </span>
               </button>

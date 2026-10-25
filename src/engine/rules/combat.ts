@@ -1,7 +1,9 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
-import { attackTargets, availableSergeants, duelKnight, duelRoleOf } from '../queries';
+import { adjacentSquares, attackTargets, availableSergeants, duelKnight, duelRoleOf, knightAt } from '../queries';
+import { SECOND_PASS_SHARE } from '../state';
 import type {
+  AftermathEffect,
   Clash,
   ClashPick,
   Duel,
@@ -56,6 +58,7 @@ export function declareAttack(
     pending: { attacker: null, defender: null },
     clashes: [],
     outcome: null,
+    aftermath: [],
   };
 
   let next: MatchState = { ...state, duel, turn: { ...turn, step: 'battle' } };
@@ -108,6 +111,10 @@ function pickFor(state: MatchState, duel: Duel, role: DuelRole): ClashPick | nul
   if (!id) return null;
   const sergeant = duelKnight(state, duel, role).sergeants.find((s) => s.id === id)!;
   return { sergeantId: sergeant.id, tactic: sergeant.tactic, militia: sergeant.militia };
+}
+
+function maxSergeant(knight: Knight): number {
+  return Math.max(0, ...knight.sergeants.map((s) => s.militia));
 }
 
 /** Half a Sergeant's men fall in a tied clash, rounded so at least one is lost. */
@@ -202,21 +209,90 @@ function finishDuel(state: MatchState): { state: MatchState; events: MatchEvent[
 
   let outcome: DuelOutcome = { winner: null, loserFate: null };
   const knights = { ...state.knights };
+  const aftermath: AftermathEffect[] = [];
+  const current: Record<DuelRole, Knight> = { attacker, defender };
+
   if (attacker.hp !== defender.hp) {
     const winner: DuelRole = attacker.hp > defender.hp ? 'attacker' : 'defender';
-    const loser = winner === 'attacker' ? defender : attacker;
+    const loserRole: DuelRole = OTHER[winner];
+    let loser = current[loserRole];
+    let victor = current[winner];
+
+    // Archers: Cover Retreat for a friendly Infantry that lost and is retreating alive.
+    let covered = false;
+    if (loser.subclass === 'infantry' && loser.hp > 0 && loser.position) {
+      const { region, square } = loser.position;
+      const archer = adjacentSquares(square)
+        .map((sq) => knightAt(state, region, sq))
+        .filter((k): k is Knight => k !== null && k.owner === loser.owner && k.subclass === 'archers' && k.sergeants.length > 0)
+        .sort((a, b) => maxSergeant(b) - maxSergeant(a))[0];
+      if (archer) {
+        covered = true;
+        const damage = Math.min(maxSergeant(archer), victor.hp);
+        victor = { ...victor, hp: victor.hp - damage };
+        const victorKilled = victor.hp <= 0;
+        if (victorKilled) victor = { ...victor, status: 'dead', position: null, hp: 0, sergeants: [] };
+        current[winner] = victor;
+        aftermath.push({
+          type: 'coverRetreat',
+          knightId: archer.id,
+          coveredId: loser.id,
+          targetId: victor.id,
+          damage,
+          killed: victorKilled,
+          blockedSecondPass: current[winner].subclass === 'cavalry',
+        });
+      }
+    }
+
+    // Cavalry: Second Pass on a loser who is still alive and retreating (unless covered).
+    if (!covered && victor.subclass === 'cavalry' && victor.hp > 0 && loser.hp > 0) {
+      const damage = Math.min(Math.floor(victor.hp * SECOND_PASS_SHARE), loser.hp);
+      if (damage > 0) {
+        loser = { ...loser, hp: loser.hp - damage };
+        current[loserRole] = loser;
+        aftermath.push({ type: 'secondPass', knightId: victor.id, targetId: loser.id, damage, killed: loser.hp <= 0 });
+      }
+    }
+
     const killed = loser.hp <= 0;
-    knights[loser.id] = killed
+    current[loserRole] = killed
       ? { ...loser, status: 'dead', position: null, hp: 0, sergeants: [] }
       : { ...loser, status: 'ready', position: null };
     outcome = { winner, loserFate: killed ? 'killed' : 'retreated' };
   }
 
+  // Infantry: Regroup. A surviving Knight's Sergeants that tied a clash recover
+  // the men they lost, back to what they had when the duel began.
+  for (const role of ['attacker', 'defender'] as const) {
+    const knight = current[role];
+    if (knight.subclass !== 'infantry' || knight.hp <= 0) continue;
+    const tiedIds = new Set(
+      duel.clashes.filter((c) => c.winner === 'tie').map((c) => c[role]?.sergeantId).filter(Boolean) as string[],
+    );
+    let restored = 0;
+    const sergeantIds: string[] = [];
+    const sergeants = knight.sergeants.map((s) => {
+      const start = duel[role].startSergeants.find((x) => x.id === s.id);
+      if (!tiedIds.has(s.id) || !start || s.militia >= start.militia) return s;
+      restored += start.militia - s.militia;
+      sergeantIds.push(s.id);
+      return { ...s, militia: start.militia };
+    });
+    if (restored > 0) {
+      current[role] = { ...knight, sergeants };
+      aftermath.push({ type: 'regroup', knightId: knight.id, restored, sergeantIds });
+    }
+  }
+
+  knights[attacker.id] = current.attacker;
+  knights[defender.id] = current.defender;
+
   return {
     state: {
       ...state,
       knights,
-      duel: { ...duel, outcome },
+      duel: { ...duel, outcome, aftermath },
       turn: state.turn ? { ...state.turn, step: 'end' } : null,
     },
     events: [{ type: 'duelEnded', outcome, attackerId: attacker.id, defenderId: defender.id }],

@@ -76,6 +76,23 @@ export function BattleResults({ match, duel, myRole, onReturn }: BattleResultsPr
           })}
         </div>
 
+        {duel.aftermath.length > 0 && (
+          <ul className="battle-results__abilities">
+            {duel.aftermath.map((e, i) => {
+              const actor = match.knights[e.knightId]!;
+              return (
+                <li key={i}>
+                  {e.type === 'secondPass'
+                    ? `Second Pass: ${knightName(actor)} struck the retreating ${knightName(match.knights[e.targetId]!)} for ${e.damage}${e.killed ? ', killing them' : ''}.`
+                    : e.type === 'coverRetreat'
+                      ? `Cover Retreat: ${knightName(actor)} covered ${knightName(match.knights[e.coveredId]!)}${e.blockedSecondPass ? ', blocked Second Pass,' : ''} and struck ${knightName(match.knights[e.targetId]!)} for ${e.damage}${e.killed ? ', killing them' : ''}.`
+                      : `Regroup: ${knightName(actor)} recovered ${e.restored} men.`}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
         <div className="attack-preview__actions">
           <button className="btn btn--primary" onClick={onReturn} autoFocus>
             Return to {REGION_NAMES[duel.region]}

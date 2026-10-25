@@ -145,6 +145,16 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - Side panels hold their numbers during a battle and update when the player returns, so they never reveal a result early.
 - During a battle each side panel shows that player's fighting Knight: card, name, HP, and their Sergeants listed below as slanted blocks. The human picks from the left panel. The field shows the two Knight sprites, HP boxes and clash results.
 
+## Knight types: Army — Settled
+
+Each Lord class gives its Knights types. Army effects happen after a battle; Garrison (before) and Raiders (after) come later.
+
+- **Infantry: Regroup.** After a battle the Knight survives (won, tied, or retreating alive), its Sergeants that tied a clash recover the men they lost, back to what they had when the battle began. Automatic.
+- **Cavalry: Second Pass.** After winning while the loser retreats alive, it strikes the loser for half its remaining HP (rounded down). This can kill the retreating Knight. Automatic.
+- **Archers.** Lead 3 Sergeants instead of 5 (the 20 spare militia sit in their Captain's reserve, so each Lord still totals 1,000). Can attack any enemy in the same row or column of the Region, at any distance. **Cover Retreat:** when a friendly Infantry directly next to them loses and retreats alive, they block the enemy's Second Pass and strike the victor for their strongest Sergeant's men; this can kill the victor. Automatic.
+- Provisional choices: Army Knights cycle Infantry, Cavalry, Archers by slot (1–3 and 4–6); all three abilities trigger automatically rather than by prompt.
+- Abilities play out on the battlefield after the last clash ("Second Pass!", "Cover Retreat!", "Regroup") and are listed in the results window. Knight type shows on board pieces, Knight tokens, battle HUD, attack preview and Captain details.
+
 ## Computer opponent — Settled
 
 - The computer sets its own Lord order and plays its whole turn by itself at a watchable pace (about a second per step), zooming into the Region it plays in, and ends its own turns.

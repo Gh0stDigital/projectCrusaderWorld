@@ -30,6 +30,18 @@ export const CAPTAIN_RESERVE = 100;
 export const KNIGHT_HP = 50;
 export const SERGEANT_MILITIA = 10;
 
+/**
+ * Knight types. Army: Infantry (Regroup), Cavalry (Second Pass) and Archers
+ * (ranged attacks, Cover Retreat). Garrison and Raiders types come later.
+ */
+export type KnightSubclass = 'infantry' | 'cavalry' | 'archers';
+
+/** Archer Knights lead fewer Sergeants; the men saved go to their Captain's reserve. */
+export const ARCHER_SERGEANTS = 3;
+
+/** Cavalry's Second Pass deals this share of its remaining HP to a retreating loser. */
+export const SECOND_PASS_SHARE = 0.5;
+
 /** Sergeant tactics. Rush beats Flank, Flank beats Counter, Counter beats Rush. */
 export type Tactic = 'rush' | 'flank' | 'counter';
 export const TACTICS: readonly Tactic[] = ['rush', 'flank', 'counter'];
@@ -75,6 +87,8 @@ export interface Knight {
   hp: number;
   /** Surviving Sergeants. A Sergeant whose militia reaches 0 is removed. */
   sergeants: Sergeant[];
+  /** The Knight's military type, set by their Lord's class. null until that class's types exist. */
+  subclass: KnightSubclass | null;
 }
 
 export interface PlayerState {
@@ -158,7 +172,25 @@ export interface Duel {
   clashes: Clash[];
   /** Set when the duel is over. */
   outcome: DuelOutcome | null;
+  /** Abilities that took effect after the duel, in order. */
+  aftermath: AftermathEffect[];
 }
+
+export type AftermathEffect =
+  /** Infantry: tied Sergeants recover the men they lost in this duel. */
+  | { type: 'regroup'; knightId: string; restored: number; sergeantIds: string[] }
+  /** Cavalry: a parting strike on the retreating loser. */
+  | { type: 'secondPass'; knightId: string; targetId: string; damage: number; killed: boolean }
+  /** Archers: cover a retreating friendly Infantry, blocking Second Pass and striking the victor. */
+  | {
+      type: 'coverRetreat';
+      knightId: string;
+      coveredId: string;
+      targetId: string;
+      damage: number;
+      killed: boolean;
+      blockedSecondPass: boolean;
+    };
 
 export interface MatchState {
   phase: MatchPhase;

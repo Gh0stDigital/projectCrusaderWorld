@@ -1,5 +1,5 @@
 // Display names. Placeholder wording until factions and the Muster screen exist.
-import type { Captain, Knight, LordClass, PlayerId, RegionIndex, Tactic } from '../engine/state';
+import type { Captain, Knight, KnightSubclass, LordClass, PlayerId, RegionIndex, Tactic } from '../engine/state';
 import type { ArtId } from './artCatalog';
 
 export const PLAYER_NAMES: Record<PlayerId, string> = {
@@ -88,6 +88,29 @@ export function captainName(captain: Pick<Captain, 'owner' | 'lord' | 'rank'>): 
 export function captainArt(owner: PlayerId): ArtId {
   return owner === 'p1' ? 'captain' : 'enemyCaptain';
 }
+
+export const SUBCLASS_NAMES: Record<KnightSubclass, string> = {
+  infantry: 'Infantry',
+  cavalry: 'Cavalry',
+  archers: 'Archers',
+};
+
+/** Short label for tight spaces. */
+export const SUBCLASS_SHORT: Record<KnightSubclass, string> = {
+  infantry: 'Inf',
+  cavalry: 'Cav',
+  archers: 'Arc',
+};
+
+/** Each Knight type's ability, with a one-line description. */
+export const SUBCLASS_ABILITIES: Record<KnightSubclass, { name: string; text: string }> = {
+  infantry: { name: 'Regroup', text: 'After a battle it survives, Sergeants that tied a clash recover their lost men.' },
+  cavalry: { name: 'Second Pass', text: 'After winning, strikes the retreating enemy for half its remaining HP.' },
+  archers: {
+    name: 'Cover Retreat',
+    text: 'Attacks along its row or column. When adjacent Infantry retreats, blocks Second Pass and strikes the victor.',
+  },
+};
 
 export const TACTIC_NAMES: Record<Tactic, string> = {
   rush: 'Rush',

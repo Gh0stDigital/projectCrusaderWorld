@@ -1,8 +1,26 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { availableSergeants, duelRoleOf } from '../../engine/queries';
-import { KNIGHT_HP, type Clash, type Duel, type DuelRole, type MatchState, type PlayerId, type Sergeant } from '../../engine/state';
-import { PLAYER_NAMES, REGION_NAMES, TACTIC_NAMES, captainName, knightArt, knightName } from '../../data/names';
+import {
+  KNIGHT_HP,
+  type AftermathEffect,
+  type Clash,
+  type Duel,
+  type DuelRole,
+  type MatchState,
+  type PlayerId,
+  type Sergeant,
+} from '../../engine/state';
+import {
+  PLAYER_NAMES,
+  REGION_NAMES,
+  SUBCLASS_ABILITIES,
+  SUBCLASS_NAMES,
+  TACTIC_NAMES,
+  captainName,
+  knightArt,
+  knightName,
+} from '../../data/names';
 import { Card } from '../components/Card';
 import { BattleResults } from './BattleResults';
 import knightBattle from '../../assets/sprites/knight-battle-anim.png';
@@ -17,7 +35,10 @@ const REVEAL_MS = 1200;
 const RESULT_MS = 1900;
 const CLOSE_MS = 450;
 
-type Phase = 'intro' | 'choose' | 'reveal' | 'result' | 'over';
+type Phase = 'intro' | 'choose' | 'reveal' | 'result' | 'aftermath' | 'over';
+
+/** How long each after-battle ability is shown. */
+const AFTERMATH_MS = 2200;
 
 /** The human always fights as Player 1 (blue); the computer answers for Player 2 (red). */
 const HUMAN: PlayerId = 'p1';
@@ -40,6 +61,7 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
   const [shown, setShown] = useState(0);
   const [phase, setPhase] = useState<Phase>('intro');
   const [closing, setClosing] = useState(false);
+  const [effectIndex, setEffectIndex] = useState(0);
 
   const pendingClash = duel.clashes[shown];
 
@@ -50,7 +72,14 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
     }
     if (phase === 'choose') {
       if (pendingClash) setPhase('reveal');
-      else if (duel.outcome) setPhase('over');
+      else if (duel.outcome) setPhase(duel.aftermath.length > 0 ? 'aftermath' : 'over');
+    }
+    if (phase === 'aftermath') {
+      const t = window.setTimeout(() => {
+        if (effectIndex + 1 < duel.aftermath.length) setEffectIndex(effectIndex + 1);
+        else setPhase('over');
+      }, AFTERMATH_MS);
+      return () => window.clearTimeout(t);
     }
     if (phase === 'reveal') {
       const t = window.setTimeout(() => setPhase('result'), REVEAL_MS);
@@ -63,7 +92,7 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
       }, RESULT_MS);
       return () => window.clearTimeout(t);
     }
-  }, [phase, pendingClash, duel.outcome]);
+  }, [phase, pendingClash, duel.outcome, duel.aftermath.length, effectIndex]);
 
   const close = () => {
     setClosing(true);
@@ -77,18 +106,31 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
   const myRole: DuelRole = duelRoleOf(duel, HUMAN) ?? 'attacker';
   const enemyRole: DuelRole = myRole === 'attacker' ? 'defender' : 'attacker';
   const myOptions = new Set(canChoose ? availableSergeants(match, duel, myRole).map((s) => s.id) : []);
+  // After-battle abilities shown so far, and the one playing now.
+  const effects =
+    phase === 'over' ? duel.aftermath : phase === 'aftermath' ? duel.aftermath.slice(0, effectIndex + 1) : [];
+  const activeEffect = phase === 'aftermath' ? duel.aftermath[effectIndex] : undefined;
 
   return (
     <div className={`battle${closing ? ' battle--closing' : ''}`}>
       <header className="battle__header">
         <span className="battle__where">Battle in {REGION_NAMES[duel.region]}</span>
         <span className="battle__clash">
-          {phase === 'over' ? 'Battle over' : `Clash ${Math.min(shown + 1, 5)}`}
+          {phase === 'over' || phase === 'aftermath' ? 'Battle over' : `Clash ${Math.min(shown + 1, 5)}`}
         </span>
         <TacticLegend />
       </header>
 
-      <Combatant match={match} duel={duel} role={enemyRole} position="top" upTo={upTo} current={current} />
+      <Combatant
+        match={match}
+        duel={duel}
+        role={enemyRole}
+        position="top"
+        upTo={upTo}
+        current={current}
+        effects={effects}
+        activeEffect={activeEffect}
+      />
       <Combatant
         match={match}
         duel={duel}
@@ -96,6 +138,8 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
         position="bottom"
         upTo={upTo}
         current={current}
+        effects={effects}
+        activeEffect={activeEffect}
         options={myOptions}
         onPick={onCommit}
       />
@@ -110,6 +154,7 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
           enemyReady={duel.pending[enemyRole] !== null}
           myRole={myRole}
           onReturn={close}
+          effect={activeEffect}
         />
       </div>
 
@@ -130,6 +175,10 @@ interface CombatantProps {
   current: Clash | undefined;
   options?: Set<string>;
   onPick?: (sergeantId: string) => void;
+  /** After-battle abilities already shown (their HP and Sergeant changes apply). */
+  effects?: AftermathEffect[];
+  /** The ability playing right now, if any. */
+  activeEffect?: AftermathEffect;
 }
 
 /** The element a side panel provides for that player's battle HUD, once it exists. */
@@ -145,18 +194,32 @@ function useHudHost(player: PlayerId): HTMLElement | null {
  * One Knight in the battle: the sprite and HP box on the field, and in that
  * player's side panel their Knight card with the Sergeants listed below it.
  */
-function Combatant({ match, duel, role, position, upTo, current, options, onPick }: CombatantProps) {
+function Combatant({ match, duel, role, position, upTo, current, options, onPick, effects = [], activeEffect }: CombatantProps) {
   const side = duel[role];
   const knight = match.knights[side.knightId]!;
   const captain = match.captains[knight.captainId]!;
   const last = upTo > 0 ? duel.clashes[upTo - 1] : undefined;
-  const hp = last ? last.hpAfter[role] : side.startHp;
-  const alive: Sergeant[] = last ? last.sergeantsAfter[role] : side.startSergeants;
+  let hp = last ? last.hpAfter[role] : side.startHp;
+  let alive: Sergeant[] = last ? last.sergeantsAfter[role] : side.startSergeants;
+  for (const e of effects) {
+    if ((e.type === 'secondPass' || e.type === 'coverRetreat') && e.targetId === side.knightId) hp = Math.max(0, hp - e.damage);
+    if (e.type === 'regroup' && e.knightId === side.knightId) {
+      alive = alive.map((s) =>
+        e.sergeantIds.includes(s.id) ? { ...s, militia: side.startSergeants.find((x) => x.id === s.id)!.militia } : s,
+      );
+    }
+  }
+  const passTarget =
+    (activeEffect?.type === 'secondPass' || activeEffect?.type === 'coverRetreat') && activeEffect.targetId === side.knightId;
+  const passStriker = activeEffect?.type === 'secondPass' && activeEffect.knightId === side.knightId;
+  const regrouping = activeEffect?.type === 'regroup' && activeEffect.knightId === side.knightId;
   const used = new Set(duel.clashes.slice(0, upTo).map((c) => c[role]?.sergeantId));
   const chosenId = current?.[role]?.sergeantId;
   const maxHp = Math.max(KNIGHT_HP, side.startHp);
-  const tookDamage = current && upTo > 0 && current === last && current.winner !== role && current.winner !== 'tie';
-  const struck = current && upTo > 0 && current === last && current.winner === role;
+  const tookDamage =
+    passTarget || (current && upTo > 0 && current === last && current.winner !== role && current.winner !== 'tie');
+  const struck = passStriker || (current && upTo > 0 && current === last && current.winner === role);
+  const hitKey = passTarget ? 'pass' : `${upTo}`;
   const hudHost = useHudHost(side.player);
   const picking = (options?.size ?? 0) > 0;
 
@@ -166,6 +229,11 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
         <Card art={knightArt(side.player)} size="detail" owner={side.player} alt={knightName(knight)} />
       </div>
       <div className="battle-hud__name">{knightName(knight)}</div>
+      {knight.subclass && (
+        <div className="battle-hud__type" title={SUBCLASS_ABILITIES[knight.subclass].text}>
+          {SUBCLASS_NAMES[knight.subclass]} · {SUBCLASS_ABILITIES[knight.subclass].name}
+        </div>
+      )}
       <div className="battle-hud__hp">
         <div className="hp-bar" aria-hidden="true">
           <div className="hp-bar__fill" style={{ width: `${(hp / maxHp) * 100}%` }} />
@@ -205,8 +273,8 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
       <div className="combatant__body">
         <div className={`combatant__card${hp <= 0 ? ' combatant__card--fallen' : ''}`}>
           <div
-            key={tookDamage ? `hit-${upTo}` : struck ? `strike-${upTo}` : 'idle'}
-            className={`combatant__motion${tookDamage ? ' combatant__motion--hit' : ''}${struck ? ' combatant__motion--strike' : ''}`}
+            key={tookDamage ? `hit-${hitKey}` : struck ? `strike-${hitKey}` : 'idle'}
+            className={`combatant__motion${tookDamage ? ' combatant__motion--hit' : ''}${struck ? ' combatant__motion--strike' : ''}${regrouping ? ' combatant__motion--regroup' : ''}`}
           >
             <span
               className="combatant__sprite"
@@ -218,7 +286,7 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
           </div>
         </div>
         <div
-          key={struck ? `strike-info-${upTo}` : 'info'}
+          key={struck ? `strike-info-${hitKey}` : 'info'}
           className={`combatant__info${struck ? ' combatant__info--strike' : ''}`}
         >
           <span className="combatant__name">{knightName(knight)}</span>
@@ -232,7 +300,11 @@ function Combatant({ match, duel, role, position, upTo, current, options, onPick
             <span className={hp > KNIGHT_HP ? 'hp--over' : undefined}>
               {hp} / {KNIGHT_HP} HP{hp > KNIGHT_HP ? ` (+${hp - KNIGHT_HP})` : ''}
             </span>
-            {tookDamage && <span className="combatant__damage">−{current.damage}</span>}
+            {tookDamage && (
+              <span className="combatant__damage">
+                −{passTarget && activeEffect && 'damage' in activeEffect ? activeEffect.damage : current?.damage}
+              </span>
+            )}
           </span>
         </div>
       </div>
@@ -249,9 +321,48 @@ interface CenterPanelProps {
   enemyReady: boolean;
   myRole: DuelRole;
   onReturn: () => void;
+  effect?: AftermathEffect;
 }
 
-function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, myRole }: CenterPanelProps) {
+function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, myRole, effect }: CenterPanelProps) {
+  if (phase === 'aftermath' && effect) {
+    const actor = match.knights[effect.knightId]!;
+    if (effect.type === 'secondPass') {
+      const target = match.knights[effect.targetId]!;
+      return (
+        <div className="battle-msg battle-msg--ability">
+          <span className="battle-msg__ability">Cavalry · Second Pass!</span>
+          <span className="battle-msg__small battle-msg__verdict">
+            {knightName(actor)} rides down the retreating {knightName(target)} for {effect.damage} damage
+            {effect.killed ? `. ${knightName(target)} falls!` : '.'}
+          </span>
+        </div>
+      );
+    }
+    if (effect.type === 'coverRetreat') {
+      const target = match.knights[effect.targetId]!;
+      const covered = match.knights[effect.coveredId]!;
+      return (
+        <div className="battle-msg battle-msg--ability">
+          <span className="battle-msg__ability">Archers · Cover Retreat!</span>
+          <span className="battle-msg__small battle-msg__verdict">
+            {knightName(actor)} covers {knightName(covered)}&rsquo;s retreat
+            {effect.blockedSecondPass ? ', blocking Second Pass,' : ''} and looses on {knightName(target)} for {effect.damage}
+            {effect.killed ? `. ${knightName(target)} falls!` : '.'}
+          </span>
+        </div>
+      );
+    }
+    return (
+      <div className="battle-msg battle-msg--ability">
+        <span className="battle-msg__ability">Infantry · Regroup</span>
+        <span className="battle-msg__small battle-msg__verdict">
+          {knightName(actor)} rallies {effect.restored} men back to {effect.sergeantIds.length === 1 ? 'a Sergeant' : 'their Sergeants'}.
+        </span>
+      </div>
+    );
+  }
+
   const enemyRole: DuelRole = myRole === 'attacker' ? 'defender' : 'attacker';
   const attacker = match.knights[duel.attacker.knightId]!;
   const defender = match.knights[duel.defender.knightId]!;
