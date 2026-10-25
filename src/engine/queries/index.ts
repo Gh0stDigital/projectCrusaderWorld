@@ -107,8 +107,9 @@ export function captainCanAct(state: MatchState, captain: Captain): boolean {
  * - routed: the last placement sends them to `route`. If they already have a
  *   Captain there who can act, that Captain takes the turn; otherwise one of the
  *   current Lord's Ready Captains deploys there.
- * - lordCaptains: the current Lord has no Ready Captain left, so routing is
- *   ignored and they choose one of that Lord's stationed Captains.
+ * - lordCaptains: the current Lord has no Ready Captain left and none of their
+ *   Captains can act in the routed Region, so they choose one of that Lord's
+ *   deployed Captains. (One who can act in the routed Region makes it routed.)
  * - free: no route yet, or the routed Region is closed to them; they deploy a
  *   Ready Captain to any open Region (or, if none is open, resume any Captain).
  */
@@ -132,6 +133,12 @@ export function commandOptions(state: MatchState): CommandOptions {
   const route = state.route;
 
   if (ready.length === 0) {
+    // Both Captains deployed: a route into a Region where one of them can act
+    // is a Fated Move (that Captain must play there). Otherwise the Lord chooses.
+    if (route !== null) {
+      const own = lordCaptains.find((c) => c.region === route && captainCanAct(state, c));
+      if (own) return { mode: 'routed', route, deployRegions: [], resumeCaptainIds: [own.id] };
+    }
     return {
       mode: 'lordCaptains',
       route,

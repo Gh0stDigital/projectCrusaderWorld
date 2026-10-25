@@ -243,7 +243,18 @@ describe('Routing', () => {
     expect(rejected(s, { type: 'resumeCaptain', player: 'p1', captainId: 'p1-raiders-1' })).toMatch(/sent you to/);
   });
 
-  it('ignores routing once the Lord has deployed both Captains: choose either of their Regions', () => {
+  it('makes it a Fated Move when both Captains are deployed and one stands in the routed Region', () => {
+    let s = startedMatch();
+    s.captains['p1-raiders-1'] = { ...s.captains['p1-raiders-1']!, region: 2 };
+    s.captains['p1-raiders-2'] = { ...s.captains['p1-raiders-2']!, region: 6 };
+    s = { ...s, route: 6 };
+    expect(commandOptions(s)).toMatchObject({ mode: 'routed', route: 6, resumeCaptainIds: ['p1-raiders-2'] });
+    expect(moveType(s)).toBe('fated');
+    expect(commandableRegions(s)).toEqual([]);
+    expect(rejected(s, { type: 'resumeCaptain', player: 'p1', captainId: 'p1-raiders-1' })).toBeTruthy();
+  });
+
+  it('otherwise lets a Lord with both Captains deployed choose either of their Regions', () => {
     let s = startedMatch();
     s.captains['p1-raiders-1'] = { ...s.captains['p1-raiders-1']!, region: 2 };
     s.captains['p1-raiders-2'] = { ...s.captains['p1-raiders-2']!, region: 6 };
