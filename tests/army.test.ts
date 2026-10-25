@@ -54,6 +54,11 @@ function clash(s: MatchState, a: number, d: number): MatchState {
 }
 
 describe('Army Knight types', () => {
+  it('lead 5, 4 and 3 Sergeants (Infantry, Cavalry, Archers)', () => {
+    const s = createMatch();
+    expect([1, 2, 3].map((n) => s.knights[`p1-army-1-k${n}`]!.sergeants.length)).toEqual([5, 4, 3]);
+  });
+
   it('cycles Infantry, Cavalry and Archers for Army Knights only', () => {
     const s = createMatch();
     expect(s.knights['p1-army-1-k1']!.subclass).toBe('infantry');
@@ -124,7 +129,7 @@ describe('Archers', () => {
     const { lordMilitia } = await import('../src/engine/queries');
     const s = createMatch();
     expect(s.knights['p1-army-1-k3']!.sergeants).toHaveLength(3);
-    expect(s.captains['p1-army-1']!.reserve).toBe(120);
+    expect(s.captains['p1-army-1']!.reserve).toBe(130); // 100 + 10 (Cavalry) + 20 (Archers)
     expect(lordMilitia(s, 'p1', 'army')).toBe(1000);
   });
 

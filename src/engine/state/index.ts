@@ -52,13 +52,17 @@ export const AMBUSH_COUNT = 2;
 /** Sabotage costs the opponent this much HP after every clash. */
 export const SABOTAGE_DAMAGE = 1;
 
-/** Sergeants each Knight type leads (others lead SERGEANTS_PER_KNIGHT). Spare men go to the Captain's reserve. */
-export const SUBCLASS_SERGEANTS: Partial<Record<KnightSubclass, number>> = {
+/** Most Sergeants each Knight type leads. Spare men (versus SERGEANTS_PER_KNIGHT) go to the Captain's reserve. */
+export const SUBCLASS_SERGEANTS: Record<KnightSubclass, number> = {
+  infantry: 5,
+  cavalry: 4,
   archers: 3,
   gatekeeper: 2,
   watchman: 3,
   warden: 3,
+  skirmisher: 4,
   ambusher: 3,
+  saboteur: 2,
 };
 
 /** Base HP for Knight types that differ from KNIGHT_HP. Gatekeepers Brace: double HP. */

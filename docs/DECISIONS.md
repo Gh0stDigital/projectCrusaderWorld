@@ -145,6 +145,16 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - Side panels hold their numbers during a battle and update when the player returns, so they never reveal a result early.
 - During a battle each side panel shows that player's fighting Knight: card, name, HP, and their Sergeants listed below as slanted blocks. The human picks from the left panel. The field shows the two Knight sprites, HP boxes and clash results.
 
+## Sergeants per Knight type — Settled
+
+| Lord | Type | Sergeants |
+|---|---|---|
+| Army | Infantry / Cavalry / Archers | 5 / 4 / 3 |
+| Garrison | Gatekeeper / Watchman / Warden | 2 / 3 / 3 |
+| Raiders | Skirmisher / Ambusher / Saboteur | 4 / 3 / 2 |
+
+Each Sergeant starts with 10 men. Men a Knight type doesn't use (versus 5 Sergeants and 50 HP) sit in its Captain's reserve, so every Lord still totals 1,000. Starting Captain reserves: Army 130, Garrison 120 (the Gatekeeper's extra HP is paid from it), Raiders 160.
+
 ## Knight types: Army — Settled
 
 Each Lord class gives its Knights types. Army effects happen after a battle; Garrison (before) and Raiders (after) come later.

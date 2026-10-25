@@ -39,11 +39,11 @@ function clash(s: MatchState, a: number, d: number): MatchState {
 }
 
 describe('Raiders Knight types', () => {
-  it('cycle Skirmisher, Ambusher and Saboteur; Ambushers lead 3 Sergeants; still 1,000 per Lord', () => {
+  it('cycle Skirmisher, Ambusher and Saboteur; Sergeants 4 / 3 / 2; still 1,000 per Lord', () => {
     const s = createMatch();
     const k = (n: number) => s.knights[`p1-raiders-1-k${n}`]!;
     expect([k(1).subclass, k(2).subclass, k(3).subclass]).toEqual(['skirmisher', 'ambusher', 'saboteur']);
-    expect([k(1).sergeants.length, k(2).sergeants.length, k(3).sergeants.length]).toEqual([5, 3, 5]);
+    expect([k(1).sergeants.length, k(2).sergeants.length, k(3).sergeants.length]).toEqual([4, 3, 2]);
     expect(lordMilitia(s, 'p1', 'raiders')).toBe(1000);
   });
 });
