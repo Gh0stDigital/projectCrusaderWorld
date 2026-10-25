@@ -4,6 +4,7 @@ import { availableSergeants, duelRoleOf } from '../../engine/queries';
 import { KNIGHT_HP, type Clash, type Duel, type DuelRole, type MatchState, type PlayerId, type Sergeant } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, TACTIC_NAMES, captainName, knightArt, knightName } from '../../data/names';
 import { Card } from '../components/Card';
+import { BattleResults } from './BattleResults';
 import knightBattle from '../../assets/sprites/knight-battle-anim.png';
 import enemyKnightBattle from '../../assets/sprites/enemy-knight-battle-anim.png';
 import { SergeantBox, TacticLegend, type SergeantBoxState } from '../components/SergeantBox';
@@ -111,6 +112,10 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
           onReturn={close}
         />
       </div>
+
+      {phase === 'over' && duel.outcome && (
+        <BattleResults match={match} duel={duel} myRole={myRole} onReturn={close} />
+      )}
     </div>
   );
 }
@@ -246,7 +251,7 @@ interface CenterPanelProps {
   onReturn: () => void;
 }
 
-function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, myRole, onReturn }: CenterPanelProps) {
+function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, myRole }: CenterPanelProps) {
   const enemyRole: DuelRole = myRole === 'attacker' ? 'defender' : 'attacker';
   const attacker = match.knights[duel.attacker.knightId]!;
   const defender = match.knights[duel.defender.knightId]!;
@@ -290,31 +295,7 @@ function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, myRol
     );
   }
 
-  if (phase === 'over' && duel.outcome) {
-    const { winner, loserFate } = duel.outcome;
-    const winnerKnight = winner === 'attacker' ? attacker : winner === 'defender' ? defender : null;
-    const loserKnight = winner === 'attacker' ? defender : winner === 'defender' ? attacker : null;
-    const loserSide = winner === 'attacker' ? duel.defender : duel.attacker;
-    return (
-      <div className="battle-msg battle-msg--over">
-        <span className="battle-msg__big">
-          {winnerKnight
-            ? `${knightName(winnerKnight)} wins!`
-            : 'The battle ends even'}
-        </span>
-        <span className="battle-msg__small">
-          {loserKnight
-            ? loserFate === 'killed'
-              ? `${PLAYER_NAMES[loserSide.player]}’s ${knightName(loserKnight)} has fallen.`
-              : `${PLAYER_NAMES[loserSide.player]}’s ${knightName(loserKnight)} retreats with ${loserKnight.hp} HP.`
-            : 'The defender holds; both Knights keep their squares.'}
-        </span>
-        <button className="btn btn--primary" onClick={onReturn} autoFocus>
-          Return to {REGION_NAMES[duel.region]}
-        </button>
-      </div>
-    );
-  }
+  if (phase === 'over') return null;
 
   return null;
 }

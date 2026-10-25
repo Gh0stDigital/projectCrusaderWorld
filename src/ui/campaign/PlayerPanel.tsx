@@ -80,7 +80,7 @@ export function PlayerPanel({
           const card = <LordCard lord={lord} owner={player} size="roster" position={i + 1} />;
 
           return (
-            <li key={lord} className={`lord-row${active ? ' lord-row--active' : ''}`}>
+            <li key={lord} className={`lord-row${active ? ' lord-row--active' : match.phase === 'turns' && turn ? ' lord-row--resting' : ''}`}>
               {draft ? (
                 <button className="lord-row__draft" onClick={() => draft.remove(lord)} title="Take this Lord back">
                   {card}

@@ -185,3 +185,45 @@
   font-size: 9px;
   color: var(--parchment-dim);
 }
+
+/* ---- Battle results ---- */
+.battle-results {
+  background: rgba(10, 8, 6, 0.55);
+}
+
+.battle-results__window {
+  width: 960px;
+  animation: results-in 300ms ease-out both;
+}
+
+.battle-results__title {
+  font-size: 28px;
+}
+
+.battle-results__window--win { border-color: var(--gold); }
+.battle-results__window--loss { border-color: #b5402d; }
+.battle-results__window--loss .battle-results__title { color: #f0a08f; }
+.battle-results__window--even .battle-results__title { color: var(--parchment); }
+
+.battle-results__verdict {
+  margin: -4px 0 4px;
+  font-size: 11px;
+  color: var(--parchment);
+}
+
+.battle-results__side-wrap {
+  display: contents;
+}
+
+.battle-results__side--won {
+  box-shadow: 0 0 0 2px var(--gold), 0 0 16px rgba(217, 169, 58, 0.35);
+}
+
+.battle-results__fallen .card {
+  filter: grayscale(1) brightness(0.45);
+}
+
+@keyframes results-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}

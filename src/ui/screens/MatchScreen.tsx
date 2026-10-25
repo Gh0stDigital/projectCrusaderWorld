@@ -27,7 +27,7 @@ export function MatchScreen() {
   const goTo = useAppStore((s) => s.goTo);
   const store = useMatchStore();
   const { match, selectedCaptainId, selectedKnightId, focusedRegion, busy, notice, error, announcement } = store;
-  const { attackPreviewId, battleOpen, battleSnapshot, defensePromptOpen } = store;
+  const { attackPreviewId, battleOpen, battleSnapshot, defensePromptOpen, departure } = store;
   // During a battle the side panels hold still until the battle screen has shown the result.
   const panelMatch = battleOpen && battleSnapshot ? battleSnapshot : match;
   const [draft, setDraft] = useState<LordClass[]>([]);
@@ -37,7 +37,7 @@ export function MatchScreen() {
   const acting = actingCaptain(match);
   // The human only acts on their own turn; the computer plays Player 2.
   const humanTurn = turn?.player === 'p1';
-  const locked = busy || !humanTurn;
+  const locked = busy || !humanTurn || departure !== null;
 
   // --- Lord order setup ---
   const draftControls = { order: draft, remove: (lord: LordClass) => setDraft(draft.filter((d) => d !== lord)) };
@@ -185,6 +185,7 @@ export function MatchScreen() {
             region={region}
             selectedKnightId={selectedKnightId}
             onChooseTarget={(id) => !locked && store.openAttackPreview(id)}
+            departure={departure}
             onPlaceKnight={(square) =>
               turn &&
               !locked &&
@@ -243,6 +244,7 @@ export function MatchScreen() {
         focusedRegion={focusedRegion}
         busy={busy}
         battleOpen={battleOpen}
+        departing={departure !== null}
         error={error}
         onEnterRegion={store.focusRegion}
         onEndTurn={store.requestEndTurn}

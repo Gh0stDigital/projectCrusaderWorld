@@ -6,7 +6,7 @@ import { chooseAttack, chooseCommand, chooseLordOrder, choosePlacement, chooseSe
 import { commandSummary } from '../ui/campaign/commandText';
 import { actionableCaptains, canEndTurn, reserveKnights } from '../engine/queries';
 import { createMatch } from '../engine/setup';
-import type { LordClass, MatchState, PlayerId, RegionIndex } from '../engine/state';
+import type { LordClass, MatchState, PlayerId, RegionIndex, SquareIndex } from '../engine/state';
 
 export interface TurnAnnouncement {
   player: PlayerId;
@@ -16,6 +16,18 @@ export interface TurnAnnouncement {
   /** Where the player must (or may) play this turn. */
   task: string;
 }
+
+/** A defeated Knight's piece leaving the board after a battle: shown, then animated away. */
+export interface Departure {
+  knightId: string;
+  owner: PlayerId;
+  region: RegionIndex;
+  square: SquareIndex;
+  fate: 'killed' | 'retreated';
+}
+
+/** How long the loser's piece lingers and then plays its exit, in milliseconds. */
+export const DEPART_MS = 2000;
 
 /** The computer plays Player 2. */
 export const COMPUTER: PlayerId = 'p2';
@@ -47,6 +59,8 @@ interface MatchStore {
    * battle plays, so they don't reveal results before the battle screen does.
    */
   battleSnapshot: MatchState | null;
+  /** The loser of the last battle leaving the board; End turn waits for it. */
+  departure: Departure | null;
   /** The computer has attacked the human: the pre-battle window offers reinforcements. */
   defensePromptOpen: boolean;
   /** "Orders complete" confirmation shown at the end of a turn. */
@@ -80,7 +94,10 @@ const freshScreenState = {
   battleOpen: false,
   battleSnapshot: null,
   defensePromptOpen: false,
+  departure: null,
 };
+
+let departureTimer: number | null = null;
 
 let computerTimer: number | null = null;
 function clearComputer() {
@@ -127,9 +144,9 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
    * pause, then hand over to the next player.
    */
   requestEndTurn: () => {
-    const { match, busy, focusedRegion, battleOpen } = get();
+    const { match, busy, focusedRegion, battleOpen, departure } = get();
     const turn = match.turn;
-    if (busy || battleOpen || !turn) return;
+    if (busy || battleOpen || departure || !turn) return;
     if (!canEndTurn(match)) {
       // Let the engine explain why.
       get().dispatch({ type: 'endTurn', player: turn.player });
@@ -162,8 +179,35 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
   },
 
   closeBattle: () => {
-    set({ battleOpen: false, battleSnapshot: null });
-    scheduleComputer();
+    // The loser's piece stays on its old square for a moment, then retreats or is destroyed.
+    const { match, battleSnapshot } = get();
+    const duel = match.duel;
+    let departure: Departure | null = null;
+    if (duel?.outcome?.winner && duel.outcome.loserFate) {
+      const loserRole = duel.outcome.winner === 'attacker' ? 'defender' : 'attacker';
+      const loserId = duel[loserRole].knightId;
+      const before = (battleSnapshot ?? match).knights[loserId];
+      if (before?.position) {
+        departure = {
+          knightId: loserId,
+          owner: before.owner,
+          region: before.position.region,
+          square: before.position.square,
+          fate: duel.outcome.loserFate,
+        };
+      }
+    }
+    set({ battleOpen: false, battleSnapshot: null, departure });
+    if (departure) {
+      if (departureTimer !== null) window.clearTimeout(departureTimer);
+      departureTimer = window.setTimeout(() => {
+        departureTimer = null;
+        set({ departure: null });
+        scheduleComputer();
+      }, DEPART_MS);
+    } else {
+      scheduleComputer();
+    }
   },
 
   confirmDefense: (amount) => {
@@ -182,6 +226,8 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
   newMatch: () => {
     clearSequence();
     clearComputer();
+    if (departureTimer !== null) window.clearTimeout(departureTimer);
+    departureTimer = null;
     set({ match: createMatch(), ...freshScreenState });
   },
 }));
@@ -202,8 +248,8 @@ function scheduleComputer() {
  */
 function runComputerStep() {
   const store = useMatchStore.getState();
-  const { match, busy, announcement, battleOpen, defensePromptOpen, focusedRegion } = store;
-  if (busy || announcement || battleOpen || defensePromptOpen) return;
+  const { match, busy, announcement, battleOpen, defensePromptOpen, focusedRegion, departure } = store;
+  if (busy || announcement || battleOpen || defensePromptOpen || departure) return;
 
   if (match.phase === 'lordOrder') {
     if (match.orderingPlayer === COMPUTER) {

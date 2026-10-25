@@ -2,6 +2,7 @@ import { attackTargets, knightAt, legalSquares } from '../../engine/queries';
 import { KNIGHT_HP, SQUARES, type MatchState, type RegionIndex, type SquareIndex } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, captainName, knightName, knightPersonalName } from '../../data/names';
 import { KnightSprite } from '../components/KnightSprite';
+import type { Departure } from '../../store/matchStore';
 import './regionView.css';
 
 interface RegionViewProps {
@@ -10,13 +11,15 @@ interface RegionViewProps {
   selectedKnightId: string | null;
   onPlaceKnight: (square: SquareIndex) => void;
   onChooseTarget: (knightId: string) => void;
+  /** A defeated Knight leaving the board, drawn on its old square while it animates away. */
+  departure?: Departure | null;
 }
 
 /**
  * Zoomed-in view of one Region: its 3×3 board fills the center. The Captains
  * and their Knights appear in the side panels while zoomed in.
  */
-export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onChooseTarget }: RegionViewProps) {
+export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onChooseTarget, departure }: RegionViewProps) {
   const turn = match.turn;
   const placingHere =
     turn?.step === 'placement' && turn.captainId !== null && match.captains[turn.captainId]?.region === region;
@@ -60,6 +63,17 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
               onClick={() => (isTarget ? onChooseTarget(knight.id) : onPlaceKnight(square))}
               aria-label={label}
             >
+              {!knight && departure && departure.region === region && departure.square === square && (
+                <span
+                  className={`board-piece board-piece--${departure.owner} board-piece--departing board-piece--${departure.fate}`}
+                  aria-label={departure.fate === 'killed' ? 'Knight destroyed' : 'Knight retreating'}
+                >
+                  <KnightSprite owner={departure.owner} width={128} />
+                  <span className="knight-plate">{knightPersonalName(match.knights[departure.knightId]!)}</span>
+                  {departure.fate === 'killed' && <span className="board-piece__x" aria-hidden="true">✕</span>}
+                  <span className="board-piece__fate">{departure.fate === 'killed' ? 'Destroyed' : 'Retreats'}</span>
+                </span>
+              )}
               {!knight && isLegal && (
                 <span className="route-preview">
                   Sends enemy to

@@ -18,6 +18,8 @@ interface PhaseWindowProps {
   focusedRegion: RegionIndex | null;
   busy: boolean;
   battleOpen: boolean;
+  /** A defeated Knight is leaving the board; End turn waits for it. */
+  departing?: boolean;
   error: string | null;
   onEnterRegion: (region: RegionIndex) => void;
   onEndTurn: () => void;
@@ -29,6 +31,7 @@ export function PhaseWindow({
   focusedRegion,
   busy,
   battleOpen,
+  departing = false,
   error,
   onEnterRegion,
   onEndTurn,
@@ -49,7 +52,7 @@ export function PhaseWindow({
             key={phase.id}
             className={`phase-list__item phase-list__item--${phase.id}${current === phase.id ? ' phase-list__item--current' : ''}`}
           >
-            {phase.id === 'end' && turn && turn.player === 'p1' && !busy && !battleOpen ? (
+            {phase.id === 'end' && turn && turn.player === 'p1' && !busy && !battleOpen && !departing ? (
               <button className="phase-list__end" onClick={onEndTurn} title="End turn">
                 {phase.label}
               </button>
@@ -75,7 +78,7 @@ export function PhaseWindow({
         {error && !busy && <p className="phase-window__error">{error}</p>}
       </div>
 
-      {turn && turn.player === 'p1' && !busy && !battleOpen && (
+      {turn && turn.player === 'p1' && !busy && !battleOpen && !departing && (
         <div className="phase-window__buttons">
           {enterTarget !== null && (
             <button

@@ -199,3 +199,83 @@
 
 .region-view__secured--p1 { box-shadow: 0 0 0 3px rgba(91, 156, 240, 0.7); }
 .region-view__secured--p2 { box-shadow: 0 0 0 3px rgba(226, 96, 79, 0.7); }
+
+/* ---- A defeated Knight leaving the board (DEPART_MS = 2000 in total) ---- */
+.board-piece--departing {
+  pointer-events: none;
+}
+
+.board-piece__fate {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 3px 8px;
+  border-radius: 3px;
+  background: rgba(20, 15, 11, 0.9);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+/* Retreat: holds for a moment, then slides off toward its own side and fades. */
+.board-piece--retreated .board-piece__fate { color: var(--parchment); }
+.board-piece--retreated.board-piece--p1 { --away: -140px; }
+.board-piece--retreated.board-piece--p2 { --away: 140px; }
+
+.board-piece--retreated {
+  animation: piece-retreat 900ms ease-in 1000ms 1 both;
+}
+
+@keyframes piece-retreat {
+  0% { translate: 0 0; opacity: 1; }
+  20% { translate: calc(var(--away) * -0.08) 0; opacity: 1; }
+  100% { translate: var(--away) 0; opacity: 0; }
+}
+
+/* Destroyed: flashes red, a cross strikes it, then it collapses and fades. */
+.board-piece--killed .board-piece__fate { color: #f0a08f; }
+
+.board-piece--killed .knight-sprite {
+  animation: piece-hurt 900ms steps(1, end) 300ms 1 both;
+}
+
+@keyframes piece-hurt {
+  0% { filter: brightness(2) sepia(1) hue-rotate(-40deg) saturate(4); }
+  25% { filter: none; }
+  50% { filter: brightness(2) sepia(1) hue-rotate(-40deg) saturate(4); }
+  75% { filter: grayscale(1) brightness(0.5); }
+  100% { filter: grayscale(1) brightness(0.5); }
+}
+
+.board-piece__x {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 96px;
+  line-height: 1;
+  color: #e2503e;
+  text-shadow: 0 0 8px #000, 0 4px 0 #000;
+  animation: piece-x 300ms ease-out 400ms 1 both;
+}
+
+@keyframes piece-x {
+  from { opacity: 0; transform: scale(2); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.board-piece--killed {
+  animation: piece-collapse 700ms ease-in 1250ms 1 both;
+}
+
+@keyframes piece-collapse {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.4) rotate(-12deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-piece--retreated,
+  .board-piece--killed,
+  .board-piece--killed .knight-sprite,
+  .board-piece__x { animation-duration: 1ms; }
+}
