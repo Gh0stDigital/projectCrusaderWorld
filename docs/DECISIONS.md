@@ -155,7 +155,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 | Garrison | Gatekeeper / Watchman / Warden | 2 / 3 / 3 |
 | Raiders | Skirmisher / Ambusher / Saboteur | 4 / 3 / 2 |
 
-Each Sergeant starts with 10 men. Men a Knight type doesn't use (versus 5 Sergeants and 50 HP) sit in its Captain's reserve, so every Lord still totals 1,000. Starting Captain reserves: Army 130, Garrison 170 (the Gatekeeper's Brace draws 50 of it), Raiders 160.
+Each Sergeant starts with 10 men. Men a Knight type doesn't use (versus 5 Sergeants and 50 HP) sit in its Captain's reserve, so every Lord still totals 1,000. Starting Captain reserves: Army 130, Garrison 170, Raiders 160.
 
 ## Knight types: Army — Settled
 
@@ -171,7 +171,7 @@ Each Lord class gives its Knights types. Army effects happen after a battle; Gar
 
 Garrison effects happen before a battle, when a Garrison Knight is attacked.
 
-- **Gatekeeper: Brace.** Starts at 50 HP with 2 Sergeants. Once per game, in its first battle (attacking or defending), Brace doubles its base HP (+50) before the first clash. The men come from its Captain's reserve (as many as it holds, up to 50), so no militia is created.
+- **Gatekeeper: Brace.** Starts at 50 HP with 2 Sergeants. Once per game, in its first battle (attacking or defending), Brace doubles its HP before the first clash. No men are added or drawn from anywhere: its men fight with the strength of two, so each man is worth 2 HP. Its militia count is half its HP, rounded up, so every 2 HP lost is one man dead. Men sent to reinforce a braced Gatekeeper also count 2 HP each. The Knight stays braced for the rest of the game.
 - **Watchman: Snipe.** 3 Sergeants. When a Gatekeeper it stands directly next to is attacked, or the Watchman itself is attacked while next to a Gatekeeper, it hits the attacker with its strongest Sergeant's men before the first clash. Every Watchman next to an attacked Gatekeeper snipes.
 - **Warden: First Strike.** 3 Sergeants. When attacked, hits the attacker with its strongest Sergeant's men before the first clash.
 - Snipe and First Strike can kill the attacker; the battle then ends at once and the attacker is destroyed. All trigger automatically.

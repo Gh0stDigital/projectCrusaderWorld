@@ -68,7 +68,7 @@ export const SUBCLASS_SERGEANTS: Record<KnightSubclass, number> = {
 /** Base HP for Knight types that differ from KNIGHT_HP (none at the moment). */
 export const SUBCLASS_HP: Partial<Record<KnightSubclass, number>> = {};
 
-/** Gatekeeper Brace: once per game, its first battle doubles its base HP (adds this many). */
+/** Gatekeeper Brace: once per game, its first battle doubles its base HP (men count double, none added). */
 export const BRACE_BONUS = KNIGHT_HP;
 
 /** Cavalry's Second Pass deals this share of its remaining HP to a retreating loser. */

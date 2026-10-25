@@ -24,7 +24,8 @@ export function AttackPreview({ match, attacker, defender, mode = 'attack', onCa
   const defending = mode === 'defend';
   const reserve = match.captains[defender.captainId]!.reserve;
   const [amount, setAmount] = useState(0);
-  const newHp = defender.hp + amount;
+  // A braced Gatekeeper's men are worth 2 HP each, reinforcements included.
+  const newHp = defender.hp + amount * (defender.braced ? 2 : 1);
   const normalMax = normalMaxHp(defender);
   const over = newHp - normalMax;
 

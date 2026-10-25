@@ -78,7 +78,6 @@ export function createMatch(): MatchState {
           const standard = KNIGHT_HP + SERGEANTS_PER_KNIGHT * SERGEANT_MILITIA;
           const actual = baseHp(sub) + sergeantCount(sub) * SERGEANT_MILITIA;
           captains[id]!.reserve += standard - actual;
-          // Gatekeepers' Brace draws its men from here, so it never creates militia.
         }
         for (let number = 1; number <= KNIGHTS_PER_CAPTAIN; number++) {
           const kid = knightId(id, number);

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { applyAction } from '../src/engine/match';
 import { createMatch } from '../src/engine/setup';
-import { lordMilitia } from '../src/engine/queries';
+import { knightHpMen, lordMilitia } from '../src/engine/queries';
 import type { MatchAction } from '../src/engine/actions';
 import type { KnightSubclass, MatchState, SquareIndex } from '../src/engine/state';
 
@@ -104,7 +104,7 @@ describe('Watchman: Snipe', () => {
 });
 
 describe('Gatekeeper: Brace', () => {
-  it('doubles base HP in its first battle, paid from its Captain\u2019s reserve', () => {
+  it('doubles HP in its first battle without adding militia: each man is worth 2 HP', () => {
     let s = arena([{ id: 'p2-garrison-1-k1', square: 4, subclass: 'gatekeeper' }]);
     const reserve = s.captains['p2-garrison-1']!.reserve;
     const total = lordMilitia(s, 'p2', 'garrison');
@@ -112,8 +112,10 @@ describe('Gatekeeper: Brace', () => {
     expect(s.duel!.prelude[0]).toEqual({ type: 'brace', knightId: 'p2-garrison-1-k1', amount: 50 });
     expect(s.knights['p2-garrison-1-k1']).toMatchObject({ hp: 100, braced: true });
     expect(s.duel!.defender.startHp).toBe(100);
-    expect(s.captains['p2-garrison-1']!.reserve).toBe(reserve - 50);
+    expect(s.captains['p2-garrison-1']!.reserve).toBe(reserve);
     expect(lordMilitia(s, 'p2', 'garrison')).toBe(total);
+    // Men are half the HP, rounded up: 97 HP is 49 men.
+    expect(knightHpMen({ hp: 97, braced: true })).toBe(49);
   });
 
   it('is used only once per game', () => {

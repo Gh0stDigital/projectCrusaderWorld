@@ -270,10 +270,15 @@ export function sergeantMilitia(knight: Knight): number {
   return knight.sergeants.reduce((sum, s) => sum + s.militia, 0);
 }
 
-/** Living men in a Knight's company: the Knight's own HP plus their Sergeants' men. */
+/** Men behind a Knight's HP. A braced Gatekeeper's men are worth 2 HP each. */
+export function knightHpMen(knight: Pick<Knight, 'hp' | 'braced'>): number {
+  return knight.braced ? Math.ceil(knight.hp / 2) : knight.hp;
+}
+
+/** Living men in a Knight's company: the men behind the Knight's HP plus their Sergeants' men. */
 export function knightMilitia(knight: Knight): number {
   if (knight.status !== 'ready' && knight.status !== 'fielded') return 0;
-  return knight.hp + sergeantMilitia(knight);
+  return knightHpMen(knight) + sergeantMilitia(knight);
 }
 
 /** A Captain's reserve plus every living Knight under them. */

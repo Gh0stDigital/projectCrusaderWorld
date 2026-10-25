@@ -30,8 +30,12 @@ export function reinforceKnight(
     state: {
       ...state,
       captains: { ...state.captains, [captain.id]: { ...captain, reserve: captain.reserve - amount } },
-      knights: { ...state.knights, [knightId]: { ...knight, hp: knight.hp + amount } },
-      duel: { ...duel, defender: { ...duel.defender, startHp: duel.defender.startHp + amount } },
+      // A braced Gatekeeper's men are worth 2 HP each, reinforcements included.
+      knights: { ...state.knights, [knightId]: { ...knight, hp: knight.hp + amount * (knight.braced ? 2 : 1) } },
+      duel: {
+        ...duel,
+        defender: { ...duel.defender, startHp: duel.defender.startHp + amount * (knight.braced ? 2 : 1) },
+      },
     },
     events: [{ type: 'knightReinforced', player, knightId, captainId: captain.id, amount }],
   };
