@@ -1,8 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { availableSergeants, duelRoleOf } from '../../engine/queries';
+import { availableSergeants, duelRoleOf, normalMaxHp } from '../../engine/queries';
 import {
-  KNIGHT_HP,
   type AftermathEffect,
   type PreludeEffect,
   type Clash,
@@ -26,6 +25,22 @@ import { Card } from '../components/Card';
 import { BattleResults } from './BattleResults';
 import knightBattle from '../../assets/sprites/knight-battle-anim.png';
 import enemyKnightBattle from '../../assets/sprites/enemy-knight-battle-anim.png';
+import crossbowBattle from '../../assets/sprites/crossbow-battle-anim.png';
+import enemyCrossbowBattle from '../../assets/sprites/enemy-crossbow-battle-anim.png';
+
+/** Battle avatars: two-frame strips, sized to their frame shape (width 330, height from the frame). */
+const BATTLE_SPRITES = {
+  sword: { p1: knightBattle, p2: enemyKnightBattle, height: 326 },
+  crossbow: { p1: crossbowBattle, p2: enemyCrossbowBattle, height: Math.round((330 * 703) / 989) },
+} as const;
+const SWORD_HEIGHT = BATTLE_SPRITES.sword.height;
+
+/** Archers use the crossbow avatar; Watchmen and Ambushers too, for now. */
+function battleSprite(subclass: string | null) {
+  return subclass === 'archers' || subclass === 'watchman' || subclass === 'ambusher'
+    ? BATTLE_SPRITES.crossbow
+    : BATTLE_SPRITES.sword;
+}
 import { SergeantBox, TacticLegend, type SergeantBoxState } from '../components/SergeantBox';
 import { TacticIcon } from '../components/TacticIcon';
 import './battleView.css';
@@ -256,7 +271,8 @@ function Combatant({
   const regrouping = activeEffect?.type === 'regroup' && activeEffect.knightId === side.knightId;
   const used = new Set(duel.clashes.slice(0, upTo).map((c) => c[role]?.sergeantId));
   const chosenId = current?.[role]?.sergeantId;
-  const maxHp = Math.max(KNIGHT_HP, side.startHp);
+  const normalMax = normalMaxHp(knight);
+  const maxHp = Math.max(normalMax, side.startHp);
   const tookDamage =
     passTarget || (current && upTo > 0 && current === last && current.winner !== role && current.winner !== 'tie');
   const struck = (activePrelude?.knightId === side.knightId) || passStriker || (current && upTo > 0 && current === last && current.winner === role);
@@ -279,8 +295,8 @@ function Combatant({
         <div className="hp-bar" aria-hidden="true">
           <div className="hp-bar__fill" style={{ width: `${(hp / maxHp) * 100}%` }} />
         </div>
-        <span className={hp > KNIGHT_HP ? 'hp--over' : undefined}>
-          {hp} / {KNIGHT_HP} HP{hp > KNIGHT_HP ? ` (+${hp - KNIGHT_HP})` : ''}
+        <span className={hp > normalMax ? 'hp--over' : undefined}>
+          {hp} / {normalMax} HP{hp > normalMax ? ` (+${hp - normalMax})` : ''}
         </span>
       </div>
       <div className="battle-hud__label">{picking ? 'Choose a Sergeant' : 'Sergeants'}</div>
@@ -322,7 +338,12 @@ function Combatant({
               className="combatant__sprite"
               role="img"
               aria-label={knightName(knight)}
-              style={{ backgroundImage: `url(${side.player === 'p1' ? knightBattle : enemyKnightBattle})` }}
+              style={{
+                backgroundImage: `url(${battleSprite(knight.subclass)[side.player]})`,
+                height: battleSprite(knight.subclass).height,
+                // Shorter avatars keep their feet level with the info box.
+                marginTop: SWORD_HEIGHT - battleSprite(knight.subclass).height,
+              }}
             />
             {tookDamage && <span className="combatant__slash" aria-hidden="true" />}
           </div>
@@ -339,8 +360,8 @@ function Combatant({
             <div className="hp-bar__fill" style={{ width: `${(hp / maxHp) * 100}%` }} />
           </div>
           <span className="combatant__hp">
-            <span className={hp > KNIGHT_HP ? 'hp--over' : undefined}>
-              {hp} / {KNIGHT_HP} HP{hp > KNIGHT_HP ? ` (+${hp - KNIGHT_HP})` : ''}
+            <span className={hp > normalMax ? 'hp--over' : undefined}>
+              {hp} / {normalMax} HP{hp > normalMax ? ` (+${hp - normalMax})` : ''}
             </span>
             {tookDamage && (
               <span className="combatant__damage">

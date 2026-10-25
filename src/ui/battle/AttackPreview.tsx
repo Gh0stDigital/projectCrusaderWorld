@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { KNIGHT_HP, type Knight, type MatchState } from '../../engine/state';
+import type { Knight, MatchState } from '../../engine/state';
 import { PLAYER_NAMES, SUBCLASS_ABILITIES, SUBCLASS_NAMES, captainName, knightArt, knightName } from '../../data/names';
-import { sergeantMilitia } from '../../engine/queries';
+import { normalMaxHp, sergeantMilitia } from '../../engine/queries';
 import { Card } from '../components/Card';
 import { SergeantBox, TacticLegend } from '../components/SergeantBox';
 import './attackPreview.css';
@@ -25,7 +25,8 @@ export function AttackPreview({ match, attacker, defender, mode = 'attack', onCa
   const reserve = match.captains[defender.captainId]!.reserve;
   const [amount, setAmount] = useState(0);
   const newHp = defender.hp + amount;
-  const over = newHp - KNIGHT_HP;
+  const normalMax = normalMaxHp(defender);
+  const over = newHp - normalMax;
 
   return (
     <div className="attack-preview" role="dialog" aria-modal="true" aria-labelledby="attack-preview-title">
@@ -76,7 +77,7 @@ export function AttackPreview({ match, attacker, defender, mode = 'attack', onCa
               {over > 0 && (
                 <span className="reinforce__over">
                   {' '}
-                  ({over} above normal max of {KNIGHT_HP}; lasts the rest of the game)
+                  ({over} above normal max of {normalMax}; lasts the rest of the game)
                 </span>
               )}
             </p>

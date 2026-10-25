@@ -1,4 +1,5 @@
-import { KNIGHT_HP, type Duel, type DuelRole, type MatchState, type Sergeant } from '../../engine/state';
+import { normalMaxHp } from '../../engine/queries';
+import { type Duel, type DuelRole, type MatchState, type Sergeant } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, captainName, knightArt, knightName } from '../../data/names';
 import { Card } from '../components/Card';
 import './attackPreview.css';
@@ -65,7 +66,9 @@ export function BattleResults({ match, duel, myRole, onReturn }: BattleResultsPr
                       <p className="knight-summary__hp">
                         {side.startHp} → {endHp} <span>HP</span>
                       </p>
-                      {endHp > KNIGHT_HP && <p className="knight-summary__line hp--over">+{endHp - KNIGHT_HP} above max</p>}
+                      {endHp > normalMaxHp(knight) && (
+                        <p className="knight-summary__line hp--over">+{endHp - normalMaxHp(knight)} above max</p>
+                      )}
                       <p className="knight-summary__line">Sergeants lost: {sergeantsLost}</p>
                       <p className="knight-summary__line">Militia lost: {menLost}</p>
                     </div>

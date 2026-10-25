@@ -1,7 +1,9 @@
 // Read-only questions about a match. The UI and the computer player use these
 // to know what is legal; the rules use them to validate actions.
 import {
+  KNIGHT_HP,
   REGIONS,
+  SUBCLASS_HP,
   SQUARES,
   type Captain,
   type Duel,
@@ -279,4 +281,9 @@ export function lordMilitia(state: MatchState, player: PlayerId, lord: LordClass
 export function playerMilitia(state: MatchState, player: PlayerId): number {
   const order = state.players[player].lordOrder ?? (['army', 'garrison', 'raiders'] as LordClass[]);
   return order.reduce((sum, lord) => sum + lordMilitia(state, player, lord), 0);
+}
+
+/** A Knight's normal maximum HP: their type's base HP (Gatekeepers Brace to 100), else KNIGHT_HP. */
+export function normalMaxHp(knight: Pick<Knight, 'subclass'>): number {
+  return (knight.subclass && SUBCLASS_HP[knight.subclass]) ?? KNIGHT_HP;
 }
