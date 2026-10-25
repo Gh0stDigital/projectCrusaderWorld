@@ -27,19 +27,26 @@ import knightBattle from '../../assets/sprites/knight-battle-anim.png';
 import enemyKnightBattle from '../../assets/sprites/enemy-knight-battle-anim.png';
 import crossbowBattle from '../../assets/sprites/crossbow-battle-anim.png';
 import enemyCrossbowBattle from '../../assets/sprites/enemy-crossbow-battle-anim.png';
+import lanceBattle from '../../assets/sprites/lance-battle-anim.png';
+import enemyLanceBattle from '../../assets/sprites/enemy-lance-battle-anim.png';
 
 /** Battle avatars: two-frame strips, sized to their frame shape (width 330, height from the frame). */
 const BATTLE_SPRITES = {
   sword: { p1: knightBattle, p2: enemyKnightBattle, height: 326 },
   crossbow: { p1: crossbowBattle, p2: enemyCrossbowBattle, height: Math.round((330 * 703) / 989) },
+  lance: { p1: lanceBattle, p2: enemyLanceBattle, height: Math.round((330 * 717) / 1000) },
 } as const;
 const SWORD_HEIGHT = BATTLE_SPRITES.sword.height;
 
-/** Archers use the crossbow avatar; Watchmen and Ambushers too, for now. */
+/**
+ * Battle avatar by Knight type: crossbow for Archers (and, for now, Watchmen and
+ * Ambushers), lance rider for Cavalry (and, for now, Wardens and Skirmishers),
+ * sword Knight for the rest.
+ */
 function battleSprite(subclass: string | null) {
-  return subclass === 'archers' || subclass === 'watchman' || subclass === 'ambusher'
-    ? BATTLE_SPRITES.crossbow
-    : BATTLE_SPRITES.sword;
+  if (subclass === 'archers' || subclass === 'watchman' || subclass === 'ambusher') return BATTLE_SPRITES.crossbow;
+  if (subclass === 'cavalry' || subclass === 'warden' || subclass === 'skirmisher') return BATTLE_SPRITES.lance;
+  return BATTLE_SPRITES.sword;
 }
 import { SergeantBox, TacticLegend, type SergeantBoxState } from '../components/SergeantBox';
 import { TacticIcon } from '../components/TacticIcon';
