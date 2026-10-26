@@ -14,4 +14,8 @@ export type MatchAction =
   | { type: 'chooseRetreat'; player: PlayerId; retreat: boolean }
   | { type: 'rollDie'; player: PlayerId; value: number }
   | { type: 'finishDecisive'; player: PlayerId }
+  | { type: 'sendReserve'; player: PlayerId; toCaptainId: string; amount: number }
+  | { type: 'sendKnight'; player: PlayerId; knightId: string; toCaptainId: string }
+  | { type: 'assault'; player: PlayerId; region: RegionIndex }
+  | { type: 'stationCaptain'; player: PlayerId; captainId: string | null }
   | { type: 'endTurn'; player: PlayerId };

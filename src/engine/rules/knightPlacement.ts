@@ -156,7 +156,7 @@ function settleOrder(
         ...placed,
         knights,
         captains,
-        secured: { ...placed.secured, [region]: { player, captainId } },
+        secured: { ...placed.secured, [region]: { player, captainId, capturedKnightIds } },
         turn: { ...placed.turn!, step: 'end' },
       },
       events,

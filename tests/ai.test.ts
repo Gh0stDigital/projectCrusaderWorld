@@ -46,7 +46,7 @@ describe('Computer player', () => {
       const random = seeded(seed);
       let s = createMatch();
       let steps = 0;
-      while (steps < 2000 && s.turnNumber < 150) {
+      while (steps < 2000 && s.turnNumber < 150 && s.phase !== 'over') {
         const action = nextComputerAction(s, 'p1', random) ?? nextComputerAction(s, 'p2', random);
         expect(action, `seed ${seed}, turn ${s.turnNumber}, step ${s.turn?.step}`).not.toBeNull();
         s = act(s, action!);
@@ -54,7 +54,7 @@ describe('Computer player', () => {
         // Militia is only ever lost, never created.
         expect(playerMilitia(s, 'p1')).toBeLessThanOrEqual(3000);
       }
-      expect(s.turnNumber).toBeGreaterThan(20);
+      expect(s.turnNumber > 20 || s.phase === 'over').toBe(true);
     }
   });
 });

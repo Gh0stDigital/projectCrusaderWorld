@@ -11,6 +11,7 @@ import {
   type RegionIndex,
 } from '../state';
 import { passTurn } from './turns';
+import { finishAssault } from './stationed';
 
 /**
  * The Region stalemated as `first`'s turn ended: its two Captains fight a
@@ -26,6 +27,8 @@ export function startDecisive(
   const b = captainInRegion(state, region, 'p2')!;
   const men = { p1: captainMilitia(state, a.id), p2: captainMilitia(state, b.id) };
   const decisive: DecisiveBattle = settle({
+    kind: 'stalemate',
+    fromRegion: null,
     region,
     first,
     captains: { p1: a.id, p2: b.id },
@@ -42,7 +45,7 @@ export function startDecisive(
 }
 
 /** Sets the outcome once a side is wiped out or every roll is used. */
-function settle(d: DecisiveBattle): DecisiveBattle {
+export function settle(d: DecisiveBattle): DecisiveBattle {
   if (d.outcome) return d;
   for (const p of ['p1', 'p2'] as const) {
     if (d.men[p] <= 0) return { ...d, outcome: { winner: otherPlayer(p), loserKilled: true } };
@@ -108,6 +111,10 @@ export function finishDecisive(state: MatchState, player: PlayerId): EngineResul
     (hasMen ? returnedCaptainIds : fallenCaptainIds).push(c.id);
   };
 
+  if (d.kind === 'assault') {
+    return finishAssault(state, player, d, knights, captains);
+  }
+
   let secured = state.secured;
   let closed = state.closed;
   if (winner) {
@@ -130,7 +137,7 @@ export function finishDecisive(state: MatchState, player: PlayerId): EngineResul
       }
       sendHome(loser);
     }
-    secured = { ...secured, [d.region]: { player: winner, captainId: d.captains[winner] } };
+    secured = { ...secured, [d.region]: { player: winner, captainId: d.captains[winner], capturedKnightIds } };
   } else {
     closed = [...closed, d.region];
     sendHome('p1');
@@ -176,7 +183,7 @@ export function spread(pools: number[], loss: number): number[] {
 }
 
 /** Takes `loss` men from a Knight's HP and Sergeants evenly. It only dies if every man is gone. */
-function takeLosses(knight: Knight, loss: number): Knight {
+export function takeLosses(knight: Knight, loss: number): Knight {
   if (loss <= 0) return knight;
   const hpMen = knightHpMen(knight);
   const total = hpMen + knight.sergeants.reduce((n, s) => n + s.militia, 0);

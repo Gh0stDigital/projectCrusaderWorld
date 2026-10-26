@@ -1,0 +1,68 @@
+/* Orders window for a Captain holding a secured Region. */
+.station {
+  width: 920px;
+}
+
+.station__lead {
+  margin: 0 0 14px;
+  font-size: 11px;
+  text-align: center;
+  color: var(--parchment-dim);
+}
+
+.station__section {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.station__heading {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--gold);
+}
+
+.station__choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.station__choice--on {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold);
+}
+
+.station__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.station__label {
+  min-width: 150px;
+  font-size: 10px;
+}
+
+.station__select {
+  flex: 1;
+  padding: 8px;
+  border-radius: 4px;
+  border: 2px solid var(--wood-light);
+  background: rgba(20, 15, 11, 0.95);
+  color: var(--parchment);
+  font-family: inherit;
+  font-size: 10px;
+}
+
+.station__assault {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  font-size: 10px;
+  text-align: left;
+  border-color: #e2604f;
+}

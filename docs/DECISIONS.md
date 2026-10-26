@@ -224,6 +224,19 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 - **Level:** nobody secures the Region; it closes (no more deployments or placements) and both Captains return to their Lords. Their Knights on the board stay there.
 - The human rolls with a button; the computer rolls on its own. The screen is a battlefield with each side's group avatar (lance rider, crossbowman and swordsman together), men bars, rolls left, and the die.
 
+## Secured Regions: stationed Captains and winning — Settled
+
+- **Winning the match:** three secured Regions in a row, column or diagonal on the big board. Checked whenever a turn passes; the match then ends with a Victory or Defeat window.
+- **Adjacent Regions** are directly up, down, left or right (no diagonals).
+- A Captain holding a secured Region (stationed) can be chosen on a Free Choice (not on a Fated Move). Its turn is one order:
+  - **Send reserve** (the player picks the amount, in steps of 10) to one of their own Captains (any Lord) deployed in an adjacent, unsecured Region. It joins that Captain's reserve.
+  - **Send one Knight** (waiting, or lifted off the secured board) to such a Captain. It joins them, waiting to be placed, and lives or dies under them by the usual rules.
+  - **Assault** an adjacent Region held by the enemy (with its Captain there): a decisive battle between the two Captains with all their men. Each side rolls once per Knight on its own Region's board; the attacker rolls first. Losses spread as in other decisive battles.
+- **Assault won:** the defender's Knights on that board are captured and their Captain returns to their Lord (or dies at 0 men). The attacker's Knights the enemy had captured there are freed and rejoin their own Captain. If that Captain is alive and on Standby, they take the Region with those Knights. Otherwise the player stations a Standby Captain who still has a Knight (freed Knights whose Captain has fallen join them). With no such Captain, the Region empties and reopens.
+- **Assault lost or level:** only men are lost (at 0 men the attacker dies); both Regions stay as they were.
+- Each secured Region records the enemy Knights captured there, so they can be freed later.
+- The computer assaults when it has at least 1.3× the defender's men; otherwise it sends its reserve (or a Knight) next door. After winning an assault it stations its first eligible Captain.
+
 ## Battles — Provisional (my choices, open to change)
 
 1. Rush beats Flank, Flank beats Counter, Counter beats Rush.

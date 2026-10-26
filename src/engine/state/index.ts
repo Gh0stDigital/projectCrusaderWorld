@@ -141,7 +141,7 @@ export interface PlayerState {
  * - lordOrder: players are placing their Lords in turn order, one player at a time.
  * - turns: normal alternating turns.
  */
-export type MatchPhase = 'lordOrder' | 'turns';
+export type MatchPhase = 'lordOrder' | 'turns' | 'over';
 
 /**
  * Step within a turn:
@@ -153,7 +153,7 @@ export type MatchPhase = 'lordOrder' | 'turns';
  * - decisive: the Region stalemated as the turn ended; its Captains fight a decisive battle
  * - end: orders are done; waiting for End Turn
  */
-export type TurnStep = 'command' | 'orders' | 'battle' | 'decisive' | 'end';
+export type TurnStep = 'command' | 'orders' | 'battle' | 'decisive' | 'station' | 'end';
 
 export interface TurnState {
   player: PlayerId;
@@ -168,6 +168,8 @@ export interface TurnState {
   attacked: boolean;
   /** The Knight moved this turn instead of a placement, if any. */
   movedKnightId: string | null;
+  /** A stationed Captain gave its one order this turn (sent men or launched an assault). */
+  stationOrder: boolean;
   /** What the board looked like before this turn's placement or move, while it can still be undone. */
   undo: {
     knights: Record<string, Knight>;
@@ -284,6 +286,17 @@ export interface MatchState {
   closed: RegionIndex[];
   /** The decisive battle being fought, if any. Cleared when the turn passes. */
   decisive: DecisiveBattle | null;
+  /** After winning an assault: the Region needs a Captain stationed there (the player picks a Standby one). */
+  pendingStation: {
+    region: RegionIndex;
+    player: PlayerId;
+    /** Freed Knights whose own Captain has fallen: they join the Captain stationed there. */
+    orphanKnightIds: string[];
+    /** Enemy Knights captured in the assault, recorded on the Region once it is held. */
+    capturedKnightIds: string[];
+  } | null;
+  /** Whoever secured three Regions in a row. Set when the match ends. */
+  winner: PlayerId | null;
 }
 
 /** Each roll does (roller's men × die) ÷ 10 damage, rounded down. */
@@ -301,7 +314,12 @@ export interface DecisiveRoll {
  * whose turn ended first). Most men left wins; at 0 the Captain dies.
  */
 export interface DecisiveBattle {
+  /** stalemate: a full Region's two Captains. assault: a stationed Captain attacks an adjacent enemy-held Region. */
+  kind: 'stalemate' | 'assault';
+  /** The Region fought over (for an assault: the enemy-held one under attack). */
   region: RegionIndex;
+  /** For an assault: the attacking Captain's own secured Region. */
+  fromRegion: RegionIndex | null;
   /** Who rolls first. */
   first: PlayerId;
   captains: Record<PlayerId, string>;
@@ -317,6 +335,8 @@ export interface DecisiveBattle {
 export interface SecuredRegion {
   player: PlayerId;
   captainId: string;
+  /** Enemy Knights captured when it was taken; freed if the enemy wins it back. */
+  capturedKnightIds: string[];
 }
 
 export function otherPlayer(player: PlayerId): PlayerId {

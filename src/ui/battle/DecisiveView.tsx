@@ -74,7 +74,9 @@ export function DecisiveView({ match, decisive, onRoll, onReturn }: DecisiveView
   return (
     <div className={`battle decisive${closing ? ' battle--closing' : ''}`}>
       <header className="battle__header">
-        <span className="battle__where">Decisive battle in {REGION_NAMES[decisive.region]}</span>
+        <span className="battle__where">
+          {decisive.kind === 'assault' ? 'Assault on' : 'Decisive battle in'} {REGION_NAMES[decisive.region]}
+        </span>
         <span className="battle__clash">
           {over ? 'Battle over' : `Roll ${Math.min(decisive.rolls.length + (rolling ? 0 : 1), decisive.chances.p1 + decisive.chances.p2)} of ${decisive.chances.p1 + decisive.chances.p2}`}
         </span>
@@ -86,7 +88,7 @@ export function DecisiveView({ match, decisive, onRoll, onReturn }: DecisiveView
 
       <div className="decisive__center">
         {intro ? (
-          <p className="decisive__banner">Stalemate! Decisive battle</p>
+          <p className="decisive__banner">{decisive.kind === 'assault' ? 'Assault!' : 'Stalemate! Decisive battle'}</p>
         ) : (
           <>
             <Die value={rolling ? tumble : (last?.value ?? 6)} rolling={rolling} blank={!last && !rolling} />
@@ -172,7 +174,24 @@ function Results({ match, decisive, onReturn }: { match: MatchState; decisive: D
   const title = winner === null ? 'Stalemate holds' : winner === HUMAN ? 'Victory!' : 'Defeat';
   const where = REGION_NAMES[decisive.region];
   const loser: PlayerId | null = winner === null ? null : winner === 'p1' ? 'p2' : 'p1';
-  const lines =
+  const attacker = decisive.first;
+  const defender: PlayerId = attacker === 'p1' ? 'p2' : 'p1';
+  const name = (p: PlayerId) => captainName(match.captains[decisive.captains[p]]!);
+  const assaultLines =
+    winner === null
+      ? [`Neither side breaks. ${where} stays as it was.`]
+      : winner === attacker
+        ? [
+            `${PLAYER_NAMES[attacker]} takes ${where}. Any of their Knights captured there are freed.`,
+            loserKilled
+              ? `${name(defender)} has fallen with all their men.`
+              : `${PLAYER_NAMES[defender]}'s Knights there are captured; ${name(defender)} returns to their Lord.`,
+          ]
+        : [
+            `${name(defender)} holds ${where}. The attackers fall back with their losses.`,
+            ...(loserKilled ? [`${name(attacker)} has fallen with all their men.`] : []),
+          ];
+  const lines = decisive.kind === 'assault' ? assaultLines :
     winner === null || loser === null
       ? [`Both sides end with ${decisive.men.p1} men. Nobody holds ${where}; it closes and both Captains return to their Lords.`]
       : [

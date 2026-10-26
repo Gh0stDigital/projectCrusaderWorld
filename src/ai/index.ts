@@ -17,7 +17,13 @@ import {
   reserveKnights,
   retreatDecider,
   attackers,
+  assaultTargets,
+  captainMilitia,
   decisiveRoller,
+  sendTargets,
+  sendableKnights,
+  stationCandidates,
+  stationedOrdersOpen,
   moveSquares,
   movers,
 } from '../engine/queries';
@@ -185,6 +191,35 @@ export function chooseMove(state: MatchState, random: Random = Math.random): Mat
   return best ? { type: 'moveKnight', player: turn.player, knightId: best.knightId, square: best.square } : null;
 }
 
+/**
+ * A stationed Captain's one order: assault a neighbour when clearly stronger,
+ * otherwise send reserve (or a Knight) to a Captain next door. If it can only
+ * assault, it does.
+ */
+export function chooseStationOrder(state: MatchState): MatchAction | null {
+  const captain = stationedOrdersOpen(state);
+  const turn = state.turn;
+  if (!captain || !turn) return null;
+  const player = turn.player;
+  const mine = captainMilitia(state, captain.id);
+  const targets = assaultTargets(state, captain);
+  const strongest = targets.find((r) => mine >= captainMilitia(state, state.secured[r]!.captainId) * 1.3);
+  if (strongest !== undefined) return { type: 'assault', player, region: strongest };
+  const to = sendTargets(state, captain)[0];
+  if (to && captain.reserve >= 10) return { type: 'sendReserve', player, toCaptainId: to.id, amount: captain.reserve };
+  const knight = sendableKnights(state, captain).sort((a, b) => (a.status === 'ready' ? -1 : 1) - (b.status === 'ready' ? -1 : 1))[0];
+  if (to && knight) return { type: 'sendKnight', player, knightId: knight.id, toCaptainId: to.id };
+  if (to && captain.reserve > 0) return { type: 'sendReserve', player, toCaptainId: to.id, amount: captain.reserve };
+  return targets[0] !== undefined ? { type: 'assault', player, region: targets[0] } : null;
+}
+
+/** After winning an assault: station the first Standby Captain who still has a Knight. */
+export function chooseStation(state: MatchState, player: PlayerId): MatchAction | null {
+  if (state.pendingStation?.player !== player) return null;
+  const captain = stationCandidates(state, player)[0];
+  return captain ? { type: 'stationCaptain', player, captainId: captain.id } : null;
+}
+
 /** Decisive battle: roll when it is this player's roll; the player whose turn it is closes it once it is over. */
 export function chooseDecisive(state: MatchState, player: PlayerId, random: Random = Math.random): MatchAction | null {
   const d = state.decisive;
@@ -217,12 +252,15 @@ export function nextComputerAction(state: MatchState, player: PlayerId, random: 
   if (!turn) return null;
   if (state.duel && !state.duel.outcome) return chooseSergeant(state, player, random);
   if (retreatDecider(state)) return chooseRetreat(state, player);
+  if (state.phase === 'over') return null;
   if (state.decisive) return chooseDecisive(state, player, random);
+  if (state.pendingStation) return chooseStation(state, player);
   if (turn.player !== player) return null;
   switch (turn.step) {
     case 'command':
       return chooseCommand(state, random) ?? (canEndTurn(state) ? { type: 'endTurn', player } : null);
     case 'orders':
+      if (stationedOrdersOpen(state)) return chooseStationOrder(state);
       return (
         choosePlacement(state, random) ??
         chooseAttack(state) ??

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { MatchAction } from '../engine/actions';
 import type { MatchEvent } from '../engine/events';
 import { applyAction } from '../engine/match';
-import { chooseAttack, chooseCommand, chooseLordOrder, choosePlacement, chooseSergeant, chooseRetreat as chooseComputerRetreat, chooseMove } from '../ai';
+import { chooseAttack, chooseCommand, chooseLordOrder, choosePlacement, chooseSergeant, chooseRetreat as chooseComputerRetreat, chooseMove, chooseStation, chooseStationOrder } from '../ai';
 import { commandSummary } from '../ui/campaign/commandText';
 import {
   actingCaptain,
@@ -13,6 +13,7 @@ import {
   decisiveRoller,
   reserveKnights,
   retreatDecider,
+  stationedOrdersOpen,
 } from '../engine/queries';
 import { createMatch } from '../engine/setup';
 import type { LordClass, MatchState, PlayerId, RegionIndex, SquareIndex } from '../engine/state';
@@ -348,6 +349,12 @@ function runComputerStep() {
         scheduleComputer();
         return;
       }
+      if (stationedOrdersOpen(match)) {
+        const order = chooseStationOrder(match);
+        if (order) store.dispatch(order);
+        else store.requestEndTurn();
+        return;
+      }
       const placement = choosePlacement(match);
       if (placement) {
         store.dispatch(placement);
@@ -367,6 +374,11 @@ function runComputerStep() {
         return;
       }
       store.requestEndTurn();
+      return;
+    }
+    case 'station': {
+      const action = chooseStation(match, COMPUTER);
+      if (action) store.dispatch(action);
       return;
     }
     case 'end':

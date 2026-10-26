@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { useAppStore } from '../../store/appStore';
 import { useMatchStore } from '../../store/matchStore';
-import { actingCaptain, actionableCaptains, commandOptions, commandableRegions } from '../../engine/queries';
+import { actingCaptain, actionableCaptains, commandOptions, commandableRegions, stationedOrdersOpen } from '../../engine/queries';
 import type { LordClass, RegionIndex } from '../../engine/state';
 import { LORD_NAMES, PLAYER_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
 import { PlayerPanel } from '../campaign/PlayerPanel';
@@ -15,6 +15,7 @@ import { OrdersNotice } from '../overlays/OrdersNotice';
 import { AttackPreview } from '../battle/AttackPreview';
 import { BattleView } from '../battle/BattleView';
 import { DecisiveView } from '../battle/DecisiveView';
+import { MatchOver, StationOrders, StationPrompt } from '../campaign/StationOrders';
 import regionBoardSkin from '../../assets/ui/region-board-skin.webp';
 import regionViewSkin from '../../assets/ui/region-view-skin.webp';
 import './match.css';
@@ -45,7 +46,7 @@ export function MatchScreen() {
   const acting = actingCaptain(match);
   // The human only acts on their own turn; the computer plays Player 2.
   const humanTurn = turn?.player === 'p1';
-  const locked = busy || !humanTurn || departure !== null;
+  const locked = busy || !humanTurn || departure !== null || match.phase === 'over';
 
   // --- Lord order setup ---
   const draftControls = { order: draft, remove: (lord: LordClass) => setDraft(draft.filter((d) => d !== lord)) };
@@ -259,6 +260,24 @@ export function MatchScreen() {
                 onRoll={store.rollDecisive}
                 onReturn={store.closeDecisive}
               />
+            )}
+            {turn && !locked && !battleOpen && !store.decisiveOpen && stationedOrdersOpen(match) && (
+              <StationOrders
+                match={match}
+                captain={stationedOrdersOpen(match)!}
+                onSendReserve={(toCaptainId, amount) => store.dispatch({ type: 'sendReserve', player: 'p1', toCaptainId, amount })}
+                onSendKnight={(knightId, toCaptainId) => store.dispatch({ type: 'sendKnight', player: 'p1', knightId, toCaptainId })}
+                onAssault={(region) => store.dispatch({ type: 'assault', player: 'p1', region: region as RegionIndex })}
+              />
+            )}
+            {match.pendingStation?.player === 'p1' && !store.decisiveOpen && (
+              <StationPrompt
+                match={match}
+                onStation={(captainId) => store.dispatch({ type: 'stationCaptain', player: 'p1', captainId })}
+              />
+            )}
+            {match.phase === 'over' && match.winner && !store.decisiveOpen && !battleOpen && (
+              <MatchOver winner={match.winner} onMenu={leave} />
             )}
             {notice && <OrdersNotice player={notice.player} detail={noticeDetail} />}
             {announcement && <TurnAnnouncement announcement={announcement} onDone={store.dismissAnnouncement} />}

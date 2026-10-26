@@ -100,6 +100,7 @@ export function captainCanAct(state: MatchState, captain: Captain): boolean {
   if (captain.region === null) {
     return reserveKnights(state, captain.id).length > 0 && regionsOpenTo(state, captain.owner).length > 0;
   }
+  if (isStationed(state, captain)) return stationedCanAct(state, captain);
   return captainCanPlace(state, captain) || captainAttackers(state, captain).length > 0 || captainMovers(state, captain).length > 0;
 }
 
@@ -214,7 +215,12 @@ export function commandOptions(state: MatchState): CommandOptions {
       // it becomes a must-play-here.
       const elsewhere = regionsOpenTo(state, player);
       if (elsewhere.length > 0) {
-        return { mode: 'free', route, deployRegions: elsewhere, resumeCaptainIds: [stationed.id] };
+        return {
+          mode: 'free',
+          route,
+          deployRegions: elsewhere,
+          resumeCaptainIds: [stationed.id, ...stationedOf(state, player, turn.lord)],
+        };
       }
       return { mode: 'routed', route, deployRegions: [], resumeCaptainIds: [stationed.id] };
     }
@@ -224,7 +230,7 @@ export function commandOptions(state: MatchState): CommandOptions {
   }
 
   const open = regionsOpenTo(state, player);
-  if (open.length > 0) return { mode: 'free', route, deployRegions: open, resumeCaptainIds: [] };
+  if (open.length > 0) return { mode: 'free', route, deployRegions: open, resumeCaptainIds: stationedOf(state, player, turn.lord) };
   return {
     mode: 'free',
     route,
@@ -352,7 +358,7 @@ export function canEndTurn(state: MatchState): boolean {
   if (!turn) return false;
   if (retreatDecider(state)) return false;
   if (turn.step === 'end') return true;
-  if (turn.step === 'orders') return turn.placedKnightId !== null || turn.movedKnightId !== null || turn.attacked;
+  if (turn.step === 'orders') return turn.placedKnightId !== null || turn.movedKnightId !== null || turn.attacked || turn.stationOrder;
   return turn.step === 'command' && actionableCaptains(state).length === 0;
 }
 
@@ -459,4 +465,77 @@ export function decisiveRoller(state: MatchState): PlayerId | null {
   if (left(preferred) > 0) return preferred;
   const other: PlayerId = preferred === 'p1' ? 'p2' : 'p1';
   return left(other) > 0 ? other : null;
+}
+
+// --- Stationed Captains (holding a secured Region) ---
+
+/** Regions directly up, down, left or right of a Region on the big board. */
+export function adjacentRegions(region: RegionIndex): RegionIndex[] {
+  return adjacentSquares(region as SquareIndex) as RegionIndex[];
+}
+
+/** A Captain holding the secured Region they stand in. */
+export function isStationed(state: MatchState, captain: Captain): boolean {
+  return captain.region !== null && !captain.fallen && state.secured[captain.region]?.captainId === captain.id;
+}
+
+/** The current Lord's stationed Captains that can give an order: offered on a Free Choice. */
+function stationedOf(state: MatchState, player: PlayerId, lord: LordClass): string[] {
+  return captainsOf(state, player, lord)
+    .filter((c) => isStationed(state, c) && stationedCanAct(state, c))
+    .map((c) => c.id);
+}
+
+/** A stationed Captain's men it could send: its reserve and its Knights (waiting, or on its secured board). */
+export function sendableKnights(state: MatchState, captain: Captain): Knight[] {
+  return knightsOf(state, captain.id).filter((k) => k.status === 'ready' || k.status === 'fielded');
+}
+
+/** Your Captains deployed in adjacent, unsecured Regions: who a stationed Captain can send men to. */
+export function sendTargets(state: MatchState, captain: Captain): Captain[] {
+  if (!isStationed(state, captain)) return [];
+  return adjacentRegions(captain.region!)
+    .filter((r) => !state.secured[r] && !state.closed.includes(r))
+    .map((r) => captainInRegion(state, r, captain.owner))
+    .filter((c): c is Captain => c !== null && !c.fallen);
+}
+
+/** Adjacent Regions held by the enemy, with their Captain there: what a stationed Captain can assault. */
+export function assaultTargets(state: MatchState, captain: Captain): RegionIndex[] {
+  if (!isStationed(state, captain)) return [];
+  return adjacentRegions(captain.region!).filter((r) => {
+    const held = state.secured[r];
+    if (!held || held.player === captain.owner) return false;
+    const holder = state.captains[held.captainId];
+    return Boolean(holder && !holder.fallen && holder.region === r);
+  });
+}
+
+/** Whether a stationed Captain has any order to give: send men somewhere, or assault. */
+export function stationedCanAct(state: MatchState, captain: Captain): boolean {
+  const hasMen = captain.reserve > 0 || sendableKnights(state, captain).length > 0;
+  return (hasMen && sendTargets(state, captain).length > 0) || assaultTargets(state, captain).length > 0;
+}
+
+/** The acting Captain, if stationed and still owed its one order this turn. */
+export function stationedOrdersOpen(state: MatchState): Captain | null {
+  const turn = state.turn;
+  const captain = actingCaptain(state);
+  if (!turn || turn.step !== 'orders' || turn.stationOrder || !captain || !isStationed(state, captain)) return null;
+  return captain;
+}
+
+/** Standby Captains of a player who still have a Knight: who can be stationed in a Region just taken. */
+export function stationCandidates(state: MatchState, player: PlayerId): Captain[] {
+  return Object.values(state.captains).filter(
+    (c) => c.owner === player && c.region === null && !c.fallen && reserveKnights(state, c.id).length > 0,
+  );
+}
+
+/** Whoever holds three secured Regions in a row on the big board, if anyone. */
+export function matchWinner(state: MatchState): PlayerId | null {
+  for (const player of ['p1', 'p2'] as const) {
+    if (LINES.some((line) => line.every((r) => state.secured[r as RegionIndex]?.player === player))) return player;
+  }
+  return null;
 }

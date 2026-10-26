@@ -1,6 +1,6 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
-import { actingCaptain, actionableCaptains, canEndTurn, isStalemate, nextLordFor, retreatDecider } from '../queries';
+import { actingCaptain, actionableCaptains, canEndTurn, isStalemate, matchWinner, nextLordFor, retreatDecider } from '../queries';
 import { startDecisive } from './decisive';
 import { otherPlayer, type MatchState, type PlayerId } from '../state';
 
@@ -16,7 +16,7 @@ export function startTurn(
   const next: MatchState = {
     ...state,
     turnNumber,
-    turn: { player, lord, step: 'command', captainId: null, placedKnightId: null, attacked: false, movedKnightId: null, undo: null },
+    turn: { player, lord, step: 'command', captainId: null, placedKnightId: null, attacked: false, movedKnightId: null, stationOrder: false, undo: null },
     duel: null,
     decisive: null,
   };
@@ -38,6 +38,7 @@ export function endTurn(state: MatchState, player: PlayerId): EngineResult<Match
       command: 'Choose a Captain before ending your turn.',
       orders: 'Place a Knight or attack before ending your turn.',
       decisive: 'Finish the decisive battle first.',
+      station: 'Choose a Captain to station in the Region you took.',
       battle: 'Finish the battle before ending your turn.',
     };
     return reject(reasons[turn.step] ?? 'You cannot end your turn yet.');
@@ -57,8 +58,15 @@ export function endTurn(state: MatchState, player: PlayerId): EngineResult<Match
   return { ok: true, state: passed.state, events: passed.events };
 }
 
-/** Hands the turn to the other player. */
+/** Hands the turn to the other player, unless someone has secured three Regions in a row: then the match ends. */
 export function passTurn(state: MatchState, player: PlayerId): { state: MatchState; events: MatchEvent[] } {
+  const winner = matchWinner(state);
+  if (winner) {
+    return {
+      state: { ...state, phase: 'over', winner, decisive: null, turn: state.turn ? { ...state.turn, step: 'end' } : null },
+      events: [{ type: 'turnEnded', player }, { type: 'matchWon', player: winner }],
+    };
+  }
   const players = {
     ...state.players,
     [player]: { ...state.players[player], turnsTaken: state.players[player].turnsTaken + 1 },

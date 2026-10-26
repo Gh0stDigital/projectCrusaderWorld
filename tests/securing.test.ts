@@ -43,7 +43,7 @@ describe('Securing a Region', () => {
     const result = applyAction(aboutToSecure(), { type: 'placeKnight', player: 'p1', knightId: 'p1-raiders-1-k3', square: 2 });
     if (!result.ok) throw new Error(result.reason);
     const s = result.state;
-    expect(s.secured[4]).toEqual({ player: 'p1', captainId: 'p1-raiders-1' });
+    expect(s.secured[4]).toMatchObject({ player: 'p1', captainId: 'p1-raiders-1' });
     expect(result.events.some((e) => e.type === 'regionSecured')).toBe(true);
     expect(s.turn!.step).toBe('end');
   });

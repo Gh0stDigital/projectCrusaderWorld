@@ -115,5 +115,7 @@ export function createMatch(): MatchState {
     secured: {},
     closed: [],
     decisive: null,
+    pendingStation: null,
+    winner: null,
   };
 }

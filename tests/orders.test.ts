@@ -131,7 +131,7 @@ describe('Decisive battle', () => {
     expect(s.decisive!.men).toEqual({ p1: 364, p2: 85 });
     expect(s.decisive!.outcome).toEqual({ winner: 'p1', loserKilled: false });
     s = act(s, { type: 'finishDecisive', player: 'p1' });
-    expect(s.secured[4]).toEqual({ player: 'p1', captainId: P1 });
+    expect(s.secured[4]).toMatchObject({ player: 'p1', captainId: P1 });
     expect(['k1', 'k2', 'k3'].map((k) => s.knights[`${P2}-${k}`]!.status)).toEqual(['captured', 'captured', 'captured']);
     expect(s.captains[P2]).toMatchObject({ region: null, fallen: false });
     // Losses were spread over each Captain's men.

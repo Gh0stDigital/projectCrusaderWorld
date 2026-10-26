@@ -1,4 +1,4 @@
-import { actingCaptain, actionableCaptains, canEndTurn, attackers, canPlaceNow, canUndoKnight, commandOptions, movers, decisiveRoller, moveType, retreatDecider } from '../../engine/queries';
+import { actingCaptain, actionableCaptains, canEndTurn, attackers, canPlaceNow, canUndoKnight, commandOptions, movers, decisiveRoller, isStationed, moveType, retreatDecider } from '../../engine/queries';
 import { MOVE_TYPE_NAMES, commandSummary } from './commandText';
 import type { MatchState, RegionIndex } from '../../engine/state';
 import { LORD_NAMES, REGION_NAMES, captainName } from '../../data/names';
@@ -147,6 +147,10 @@ function instructionFor(match: MatchState, selectedCaptainId: string | null, foc
   const captain = actingCaptain(match);
   const where = captain?.region != null ? REGION_NAMES[captain.region] : 'the Region';
   if (turn.step === 'decisive') return `Stalemate in ${where}: decisive battle!`;
+  if (turn.step === 'station') return 'Choose a Captain to station in the Region you took.';
+  if (turn.step === 'orders' && captain && isStationed(match, captain) && !turn.stationOrder) {
+    return `${captainName(captain)} holds ${where}: give one order.`;
+  }
   if (turn.step === 'orders') {
     const place = canPlaceNow(match);
     const attack = attackers(match).length > 0;

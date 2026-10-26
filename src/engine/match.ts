@@ -3,6 +3,10 @@ import type { MatchAction } from './actions';
 import type { MatchEvent } from './events';
 import type { MatchState } from './state';
 import {
+  assault,
+  sendKnight,
+  sendReserve,
+  stationCaptain,
   chooseRetreat,
   commitSergeant,
   declareAttack,
@@ -45,6 +49,14 @@ export function applyAction(state: MatchState, action: MatchAction): EngineResul
       return rollDie(state, action.player, action.value);
     case 'finishDecisive':
       return finishDecisive(state, action.player);
+    case 'sendReserve':
+      return sendReserve(state, action.player, action.toCaptainId, action.amount);
+    case 'sendKnight':
+      return sendKnight(state, action.player, action.knightId, action.toCaptainId);
+    case 'assault':
+      return assault(state, action.player, action.region);
+    case 'stationCaptain':
+      return stationCaptain(state, action.player, action.captainId);
     case 'endTurn':
       return endTurn(state, action.player);
   }
