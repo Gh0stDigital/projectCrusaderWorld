@@ -16,7 +16,7 @@ export function startTurn(
   const next: MatchState = {
     ...state,
     turnNumber,
-    turn: { player, lord, step: 'command', captainId: null, placedKnightId: null, attacked: false },
+    turn: { player, lord, step: 'command', captainId: null, placedKnightId: null, attacked: false, movedKnightId: null, undo: null },
     duel: null,
     decisive: null,
   };
@@ -43,8 +43,8 @@ export function endTurn(state: MatchState, player: PlayerId): EngineResult<Match
     return reject(reasons[turn.step] ?? 'You cannot end your turn yet.');
   }
 
-  // Only a placement routes the opponent; a turn without one leaves them a free choice.
-  const routed: MatchState = turn.placedKnightId ? state : { ...state, route: null };
+  // Only a placement (or move) routes the opponent; a turn without one leaves them a free choice.
+  const routed: MatchState = turn.placedKnightId || turn.movedKnightId ? state : { ...state, route: null };
 
   // The Region played in stalemated: its Captains fight a decisive battle before the turn passes.
   const region = actingCaptain(routed)?.region ?? null;

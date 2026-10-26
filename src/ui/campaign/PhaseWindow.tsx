@@ -1,4 +1,4 @@
-import { actingCaptain, actionableCaptains, canEndTurn, attackers, canPlaceNow, commandOptions, decisiveRoller, moveType, retreatDecider } from '../../engine/queries';
+import { actingCaptain, actionableCaptains, canEndTurn, attackers, canPlaceNow, canUndoKnight, commandOptions, movers, decisiveRoller, moveType, retreatDecider } from '../../engine/queries';
 import { MOVE_TYPE_NAMES, commandSummary } from './commandText';
 import type { MatchState, RegionIndex } from '../../engine/state';
 import { LORD_NAMES, REGION_NAMES, captainName } from '../../data/names';
@@ -23,6 +23,8 @@ interface PhaseWindowProps {
   error: string | null;
   onEnterRegion: (region: RegionIndex) => void;
   onEndTurn: () => void;
+  /** Take back this turn's placement or move. */
+  onUndo: () => void;
 }
 
 export function PhaseWindow({
@@ -35,6 +37,7 @@ export function PhaseWindow({
   error,
   onEnterRegion,
   onEndTurn,
+  onUndo,
 }: PhaseWindowProps) {
   const turn = match.turn;
   const captain = actingCaptain(match);
@@ -100,6 +103,11 @@ export function PhaseWindow({
 
       {turn && turn.player === 'p1' && !busy && !battleOpen && !departing && (
         <div className="phase-window__buttons">
+          {canUndoKnight(match) && (
+            <button className="btn" onClick={onUndo}>
+              {turn.movedKnightId ? 'Undo move' : 'Undo placement'}
+            </button>
+          )}
           {enterTarget !== null && (
             <button
               className={`btn${turn.step === 'orders' && !canEndTurn(match) ? ' btn--primary' : ''}`}
@@ -142,17 +150,17 @@ function instructionFor(match: MatchState, selectedCaptainId: string | null, foc
   if (turn.step === 'orders') {
     const place = canPlaceNow(match);
     const attack = attackers(match).length > 0;
+    const move = movers(match).length > 0;
     const done = canEndTurn(match) ? ', or End turn' : '';
-    if (focusedRegion !== captain?.region) {
-      return `Enter ${where} to ${place && attack ? 'place a Knight and/or attack' : place ? 'place a Knight' : 'attack'}${done}.`;
-    }
-    if (place && attack) return `Place a Knight and/or attack, in any order${done}.`;
-    if (place) return `Choose a Knight, then an empty square${done}.`;
+    if (focusedRegion !== captain?.region) return `Enter ${where} to give orders${done}.`;
+    if (place && attack) return `Place a Knight and/or attack${move ? ', or move one' : ''}${done}.`;
+    if (place) return `Place a Knight${move ? ', or move one a square' : ''}${done}.`;
+    if (move && !attack) return `Pick one of your Knights and move it a square${done}.`;
     return `Pick one of your Knights, then an enemy to attack${done}.`;
   }
   if (match.duel?.outcome) return 'Battle fought. Press End turn when ready.';
   if (captain?.region != null && match.secured[captain.region]?.captainId === captain.id) {
     return `${where} secured! Press End turn.`;
   }
-  return 'Knight placed. Press End turn when ready.';
+  return `Knight ${turn.movedKnightId ? 'moved' : 'placed'}. Press End turn when ready.`;
 }

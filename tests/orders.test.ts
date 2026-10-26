@@ -174,3 +174,61 @@ describe('Decisive battle', () => {
     expect(spread([5, 5], 20)).toEqual([5, 5]);
   });
 });
+
+describe('Undo a placement', () => {
+  it('takes the Knight back until an attack is made', () => {
+    let s = heartland([[`${P1}-k1`, 3]], [[`${P2}-k1`, 4]]);
+    const before = s;
+    s = act(s, { type: 'placeKnight', player: 'p1', knightId: `${P1}-k2`, square: 0 });
+    expect(s.route).toBe(0);
+    s = act(s, { type: 'undoKnight', player: 'p1' });
+    expect(s.knights[`${P1}-k2`]).toMatchObject({ status: 'ready', position: null });
+    expect(s.route).toBe(before.route);
+    expect(s.turn).toMatchObject({ step: 'orders', placedKnightId: null });
+    // Place again, then attack: the placement is locked in.
+    s = act(s, { type: 'placeKnight', player: 'p1', knightId: `${P1}-k2`, square: 6 });
+    s = winQuickly(s);
+    expect(rejected(s, { type: 'undoKnight', player: 'p1' })).toMatch(/nothing to undo/);
+  });
+
+  it('undoes a placement that secured the Region, freeing the captured Knights', () => {
+    let s = heartland([[`${P1}-k1`, 0], [`${P1}-k2`, 1]], [[`${P2}-k1`, 4]]);
+    s = act(s, { type: 'placeKnight', player: 'p1', knightId: `${P1}-k3`, square: 2 });
+    expect(s.secured[4]).toBeDefined();
+    expect(s.knights[`${P2}-k1`]!.status).toBe('captured');
+    s = act(s, { type: 'undoKnight', player: 'p1' });
+    expect(s.secured[4]).toBeUndefined();
+    expect(s.knights[`${P2}-k1`]!.status).toBe('fielded');
+    expect(s.captains[P2]!.region).toBe(4);
+  });
+});
+
+describe('Moving a Knight', () => {
+  it('steps one square up, down, left or right instead of placing; no attack follows', () => {
+    let s = heartland([[`${P1}-k1`, 0]], [[`${P2}-k1`, 4]]);
+    expect(rejected(s, { type: 'moveKnight', player: 'p1', knightId: `${P1}-k1`, square: 2 })).toMatch(/directly up, down/);
+    s = act(s, { type: 'moveKnight', player: 'p1', knightId: `${P1}-k1`, square: 1 });
+    expect(s.knights[`${P1}-k1`]!.position).toEqual({ region: 4, square: 1 });
+    expect(s.route).toBe(1);
+    expect(s.turn!.step).toBe('end');
+    expect(attackers(s)).toEqual([]);
+    expect(rejected(s, { type: 'placeKnight', player: 'p1', knightId: `${P1}-k2`, square: 0 })).toMatch(/already moved/);
+    s = act(s, { type: 'undoKnight', player: 'p1' });
+    expect(s.knights[`${P1}-k1`]!.position).toEqual({ region: 4, square: 0 });
+    expect(s.turn).toMatchObject({ step: 'orders', movedKnightId: null });
+  });
+
+  it('is not allowed after placing or after a battle', () => {
+    let s = heartland([[`${P1}-k1`, 3]], [[`${P2}-k1`, 4]]);
+    const placed = act(s, { type: 'placeKnight', player: 'p1', knightId: `${P1}-k2`, square: 8 });
+    expect(rejected(placed, { type: 'moveKnight', player: 'p1', knightId: `${P1}-k1`, square: 0 })).toMatch(/after placing/);
+    s = winQuickly(s);
+    expect(rejected(s, { type: 'moveKnight', player: 'p1', knightId: `${P1}-k1`, square: 0 })).toMatch(/after a battle/);
+  });
+
+  it('lets a Captain with nothing to place or attack still act by moving', () => {
+    const s = heartland([[`${P1}-k1`, 0], [`${P1}-k2`, 8], [`${P1}-k3`, 6]], [[`${P2}-k1`, 2]]);
+    expect(attackers(s)).toEqual([]);
+    expect(captainCanAct(s, s.captains[P1]!)).toBe(true);
+  });
+});

@@ -37,7 +37,9 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - Any of the acting Captain's Knights already on that Region's board may attack (the one just placed included), but only if it has an enemy in reach. A battle can come before or after the placement.
 - A stationed Captain with no Knight left to place can still be chosen if one of their Knights on the board has a target.
 - End Turn is manual and is refused until a Knight is placed or an attack made, unless the current Lord has no Captain who can act (then it can be ended right away).
-- Only a placement routes the opponent. A turn without one (attack only, or no orders) leaves the opponent a free choice.
+- Only a placement (or move) routes the opponent. A turn without one (attack only, or no orders) leaves the opponent a free choice.
+- **Undo:** a placement can be taken back (Undo placement) until an attack is made after it or the turn ends. Undo restores everything the placement did, including securing a Region.
+- **Moving a Knight:** instead of placing, one of the acting Captain's Knights on that board may step one square up, down, left or right onto an empty square, only if nothing was placed or attacked yet this turn. The move replaces the placement: it routes the opponent from the new square and can secure the Region with three in a row. No attack follows a move. A move can be undone (Undo move) until the turn ends. Clicking one of your Knights on the board shows its step squares in green (and its attack targets, if any). A Captain whose only possible order is a move can still be chosen; the computer moves only when it has nothing else to do.
 - Ultimate Tic-Tac-Toe routing (settled):
   - The square a Knight is placed on sends the opponent to the Region in the same position next turn. The first turn of the match is a free choice.
   - While the current Lord has a Ready Captain, they must play in the routed Region: deploy a Ready Captain there. They cannot revisit other Regions.
@@ -48,8 +50,9 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
   - The routed Region is highlighted on the Region board ("Fated Move · play here") and named in the turn banner; each empty square in the Region view shows where it would send the opponent.
 - Move types (named in the turn instructions during the command step):
   - **Fated Move:** routing forces where the Lord plays (deploy in the routed Region, or command their own Captain there).
-  - **Control Move:** the Lord chooses where to deploy a Captain or which deployed Captain to command (first turn, routing not mandatory, routed Region closed, or both of the Lord's Captains already deployed).
+  - **Free Choice:** the Lord chooses where to deploy a Captain or which deployed Captain to command (first turn, routing not mandatory, routed Region closed, or both of the Lord's Captains already deployed).
   - With both of the Lord's Captains deployed, both of their Regions are highlighted green ("Playable") on the Region board.
+  - Every choice open this turn is clickable on the Region board, whichever Captain is selected: clicking a Region acts with the Captain who belongs there (a Standby Captain deploys, a deployed one takes orders). The selected Captain's choices get a dashed inner ring, and a deployed selected Captain's Region a "Selected Captain" tag.
   - The selected Captain's icon turns green when it can play this turn.
 - Exhibition is against the computer: the human plays Player 1 (blue); the computer plays Player 2 (red).
 

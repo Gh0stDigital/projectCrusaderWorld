@@ -1,4 +1,4 @@
-import { attackTargets, attackers, knightAt, legalSquares, normalMaxHp } from '../../engine/queries';
+import { attackTargets, attackers, knightAt, legalSquares, moveSquares, movers, normalMaxHp } from '../../engine/queries';
 import { SQUARES, type MatchState, type RegionIndex, type SquareIndex } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, SUBCLASS_NAMES, captainName, knightName, knightPersonalName } from '../../data/names';
 import { KnightSprite } from '../components/KnightSprite';
@@ -15,8 +15,10 @@ interface RegionViewProps {
   selectedKnightId: string | null;
   onPlaceKnight: (square: SquareIndex) => void;
   onChooseTarget: (knightId: string) => void;
-  /** Pick one of your Knights on the board as this turn's attacker. */
+  /** Pick one of your Knights on the board, to attack with or move. */
   onSelectAttacker: (knightId: string) => void;
+  /** Move the selected Knight on the board to this square. */
+  onMoveKnight: (square: SquareIndex) => void;
   /** A defeated Knight leaving the board, drawn on its old square while it animates away. */
   departure?: Departure | null;
 }
@@ -25,15 +27,18 @@ interface RegionViewProps {
  * Zoomed-in view of one Region: its 3×3 board fills the center. The Captains
  * and their Knights appear in the side panels while zoomed in.
  */
-export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onChooseTarget, onSelectAttacker, departure }: RegionViewProps) {
+export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onChooseTarget, onSelectAttacker, onMoveKnight, departure }: RegionViewProps) {
   const turn = match.turn;
   const actingHere = turn?.captainId != null && match.captains[turn.captainId]?.region === region;
   const selected = selectedKnightId ? match.knights[selectedKnightId] : undefined;
   // A waiting Knight is selected: show where it can go. One on the board: show who it can attack.
   const legal = new Set(actingHere && selected?.status === 'ready' ? legalSquares(match) : []);
   const canAttack = new Set(actingHere ? attackers(match).map((k) => k.id) : []);
+  const canMove = new Set(actingHere ? movers(match).map((k) => k.id) : []);
   const attackerId = selected && canAttack.has(selected.id) ? selected.id : null;
   const targets = new Set(attackTargets(match, attackerId).map((k) => k.id));
+  // A Knight on the board that can move: the empty squares it can step to.
+  const moveTo = new Set(selected && canMove.has(selected.id) ? moveSquares(match, selected.id) : []);
 
   return (
     <div className="region-view">
@@ -49,11 +54,13 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
           const knight = knightAt(match, region, square);
           const isLegal = legal.has(square);
           const isTarget = knight !== null && targets.has(knight.id);
-          const isAttacker = knight !== null && knight.id === attackerId;
-          const mayAttack = knight !== null && canAttack.has(knight.id) && !isAttacker;
+          const isAttacker = knight !== null && (knight.id === attackerId || (knight.id === selected?.id && canMove.has(knight.id)));
+          const mayAttack = knight !== null && (canAttack.has(knight.id) || canMove.has(knight.id)) && !isAttacker;
+          const isMove = !knight && moveTo.has(square);
           const classes = [
             'inner-board__square',
-            isLegal && 'inner-board__square--legal',
+            (isLegal || isMove) && 'inner-board__square--legal',
+            isMove && 'inner-board__square--move',
             isTarget && 'inner-board__square--target',
             isAttacker && 'inner-board__square--attacker',
             mayAttack && 'inner-board__square--may-attack',
@@ -62,23 +69,27 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
             .join(' ');
           const label = knight
             ? `${knightName(knight)} of ${PLAYER_NAMES[knight.owner]}, ${knight.hp} HP${isTarget ? ', attack' : ''}`
-            : isLegal
+            : isMove
+              ? 'Move Knight here'
+              : isLegal
               ? 'Place Knight here'
               : 'Empty square';
           return (
             <button
               key={square}
               className={classes}
-              disabled={!isLegal && !isTarget && !knight}
-              aria-disabled={!isLegal && !isTarget && !mayAttack}
+              disabled={!isLegal && !isMove && !isTarget && !knight}
+              aria-disabled={!isLegal && !isMove && !isTarget && !mayAttack}
               onClick={() =>
                 isTarget
                   ? onChooseTarget(knight.id)
                   : mayAttack
                     ? onSelectAttacker(knight.id)
-                    : isLegal
-                      ? onPlaceKnight(square)
-                      : undefined
+                    : isMove
+                      ? onMoveKnight(square)
+                      : isLegal
+                        ? onPlaceKnight(square)
+                        : undefined
               }
               aria-label={label}
             >
@@ -93,7 +104,7 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
                   <span className="board-piece__fate">{departure.fate === 'killed' ? 'Destroyed' : 'Retreats'}</span>
                 </span>
               )}
-              {!knight && isLegal && (
+              {!knight && (isLegal || isMove) && (
                 <span className="route-preview">
                   Sends enemy to
                   <br />
@@ -107,7 +118,9 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
                   <span className="knight-plate">{knightPersonalName(knight)}</span>
                   {knight.subclass && <span className={`type-badge type-badge--${knight.subclass}`}>{SUBCLASS_NAMES[knight.subclass]}</span>}
                   {isTarget && <span className="attack-marker">Attack</span>}
-                  {mayAttack && <span className="attack-marker attack-marker--ready">Can attack</span>}
+                  {mayAttack && (
+                    <span className="attack-marker attack-marker--ready">{canAttack.has(knight.id) ? 'Can attack' : 'Can move'}</span>
+                  )}
                 </HoldablePiece>
               )}
             </button>

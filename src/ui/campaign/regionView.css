@@ -311,3 +311,16 @@
   background: #6fcf6a;
   color: var(--ink);
 }
+
+/* Squares the selected Knight on the board can step to. */
+/* Extra class weight so it wins over the wireframe and skin square styles. */
+.inner-board .inner-board__square.inner-board__square--move {
+  border: 3px dashed #6fcf6a;
+  background: rgba(111, 207, 106, 0.12);
+}
+
+.inner-board .inner-board__square.inner-board__square--move:hover,
+.inner-board .inner-board__square.inner-board__square--move:focus-visible {
+  border: 3px solid #6fcf6a;
+  background: rgba(111, 207, 106, 0.22);
+}

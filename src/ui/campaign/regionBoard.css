@@ -155,7 +155,7 @@
   white-space: nowrap;
 }
 
-/* Control Move with both Captains deployed: every Region the Lord can play in. */
+/* Free Choice with both Captains deployed: every Region the Lord can play in. */
 .region--playable {
   box-shadow: 0 0 0 3px #6fcf6a, 0 0 22px rgba(111, 207, 106, 0.45);
 }
@@ -227,5 +227,25 @@
   background: rgba(20, 15, 11, 0.9);
   border: 1px solid var(--parchment-dim);
   font-size: 9px;
+  white-space: nowrap;
+}
+
+/* The selected Captain's choices: a bright inner ring and a tag, on top of any other highlight. */
+.region--selected-choice {
+  outline: 3px dashed #fff3c4;
+  outline-offset: -9px;
+}
+
+.region__selected-tag {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: #fff3c4;
+  color: var(--ink);
+  font-size: 8px;
   white-space: nowrap;
 }

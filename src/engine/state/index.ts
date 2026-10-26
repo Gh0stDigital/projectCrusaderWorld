@@ -147,7 +147,8 @@ export type MatchPhase = 'lordOrder' | 'turns';
  * Step within a turn:
  * - command: choose a Captain of the current Lord (deploy a new one or resume a stationed one)
  * - orders: in either order, place one of that Captain's Knights and/or attack
- *   once with one of their Knights on the board (only if it has a target)
+ *   once with one of their Knights on the board (only if it has a target).
+ *   Instead of both, one of their Knights on the board may step to an adjacent empty square.
  * - battle: a duel is being fought
  * - decisive: the Region stalemated as the turn ended; its Captains fight a decisive battle
  * - end: orders are done; waiting for End Turn
@@ -165,6 +166,15 @@ export interface TurnState {
   placedKnightId: string | null;
   /** Whether this turn's one attack has been used. */
   attacked: boolean;
+  /** The Knight moved this turn instead of a placement, if any. */
+  movedKnightId: string | null;
+  /** What the board looked like before this turn's placement or move, while it can still be undone. */
+  undo: {
+    knights: Record<string, Knight>;
+    captains: Record<string, Captain>;
+    secured: Partial<Record<RegionIndex, SecuredRegion>>;
+    route: RegionIndex | null;
+  } | null;
 }
 
 export type DuelRole = 'attacker' | 'defender';

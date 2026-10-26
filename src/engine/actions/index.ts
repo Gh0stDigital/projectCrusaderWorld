@@ -6,6 +6,8 @@ export type MatchAction =
   | { type: 'deployCaptain'; player: PlayerId; captainId: string; region: RegionIndex }
   | { type: 'resumeCaptain'; player: PlayerId; captainId: string }
   | { type: 'placeKnight'; player: PlayerId; knightId: string; square: SquareIndex }
+  | { type: 'moveKnight'; player: PlayerId; knightId: string; square: SquareIndex }
+  | { type: 'undoKnight'; player: PlayerId }
   | { type: 'declareAttack'; player: PlayerId; attackerKnightId: string; targetKnightId: string }
   | { type: 'reinforceKnight'; player: PlayerId; knightId: string; amount: number }
   | { type: 'commitSergeant'; player: PlayerId; sergeantId: string }

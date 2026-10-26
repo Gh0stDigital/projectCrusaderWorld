@@ -37,6 +37,7 @@ export function declareAttack(
   if (state.phase !== 'turns' || !turn) return reject('Attacks can only be made during a turn.');
   if (turn.player !== player) return reject('It is not your turn.');
   if (turn.attacked) return reject('You have already attacked this turn.');
+  if (turn.movedKnightId) return reject('No attack follows a move.');
   if (turn.step !== 'orders') return reject('You cannot attack right now.');
   if (!attackers(state).some((k) => k.id === attackerKnightId)) {
     return reject('That Knight cannot attack: it must be yours, on this board, with an enemy in reach.');
@@ -124,7 +125,8 @@ export function declareAttack(
     ...state,
     knights: { ...state.knights, [attacker.id]: attackerNow, [target.id]: targetNow },
     duel,
-    turn: { ...turn, step: 'battle', attacked: true },
+    // An attack locks in this turn's placement: it can no longer be undone.
+    turn: { ...turn, step: 'battle', attacked: true, undo: null },
   };
   const events: MatchEvent[] = [
     { type: 'duelStarted', attackerId: attacker.id, defenderId: target.id, region: duel.region },

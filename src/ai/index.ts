@@ -18,6 +18,8 @@ import {
   retreatDecider,
   attackers,
   decisiveRoller,
+  moveSquares,
+  movers,
 } from '../engine/queries';
 import {
   LORD_CLASSES,
@@ -169,6 +171,20 @@ export function chooseAttack(state: MatchState, force = false): MatchAction | nu
     : null;
 }
 
+/** Move: only when the Captain has nothing else to do. The best-scoring step for any of its Knights. */
+export function chooseMove(state: MatchState, random: Random = Math.random): MatchAction | null {
+  const turn = state.turn;
+  if (!turn) return null;
+  let best: { knightId: string; square: SquareIndex; score: number } | null = null;
+  for (const knight of movers(state)) {
+    for (const square of moveSquares(state, knight.id)) {
+      const score = scoreSquare(state, knight.position!.region, square, turn.player, random);
+      if (!best || score > best.score) best = { knightId: knight.id, square, score };
+    }
+  }
+  return best ? { type: 'moveKnight', player: turn.player, knightId: best.knightId, square: best.square } : null;
+}
+
 /** Decisive battle: roll when it is this player's roll; the player whose turn it is closes it once it is over. */
 export function chooseDecisive(state: MatchState, player: PlayerId, random: Random = Math.random): MatchAction | null {
   const d = state.decisive;
@@ -210,7 +226,7 @@ export function nextComputerAction(state: MatchState, player: PlayerId, random: 
       return (
         choosePlacement(state, random) ??
         chooseAttack(state) ??
-        (canEndTurn(state) ? { type: 'endTurn', player } : chooseAttack(state, true))
+        (canEndTurn(state) ? { type: 'endTurn', player } : (chooseAttack(state, true) ?? chooseMove(state, random)))
       );
     case 'end':
       return { type: 'endTurn', player };

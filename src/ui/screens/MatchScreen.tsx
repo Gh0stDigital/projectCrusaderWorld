@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { useAppStore } from '../../store/appStore';
 import { useMatchStore } from '../../store/matchStore';
-import { actingCaptain, commandOptions, commandableRegions } from '../../engine/queries';
+import { actingCaptain, actionableCaptains, commandOptions, commandableRegions } from '../../engine/queries';
 import type { LordClass, RegionIndex } from '../../engine/state';
 import { LORD_NAMES, PLAYER_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
 import { PlayerPanel } from '../campaign/PlayerPanel';
@@ -54,34 +54,39 @@ export function MatchScreen() {
   };
 
   // --- Region board clicks: deploy, resume, or enter ---
+  // Every choice this turn is clickable, whichever Captain is selected; each Region
+  // knows which Captain acts there. The selected Captain's choices are marked.
   const selected = selectedCaptainId ? match.captains[selectedCaptainId] : undefined;
-  const clickable = new Set<RegionIndex>();
-  let regionAction = '';
+  const choices = new Map<RegionIndex, { captainId: string; deploy: boolean }>();
   if (turn && !locked) {
-    if (turn.step === 'command' && selected) {
-      if (selected.region === null) {
-        commandOptions(match).deployRegions.forEach((r) => clickable.add(r));
-        regionAction = 'Deploy here';
-      } else {
-        clickable.add(selected.region);
-        regionAction = 'Give orders';
-      }
-    } else if (turn.step !== 'command' && acting?.region != null) {
-      clickable.add(acting.region);
-      regionAction = 'Enter';
+    if (turn.step === 'command') {
+      const captains = actionableCaptains(match);
+      const ready = captains.filter((c) => c.region === null);
+      const deployer = selected && ready.some((c) => c.id === selected.id) ? selected : ready[0];
+      if (deployer) commandOptions(match).deployRegions.forEach((r) => choices.set(r, { captainId: deployer.id, deploy: true }));
+      captains.forEach((c) => c.region !== null && choices.set(c.region, { captainId: c.id, deploy: false }));
+    } else if (acting?.region != null) {
+      choices.set(acting.region, { captainId: acting.id, deploy: false });
     }
   }
+  const clickable = new Set(choices.keys());
+  const selectedRegions = new Set(
+    turn?.step === 'command' && selected
+      ? [...choices].filter(([, c]) => c.captainId === selected.id).map(([r]) => r)
+      : [],
+  );
+  const regionLabel = (region: RegionIndex) =>
+    turn?.step !== 'command' ? 'Enter' : choices.get(region)?.deploy ? 'Deploy here' : 'Give orders';
 
   const clickRegion = (region: RegionIndex) => {
-    if (!turn || locked) return;
-    if (turn.step === 'command' && selected) {
-      if (selected.region === null) {
-        store.dispatch({ type: 'deployCaptain', player: turn.player, captainId: selected.id, region });
-      } else {
-        store.dispatch({ type: 'resumeCaptain', player: turn.player, captainId: selected.id });
-      }
-    } else if (acting?.region === region) {
+    const choice = choices.get(region);
+    if (!turn || locked || !choice) return;
+    if (turn.step !== 'command') {
       store.focusRegion(region);
+    } else if (choice.deploy) {
+      store.dispatch({ type: 'deployCaptain', player: turn.player, captainId: choice.captainId, region });
+    } else {
+      store.dispatch({ type: 'resumeCaptain', player: turn.player, captainId: choice.captainId });
     }
   };
 
@@ -190,7 +195,9 @@ export function MatchScreen() {
               playable={new Set(commandableRegions(match))}
               choosing={turn?.step === 'command' && clickable.size > 0}
               onClickRegion={clickRegion}
-              labelFor={() => regionAction}
+              labelFor={regionLabel}
+              selectedRegions={selectedRegions}
+              selectedCaptainId={selectedCaptainId}
             />
           )
         }
@@ -201,6 +208,12 @@ export function MatchScreen() {
             selectedKnightId={selectedKnightId}
             onChooseTarget={(id) => !locked && store.openAttackPreview(id)}
             onSelectAttacker={(id) => !locked && store.selectKnight(id)}
+            onMoveKnight={(square) =>
+              turn &&
+              !locked &&
+              selectedKnightId &&
+              store.dispatch({ type: 'moveKnight', player: turn.player, knightId: selectedKnightId, square })
+            }
             departure={departure}
             onPlaceKnight={(square) =>
               turn &&
@@ -273,6 +286,7 @@ export function MatchScreen() {
         error={error}
         onEnterRegion={store.focusRegion}
         onEndTurn={store.requestEndTurn}
+        onUndo={() => turn && !locked && store.dispatch({ type: 'undoKnight', player: turn.player })}
       />
     </div>
   );

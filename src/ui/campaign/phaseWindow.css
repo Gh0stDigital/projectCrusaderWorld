@@ -57,7 +57,7 @@
   padding: 18px 48px;
 }
 
-/* Fated Move (routing decides where) or Control Move (the Lord chooses). */
+/* Fated Move (routing decides where) or Free Choice (the Lord chooses). */
 .move-type {
   display: inline-block;
   margin-bottom: 6px;

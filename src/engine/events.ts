@@ -12,6 +12,8 @@ export type MatchEvent =
   | { type: 'sergeantCommitted'; player: PlayerId; role: DuelRole }
   | { type: 'clashResolved'; clash: Clash }
   | { type: 'duelEnded'; outcome: DuelOutcome; attackerId: string; defenderId: string }
+  | { type: 'knightMoved'; player: PlayerId; knightId: string; region: RegionIndex; from: SquareIndex; to: SquareIndex }
+  | { type: 'knightOrderUndone'; player: PlayerId; knightId: string }
   | { type: 'decisiveStarted'; region: RegionIndex; first: PlayerId }
   | { type: 'dieRolled'; player: PlayerId; value: number; damage: number }
   | {

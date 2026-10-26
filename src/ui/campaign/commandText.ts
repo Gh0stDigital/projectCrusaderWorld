@@ -1,6 +1,6 @@
 import { actionableCaptains, commandOptions, type MoveType } from '../../engine/queries';
 
-export const MOVE_TYPE_NAMES: Record<MoveType, string> = { fated: 'Fated Move', control: 'Control Move' };
+export const MOVE_TYPE_NAMES: Record<MoveType, string> = { fated: 'Fated Move', control: 'Free Choice' };
 import type { MatchState } from '../../engine/state';
 import { REGION_NAMES, captainName } from '../../data/names';
 

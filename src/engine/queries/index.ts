@@ -100,7 +100,44 @@ export function captainCanAct(state: MatchState, captain: Captain): boolean {
   if (captain.region === null) {
     return reserveKnights(state, captain.id).length > 0 && regionsOpenTo(state, captain.owner).length > 0;
   }
-  return captainCanPlace(state, captain) || captainAttackers(state, captain).length > 0;
+  return captainCanPlace(state, captain) || captainAttackers(state, captain).length > 0 || captainMovers(state, captain).length > 0;
+}
+
+/** Empty squares directly up, down, left or right of a Knight on the board (turn-independent). */
+function stepSquares(state: MatchState, knight: Knight): SquareIndex[] {
+  if (knight.status !== 'fielded' || !knight.position) return [];
+  const { region, square } = knight.position;
+  if (emptySquares(state, region).length === 0) return [];
+  return adjacentSquares(square).filter((s) => knightAt(state, region, s) === null);
+}
+
+/** A stationed Captain's Knights on their board that could step to an adjacent empty square. */
+export function captainMovers(state: MatchState, captain: Captain): Knight[] {
+  if (captain.region === null) return [];
+  return knightsOf(state, captain.id).filter((k) => k.position?.region === captain.region && stepSquares(state, k).length > 0);
+}
+
+/** Where a Knight may move right now: only before any placement, move or attack this turn. */
+export function moveSquares(state: MatchState, knightId: string): SquareIndex[] {
+  const turn = state.turn;
+  const captain = actingCaptain(state);
+  if (!turn || turn.step !== 'orders' || turn.placedKnightId || turn.movedKnightId || turn.attacked || !captain) return [];
+  const knight = state.knights[knightId];
+  if (!knight || knight.captainId !== captain.id || knight.position?.region !== captain.region) return [];
+  return stepSquares(state, knight);
+}
+
+/** The acting Captain's Knights that can move right now. */
+export function movers(state: MatchState): Knight[] {
+  const captain = actingCaptain(state);
+  if (!captain) return [];
+  return captainMovers(state, captain).filter((k) => moveSquares(state, k.id).length > 0);
+}
+
+/** Whether this turn's placement or move can still be undone. */
+export function canUndoKnight(state: MatchState): boolean {
+  const turn = state.turn;
+  return Boolean(turn?.undo) && (turn!.step === 'orders' || turn!.step === 'end');
 }
 
 /** A stationed Captain with a waiting Knight and an empty square in their Region. */
@@ -215,7 +252,7 @@ export function actionableCaptains(state: MatchState): Captain[] {
 
 /**
  * Fated Move: routing forces where the Lord plays this turn.
- * Control Move: the Lord chooses where to deploy or which deployed Captain to command.
+ * Free Choice: the Lord chooses where to deploy or which deployed Captain to command.
  * Null outside the command step or when the Lord has no orders to give.
  */
 export type MoveType = 'fated' | 'control';
@@ -243,7 +280,7 @@ export function actingCaptain(state: MatchState): Captain | null {
 export function legalSquares(state: MatchState): SquareIndex[] {
   const turn = state.turn;
   const captain = actingCaptain(state);
-  if (!turn || turn.step !== 'orders' || turn.placedKnightId || !captain || !captainCanPlace(state, captain)) return [];
+  if (!turn || turn.step !== 'orders' || turn.placedKnightId || turn.movedKnightId || !captain || !captainCanPlace(state, captain)) return [];
   return emptySquares(state, captain.region!);
 }
 
@@ -256,7 +293,7 @@ export function canPlaceNow(state: MatchState): boolean {
 export function attackers(state: MatchState): Knight[] {
   const turn = state.turn;
   const captain = actingCaptain(state);
-  if (!turn || turn.step !== 'orders' || turn.attacked || !captain) return [];
+  if (!turn || turn.step !== 'orders' || turn.attacked || turn.movedKnightId || !captain) return [];
   return captainAttackers(state, captain);
 }
 
@@ -265,6 +302,7 @@ export function nextOrdersStep(state: MatchState): 'orders' | 'end' {
   const turn = state.turn!;
   const captain = actingCaptain(state);
   if (!captain) return 'end';
+  if (turn.movedKnightId) return 'end';
   const canPlace = !turn.placedKnightId && captainCanPlace(state, captain);
   const canAttack = !turn.attacked && captainAttackers(state, captain).length > 0;
   return canPlace || canAttack ? 'orders' : 'end';
@@ -314,7 +352,7 @@ export function canEndTurn(state: MatchState): boolean {
   if (!turn) return false;
   if (retreatDecider(state)) return false;
   if (turn.step === 'end') return true;
-  if (turn.step === 'orders') return turn.placedKnightId !== null || turn.attacked;
+  if (turn.step === 'orders') return turn.placedKnightId !== null || turn.movedKnightId !== null || turn.attacked;
   return turn.step === 'command' && actionableCaptains(state).length === 0;
 }
 

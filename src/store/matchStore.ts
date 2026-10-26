@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { MatchAction } from '../engine/actions';
 import type { MatchEvent } from '../engine/events';
 import { applyAction } from '../engine/match';
-import { chooseAttack, chooseCommand, chooseLordOrder, choosePlacement, chooseSergeant, chooseRetreat as chooseComputerRetreat } from '../ai';
+import { chooseAttack, chooseCommand, chooseLordOrder, choosePlacement, chooseSergeant, chooseRetreat as chooseComputerRetreat, chooseMove } from '../ai';
 import { commandSummary } from '../ui/campaign/commandText';
 import {
   actingCaptain,
@@ -354,8 +354,9 @@ function runComputerStep() {
         return;
       }
       // A Captain that can only attack must; otherwise attack only at fair odds.
-      const action = canEndTurn(match) ? chooseAttack(match) : chooseAttack(match, true);
+      const action = canEndTurn(match) ? chooseAttack(match) : (chooseAttack(match, true) ?? chooseMove(match));
       if (action && store.dispatch(action)) {
+        if (action.type !== 'declareAttack') return;
         const state = useMatchStore.getState();
         if (state.match.duel?.outcome) {
           // Snipe or First Strike already decided it: straight to the battlefield.
@@ -396,6 +397,13 @@ function screenUpdatesFor(state: MatchState, events: MatchEvent[]): Partial<Matc
       case 'knightPlaced':
         // Ready to attack with the new Knight if it has a target.
         updates.selectedKnightId = attackers(state).some((k) => k.id === event.knightId) ? event.knightId : null;
+        break;
+      case 'knightMoved':
+        updates.selectedKnightId = null;
+        break;
+      case 'knightOrderUndone':
+        // The Knight is back where it was: ready to try again.
+        updates.selectedKnightId = event.knightId;
         break;
       case 'decisiveStarted':
         updates.decisiveOpen = true;
