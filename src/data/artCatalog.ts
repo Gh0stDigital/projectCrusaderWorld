@@ -6,6 +6,7 @@ import enemyLord from '../assets/cards/lords/enemy-lord.png';
 import captain from '../assets/cards/captains/captain.png';
 import enemyCaptain from '../assets/cards/captains/enemy-captain.png';
 import raidersCaptain from '../assets/cards/captains/raiders-captain.png';
+import armyCaptain from '../assets/cards/captains/army-captain.png';
 import knight from '../assets/cards/knights/knight.png';
 import enemyKnight from '../assets/cards/knights/enemy-knight.png';
 import knightFacingLeft from '../assets/cards/knights/knight-facing-left.png';
@@ -38,6 +39,8 @@ export const artCatalog = {
   enemyCaptain: { src: enemyCaptain, face: { x: 39, y: 40, zoom: 3.4 } },
   /** Player 1's Raiders Captains: masked, wide-brimmed helmet. */
   raidersCaptain: { src: raidersCaptain, face: { x: 52, y: 26, zoom: 3.4 } },
+  /** Player 1's Army Captains: bronze helmet and green scarf, mirrored from the source art. */
+  armyCaptain: { src: armyCaptain, face: { x: 51, y: 33, zoom: 3.4 } },
   knight: { src: knight, face: { x: 51, y: 24, zoom: 3.4 } },
   /** Recolored (red armor, crimson frame) and mirrored to face inward from the enemy side. */
   enemyKnight: { src: enemyKnight, face: { x: 49, y: 24, zoom: 3.4 } },

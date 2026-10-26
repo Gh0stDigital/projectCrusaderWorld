@@ -85,12 +85,14 @@ export function captainName(captain: Pick<Captain, 'owner' | 'lord' | 'rank'>): 
 }
 
 /**
- * Captain card: Player 1's Raiders Captains have their own; Player 1's other
- * Captains share one; the enemy's all share a mirrored crimson one.
+ * Captain card: Player 1's Raiders and Army Captains have their own; Player 1's
+ * Garrison Captains use the shared one; the enemy's all share a mirrored crimson one.
  */
 export function captainArt(owner: PlayerId, lord: LordClass): ArtId {
   if (owner === 'p2') return 'enemyCaptain';
-  return lord === 'raiders' ? 'raidersCaptain' : 'captain';
+  if (lord === 'raiders') return 'raidersCaptain';
+  if (lord === 'army') return 'armyCaptain';
+  return 'captain';
 }
 
 export const SUBCLASS_NAMES: Record<KnightSubclass, string> = {
