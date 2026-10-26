@@ -85,12 +85,12 @@ export function captainName(captain: Pick<Captain, 'owner' | 'lord' | 'rank'>): 
 }
 
 /**
- * Captain card by Lord: Raiders Captains have their own; the others share one.
- * The enemy's versions are recolored crimson and mirrored.
+ * Captain card: Player 1's Raiders Captains have their own; Player 1's other
+ * Captains share one; the enemy's all share a mirrored crimson one.
  */
 export function captainArt(owner: PlayerId, lord: LordClass): ArtId {
-  if (lord === 'raiders') return owner === 'p1' ? 'raidersCaptain' : 'enemyRaidersCaptain';
-  return owner === 'p1' ? 'captain' : 'enemyCaptain';
+  if (owner === 'p2') return 'enemyCaptain';
+  return lord === 'raiders' ? 'raidersCaptain' : 'captain';
 }
 
 export const SUBCLASS_NAMES: Record<KnightSubclass, string> = {
