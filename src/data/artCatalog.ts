@@ -5,6 +5,8 @@ import nevadius from '../assets/cards/lords/nevadius.png';
 import enemyLord from '../assets/cards/lords/enemy-lord.png';
 import captain from '../assets/cards/captains/captain.png';
 import enemyCaptain from '../assets/cards/captains/enemy-captain.png';
+import raidersCaptain from '../assets/cards/captains/raiders-captain.png';
+import enemyRaidersCaptain from '../assets/cards/captains/enemy-raiders-captain.png';
 import knight from '../assets/cards/knights/knight.png';
 import enemyKnight from '../assets/cards/knights/enemy-knight.png';
 import knightFacingLeft from '../assets/cards/knights/knight-facing-left.png';
@@ -35,6 +37,9 @@ export const artCatalog = {
   captain: { src: captain, face: { x: 50, y: 40, zoom: 3.4 } },
   /** Recolored crimson and mirrored to face inward from the enemy side. */
   enemyCaptain: { src: enemyCaptain, face: { x: 39, y: 40, zoom: 3.4 } },
+  /** Raiders Captains: masked, wide-brimmed helmet. The enemy's is recolored crimson and mirrored. */
+  raidersCaptain: { src: raidersCaptain, face: { x: 52, y: 22, zoom: 3.4 } },
+  enemyRaidersCaptain: { src: enemyRaidersCaptain, face: { x: 48, y: 22, zoom: 3.4 } },
   knight: { src: knight, face: { x: 51, y: 24, zoom: 3.4 } },
   /** Recolored (red armor, crimson frame) and mirrored to face inward from the enemy side. */
   enemyKnight: { src: enemyKnight, face: { x: 49, y: 24, zoom: 3.4 } },

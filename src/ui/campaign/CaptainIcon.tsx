@@ -112,7 +112,7 @@ export function CaptainIcon({ match, captain, pickable, selected, onPick }: Capt
         }}
         aria-label={`${captainName(captain)}: ${STATUS_LABEL[status]}. Press and hold for details.`}
       >
-        <Portrait art={captainArt(captain.owner)} size={64} owner={captain.owner} />
+        <Portrait art={captainArt(captain.owner, captain.lord)} size={64} owner={captain.owner} />
         <span className="captain-icon__status">{STATUS_LABEL[status]}</span>
       </button>
       {open &&
@@ -139,7 +139,7 @@ function CaptainDetails({
   const knights = knightsOf(match, captain.id).filter((k) => k.status !== 'unmanned');
   return (
     <div className={`captain-details captain-details--${captain.owner}`} role="tooltip" style={{ left: at.x, top: at.y }}>
-      <Card art={captainArt(captain.owner)} size="roster" owner={captain.owner} />
+      <Card art={captainArt(captain.owner, captain.lord)} size="roster" owner={captain.owner} />
       <div className="captain-details__info">
         <h3 className="captain-details__name">{captainName(captain)}</h3>
         <p className="captain-details__line">Serves {lordPersona(captain.owner, captain.lord).name}</p>

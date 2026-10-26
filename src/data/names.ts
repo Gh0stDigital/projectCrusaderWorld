@@ -84,8 +84,12 @@ export function captainName(captain: Pick<Captain, 'owner' | 'lord' | 'rank'>): 
   return `Captain ${captainPersonalName(captain)}`;
 }
 
-/** Player 1's Captains share one card; the enemy's share a mirrored crimson one. */
-export function captainArt(owner: PlayerId): ArtId {
+/**
+ * Captain card by Lord: Raiders Captains have their own; the others share one.
+ * The enemy's versions are recolored crimson and mirrored.
+ */
+export function captainArt(owner: PlayerId, lord: LordClass): ArtId {
+  if (lord === 'raiders') return owner === 'p1' ? 'raidersCaptain' : 'enemyRaidersCaptain';
   return owner === 'p1' ? 'captain' : 'enemyCaptain';
 }
 

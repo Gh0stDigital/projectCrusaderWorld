@@ -19,7 +19,7 @@ Lord classes: Army, Garrison, Raiders. Each player has one Lord of each.
 
 The Lords are characters with their own card art: **Aubrey** (Army), **Nevadius** (Garrison) and **Jermaine** (Raiders). The opponent (Player 2) uses one generic **Enemy Lord** card for all three of their Lords, recolored crimson (shown as "Enemy Lord of the Army" and so on).
 
-Captains have placeholder names, two per Lord (Player 1: Roderic, Godfrey, Edmund, Baldwin, Tancred, Alaric; enemy: Malric, Draven, Mordaunt, Varek, Corvin, Sauvic), set in `src/data/names.ts`. Player 1's Captains share one Captain card; the enemy's share a generic Captain card recolored crimson and mirrored to face inward from the right (the banner lettering is kept unmirrored).
+Captains have placeholder names, two per Lord (Player 1: Roderic, Godfrey, Edmund, Baldwin, Tancred, Alaric; enemy: Malric, Draven, Mordaunt, Varek, Corvin, Sauvic), set in `src/data/names.ts`. Raiders Captains have their own card (masked, wide-brimmed helmet: `raiders-captain.png`), used for their card and face icons. The other Captains share one Captain card. The enemy's versions are recolored crimson and mirrored to face inward from the right (the banner lettering is kept unmirrored).
 
 Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/data/names.ts`). Player 1's Knights use the blue Knight card; the enemy's use the same Knight with red armor and a crimson frame, mirrored to face inward. In battle the Knights always face each other. Which Lord leads which class is set in `src/data/names.ts` (`LORD_PERSONAS`).
 

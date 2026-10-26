@@ -60,7 +60,7 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
       <p className="company__where">In {REGION_NAMES[region]}</p>
 
       <div className={`company__captain${acting ? ' company__captain--acting' : ''}`}>
-        <Card art={captainArt(player)} size="detail" owner={player} alt={captainName(captain)} />
+        <Card art={captainArt(player, captain.lord)} size="detail" owner={player} alt={captainName(captain)} />
         <div className="company__captain-info">
           <h3 className="company__captain-name">{captainPersonalName(captain)}</h3>
           <p className="company__captain-lord">{lordPersona(player, captain.lord).name}</p>

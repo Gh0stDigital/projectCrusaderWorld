@@ -97,7 +97,7 @@ function SecuredMarker({ match, region }: { match: MatchState; region: RegionInd
   const captain = match.captains[held.captainId]!;
   return (
     <span className="region__secured" title={`Secured by ${PLAYER_NAMES[held.player]}: ${captainName(captain)}`}>
-      <Card art={captainArt(held.player)} size="company" owner={held.player} />
+      <Card art={captainArt(held.player, captain.lord)} size="company" owner={held.player} />
       <span className="region__secured-mark">
         <Mark player={held.player} />
       </span>
@@ -123,7 +123,7 @@ function CaptainMarker({ match, region, player }: { match: MatchState; region: R
   if (!captain) return <span className={`region__captain-empty region__captain-empty--${player}`} />;
   return (
     <Portrait
-      art={captainArt(player)}
+      art={captainArt(player, captain.lord)}
       size={38}
       owner={player}
       title={`${PLAYER_NAMES[player]}: ${captainName(captain)}`}
