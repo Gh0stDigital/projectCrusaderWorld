@@ -35,6 +35,12 @@ import watchmanBattle from '../../assets/sprites/watchman-battle-anim.png';
 import enemyWatchmanBattle from '../../assets/sprites/enemy-watchman-battle-anim.png';
 import wardenBattle from '../../assets/sprites/warden-battle-anim.png';
 import enemyWardenBattle from '../../assets/sprites/enemy-warden-battle-anim.png';
+import skirmisherBattle from '../../assets/sprites/skirmisher-battle-anim.png';
+import enemySkirmisherBattle from '../../assets/sprites/enemy-skirmisher-battle-anim.png';
+import ambusherBattle from '../../assets/sprites/ambusher-battle-anim.png';
+import enemyAmbusherBattle from '../../assets/sprites/enemy-ambusher-battle-anim.png';
+import saboteurBattle from '../../assets/sprites/saboteur-battle-anim.png';
+import enemySaboteurBattle from '../../assets/sprites/enemy-saboteur-battle-anim.png';
 
 /** Battle avatars: two-frame strips, sized to their frame shape (width 330 unless set, height from the frame). */
 interface BattleSprite {
@@ -51,20 +57,23 @@ const BATTLE_SPRITES = {
   gatekeeper: { p1: gatekeeperBattle, p2: enemyGatekeeperBattle, width: 240, height: Math.round((240 * 734) / 750) },
   watchman: { p1: watchmanBattle, p2: enemyWatchmanBattle, height: Math.round((330 * 750) / 991) },
   warden: { p1: wardenBattle, p2: enemyWardenBattle, height: Math.round((330 * 808) / 982) },
+  skirmisher: { p1: skirmisherBattle, p2: enemySkirmisherBattle, height: Math.round((330 * 850) / 919) },
+  ambusher: { p1: ambusherBattle, p2: enemyAmbusherBattle, height: Math.round((330 * 952) / 993) },
+  saboteur: { p1: saboteurBattle, p2: enemySaboteurBattle, height: Math.round((330 * 676) / 924) },
 } satisfies Record<string, BattleSprite>;
 const SWORD_HEIGHT = BATTLE_SPRITES.sword.height;
 const SPRITE_WIDTH = 330;
 
-/**
- * Battle avatar by Knight type. Garrison types have their own; for now Ambushers
- * use the crossbow, Skirmishers the lance rider, and the rest the sword Knight.
- */
+/** Battle avatar by Knight type. Garrison and Raiders types have their own; Army uses sword, crossbow and lance rider. */
 function battleSprite(subclass: string | null): BattleSprite {
   if (subclass === 'gatekeeper') return BATTLE_SPRITES.gatekeeper;
   if (subclass === 'watchman') return BATTLE_SPRITES.watchman;
   if (subclass === 'warden') return BATTLE_SPRITES.warden;
-  if (subclass === 'archers' || subclass === 'ambusher') return BATTLE_SPRITES.crossbow;
-  if (subclass === 'cavalry' || subclass === 'skirmisher') return BATTLE_SPRITES.lance;
+  if (subclass === 'skirmisher') return BATTLE_SPRITES.skirmisher;
+  if (subclass === 'ambusher') return BATTLE_SPRITES.ambusher;
+  if (subclass === 'saboteur') return BATTLE_SPRITES.saboteur;
+  if (subclass === 'archers') return BATTLE_SPRITES.crossbow;
+  if (subclass === 'cavalry') return BATTLE_SPRITES.lance;
   return BATTLE_SPRITES.sword;
 }
 import { SergeantBox, TacticLegend, type SergeantBoxState } from '../components/SergeantBox';
