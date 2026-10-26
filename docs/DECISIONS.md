@@ -57,7 +57,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 
 - Knights on a Region's 3×3 board are a pixel-art Knight sprite (`src/assets/sprites`), not cards: blue for Player 1, red and mirrored for the enemy. It idles between its two frames at 1 frame per second (off with reduced motion).
 - The Captain panel's Knight tokens use the same sprite, still and slightly greyed out (darker when in the field, faint when unmanned, sepia when fallen).
-- Battles use a pixel Knight bust (`knight-battle-anim.png`; Archers, and for now Watchmen and Ambushers, use the crossbow bust `crossbow-battle-anim.png`; Cavalry, and for now Wardens and Skirmishers, use the lance rider `lance-battle-anim.png`, two frames idling at 1 frame per second; the enemy's is red and mirrored). The clash winner lunges straight forward and back, its info box moving with it; a Knight that takes damage shakes while a slash sweeps across it.
+- Battles use a pixel Knight bust per Knight type, two frames idling at 1 frame per second; the enemy's is red and mirrored. Sword Knight (`knight-battle-anim.png`) for Infantry and Saboteurs; crossbow (`crossbow-battle-anim.png`) for Archers and, for now, Ambushers; lance rider (`lance-battle-anim.png`) for Cavalry and, for now, Skirmishers. Garrison types have their own: Gatekeeper (spear, `gatekeeper-battle-anim.png`), Watchman (crossbow, `watchman-battle-anim.png`), Warden (mace and shield, `warden-battle-anim.png`). The clash winner lunges straight forward and back, its info box moving with it; a Knight that takes damage shakes while a slash sweeps across it.
 - Knight cards are still used in the attack preview.
 
 ## Region board skin — Settled
