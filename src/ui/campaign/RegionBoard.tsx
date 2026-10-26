@@ -42,6 +42,7 @@ export function RegionBoard({ match, clickable, active, required = null, playabl
           required === region && 'region--required',
           playable?.has(region) && 'region--playable',
           match.secured[region] && `region--secured region--secured-${match.secured[region]!.player}`,
+          match.closed.includes(region) && 'region--closed',
         ]
           .filter(Boolean)
           .join(' ');
@@ -71,6 +72,7 @@ export function RegionBoard({ match, clickable, active, required = null, playabl
             </span>
 
             {match.secured[region] && <SecuredMarker match={match} region={region} />}
+            {match.closed.includes(region) && <span className="region__closed">Stalemate · closed</span>}
             {required === region && <span className="region__required">Fated Move · play here</span>}
             {playable?.has(region) && <span className="region__required region__required--playable">Playable</span>}
             {isClickable && <span className="region__action">{labelFor(region)}</span>}

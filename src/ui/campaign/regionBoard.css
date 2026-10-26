@@ -211,3 +211,21 @@
 @media (prefers-reduced-motion: reduce) {
   .region__secured { animation: none; }
 }
+
+/* Closed by a level decisive battle: nobody holds it. */
+.region--closed .region__map {
+  opacity: 0.35;
+}
+
+.region__closed {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  transform: translate(-50%, -50%);
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(20, 15, 11, 0.9);
+  border: 1px solid var(--parchment-dim);
+  font-size: 9px;
+  white-space: nowrap;
+}
