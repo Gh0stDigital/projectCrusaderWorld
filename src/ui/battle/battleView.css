@@ -327,9 +327,10 @@
   animation: battle-idle 2s steps(2, end) infinite;
 }
 
+/* Two frames: 200% moves the strip by its full width whatever the avatar's size. */
 @keyframes battle-idle {
   from { background-position: 0 0; }
-  to { background-position: -660px 0; }
+  to { background-position: 200% 0; }
 }
 
 .combatant__card--fallen .combatant__sprite {

@@ -36,22 +36,30 @@ import enemyWatchmanBattle from '../../assets/sprites/enemy-watchman-battle-anim
 import wardenBattle from '../../assets/sprites/warden-battle-anim.png';
 import enemyWardenBattle from '../../assets/sprites/enemy-warden-battle-anim.png';
 
-/** Battle avatars: two-frame strips, sized to their frame shape (width 330, height from the frame). */
+/** Battle avatars: two-frame strips, sized to their frame shape (width 330 unless set, height from the frame). */
+interface BattleSprite {
+  p1: string;
+  p2: string;
+  height: number;
+  width?: number;
+}
 const BATTLE_SPRITES = {
   sword: { p1: knightBattle, p2: enemyKnightBattle, height: 326 },
   crossbow: { p1: crossbowBattle, p2: enemyCrossbowBattle, height: Math.round((330 * 703) / 989) },
   lance: { p1: lanceBattle, p2: enemyLanceBattle, height: Math.round((330 * 717) / 1000) },
-  gatekeeper: { p1: gatekeeperBattle, p2: enemyGatekeeperBattle, height: Math.round((330 * 734) / 750) },
+  // A close-up bust: drawn smaller so it matches the others.
+  gatekeeper: { p1: gatekeeperBattle, p2: enemyGatekeeperBattle, width: 240, height: Math.round((240 * 734) / 750) },
   watchman: { p1: watchmanBattle, p2: enemyWatchmanBattle, height: Math.round((330 * 750) / 991) },
   warden: { p1: wardenBattle, p2: enemyWardenBattle, height: Math.round((330 * 808) / 982) },
-} as const;
+} satisfies Record<string, BattleSprite>;
 const SWORD_HEIGHT = BATTLE_SPRITES.sword.height;
+const SPRITE_WIDTH = 330;
 
 /**
  * Battle avatar by Knight type. Garrison types have their own; for now Ambushers
  * use the crossbow, Skirmishers the lance rider, and the rest the sword Knight.
  */
-function battleSprite(subclass: string | null) {
+function battleSprite(subclass: string | null): BattleSprite {
   if (subclass === 'gatekeeper') return BATTLE_SPRITES.gatekeeper;
   if (subclass === 'watchman') return BATTLE_SPRITES.watchman;
   if (subclass === 'warden') return BATTLE_SPRITES.warden;
@@ -372,8 +380,11 @@ function Combatant({
               style={{
                 backgroundImage: `url(${battleSprite(knight.subclass)[side.player]})`,
                 height: battleSprite(knight.subclass).height,
-                // Shorter avatars keep their feet level with the info box.
+                width: battleSprite(knight.subclass).width ?? SPRITE_WIDTH,
+                backgroundSize: `${2 * (battleSprite(knight.subclass).width ?? SPRITE_WIDTH)}px 100%`,
+                // Shorter avatars keep their feet level with the info box; narrower ones stay centered.
                 marginTop: SWORD_HEIGHT - battleSprite(knight.subclass).height,
+                marginLeft: (SPRITE_WIDTH - (battleSprite(knight.subclass).width ?? SPRITE_WIDTH)) / 2,
               }}
             />
             {tookDamage && <span className="combatant__slash" aria-hidden="true" />}
