@@ -62,11 +62,11 @@
   color: var(--parchment);
 }
 
-.captain-icon--standby .captain-icon__status { color: var(--parchment-dim); }
-.captain-icon--deployed .captain-icon__status { color: #9cc4f5; }
-.captain-icon--p2.captain-icon--deployed .captain-icon__status { color: #f0a08f; }
-.captain-icon--stationed .captain-icon__status { color: var(--ink); background: var(--gold); }
-.captain-icon--dead .captain-icon__status { color: #e0715f; }
+/* Status colors: Standby green, Deployed yellow, Stationed blue, Dead dark red. */
+.captain-icon--standby .captain-icon__status { color: #6fcf6a; }
+.captain-icon--deployed .captain-icon__status { color: #f2d14b; }
+.captain-icon--stationed .captain-icon__status { color: #5b9cf0; }
+.captain-icon--dead .captain-icon__status { color: #a8322a; }
 
 .captain-icon--dead .portrait {
   filter: grayscale(1) brightness(0.45);
@@ -135,8 +135,10 @@
   font-size: 9px;
 }
 
-.captain-details__status--stationed { background: var(--gold); color: var(--ink); }
-.captain-details__status--dead { color: #e0715f; }
+.captain-details__status--standby { color: #6fcf6a; }
+.captain-details__status--deployed { color: #f2d14b; }
+.captain-details__status--stationed { color: #5b9cf0; }
+.captain-details__status--dead { color: #a8322a; }
 
 .captain-details__knights {
   list-style: none;
@@ -167,4 +169,9 @@
 .knight-details__ability {
   color: var(--parchment) !important;
   line-height: 1.5;
+}
+
+.knight-details__type {
+  background: var(--gold);
+  color: var(--ink);
 }

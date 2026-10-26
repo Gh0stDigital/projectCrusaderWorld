@@ -51,7 +51,7 @@ export function KnightDetails({
         </p>
         {knight.subclass && ability && (
           <>
-            <p className="captain-details__status captain-details__status--stationed">
+            <p className="captain-details__status knight-details__type">
               {SUBCLASS_NAMES[knight.subclass]} · {ability.name}
             </p>
             <p className="captain-details__line knight-details__ability">{ability.text}</p>

@@ -75,7 +75,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - On the Region board, each tile shows the stationed Captains as small square face portraits (Player 1 left of the name, Player 2 right) and a large 3×3 map where occupied squares show a blue X (Player 1) or a red O (Player 2).
 - The player can zoom out to view the Region board at any time without changing orders, and return to their Region.
 - During a turn, every Lord row except the acting Lord is greyed and darkened in both side panels.
-- Each Lord's two Captains show as small face icons with a status ribbon: Standby (with their Lord), Deployed (in a contested Region), Stationed (holds a Region they secured), Dead (all their staffed Knights killed or captured). Click to choose a Captain when allowed; press and hold to see their card, Lord, status, Region, militia, reserve and Knights.
+- Each Lord's two Captains show as small face icons with a status ribbon: Standby (with their Lord), Deployed (in a contested Region), Stationed (holds a Region they secured), Dead (all their staffed Knights killed or captured). Status text colors: Standby green, Deployed yellow, Stationed blue, Dead dark red (also in the press-and-hold details). Click to choose a Captain when allowed; press and hold to see their card, Lord, status, Region, militia, reserve and Knights.
 - A Dead Captain cannot act. Press and hold a Knight (token or board piece) to see its card, type, ability description, HP and Sergeants.
 - After End Turn: about 1 second of "orders complete" confirmation, zoom out to the Region board, about 1 second pause, then the next turn's announcement.
 
