@@ -235,6 +235,11 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 - **Assault won:** the defender's Knights on that board are captured and their Captain returns to their Lord (or dies at 0 men). The attacker's Knights the enemy had captured there are freed and rejoin their own Captain. If that Captain is alive and on Standby, they take the Region with those Knights. Otherwise the player stations a Standby Captain who still has a Knight (freed Knights whose Captain has fallen join them). With no such Captain, the Region empties and reopens.
 - **Assault lost or level:** only men are lost (at 0 men the attacker dies); both Regions stay as they were.
 - Each secured Region records the enemy Knights captured there, so they can be freed later.
+- Sending reserve or a Knight asks for confirmation (Confirm / Cancel). The orders window also has "Cancel: choose another Captain", which backs out of choosing that Captain before any order is given.
+- A Knight that joins another Captain fills one of that Captain's empty (unmanned) slots: the two slots swap, so every Captain keeps six. With no free slot the Knight cannot be sent there.
+- **Reports:** whenever a Region falls (three in a row, a decisive battle or an assault) a window lists who was captured, which Captains returned to their Lord and can be redeployed, and who fell; taking a Region back also lists the Knights freed. When the enemy sends reserve or a Knight, a window says what moved where. The computer waits until each report is closed, and Victory/Defeat shows after them.
+- During a decisive battle or assault, each side panel shows that side's Captain hub (card, militia, reserve, Knights); in an assault the attacker's hub is their own Region's.
+- On the Region board the selected Captain's Regions are marked only by the dashed white frame (no tag).
 - The computer assaults when it has at least 1.3× the defender's men; otherwise it sends its reserve (or a Knight) next door. After winning an assault it stations its first eligible Captain.
 
 ## Battles — Provisional (my choices, open to change)

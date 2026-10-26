@@ -19,6 +19,7 @@ import {
   attackers,
   assaultTargets,
   captainMilitia,
+  hasFreeSlot,
   decisiveRoller,
   sendTargets,
   sendableKnights,
@@ -208,7 +209,8 @@ export function chooseStationOrder(state: MatchState): MatchAction | null {
   const to = sendTargets(state, captain)[0];
   if (to && captain.reserve >= 10) return { type: 'sendReserve', player, toCaptainId: to.id, amount: captain.reserve };
   const knight = sendableKnights(state, captain).sort((a, b) => (a.status === 'ready' ? -1 : 1) - (b.status === 'ready' ? -1 : 1))[0];
-  if (to && knight) return { type: 'sendKnight', player, knightId: knight.id, toCaptainId: to.id };
+  const roomy = sendTargets(state, captain).find((c) => hasFreeSlot(state, c.id));
+  if (roomy && knight) return { type: 'sendKnight', player, knightId: knight.id, toCaptainId: roomy.id };
   if (to && captain.reserve > 0) return { type: 'sendReserve', player, toCaptainId: to.id, amount: captain.reserve };
   return targets[0] !== undefined ? { type: 'assault', player, region: targets[0] } : null;
 }

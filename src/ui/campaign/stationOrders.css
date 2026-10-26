@@ -66,3 +66,7 @@
   text-align: left;
   border-color: #e2604f;
 }
+
+.station--confirm {
+  width: 760px;
+}

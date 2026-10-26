@@ -151,3 +151,27 @@ describe('Winning the match', () => {
     expect(s.winner).toBe('p1');
   });
 });
+
+describe('Sending a Knight and cancelling', () => {
+  it('fills one of the receiver’s empty slots instead of adding one; both keep six', () => {
+    let s = resumeHolder(setup());
+    const count = (captainId: string) => Object.values(s.knights).filter((k) => k.captainId === captainId).length;
+    s = act(s, { type: 'sendKnight', player: 'p1', knightId: `${HOLDER}-k1`, toCaptainId: NEIGHBOUR });
+    expect(s.knights[`${HOLDER}-k1`]).toMatchObject({ captainId: NEIGHBOUR, number: 4 });
+    expect([count(HOLDER), count(NEIGHBOUR)]).toEqual([6, 6]);
+    expect(Object.values(s.knights).find((k) => k.captainId === HOLDER && k.number === 1)!.status).toBe('unmanned');
+  });
+
+  it('refuses when the receiver has no free slot', () => {
+    let s = setup();
+    for (const n of [4, 5, 6]) s.knights[`${NEIGHBOUR}-k${n}`] = { ...s.knights[`${NEIGHBOUR}-k${n}`]!, status: 'dead' };
+    s = resumeHolder(s);
+    expect(rejected(s, { type: 'sendKnight', player: 'p1', knightId: `${HOLDER}-k1`, toCaptainId: NEIGHBOUR })).toMatch(/no free/);
+  });
+
+  it('can be cancelled before giving the order: choose a Captain again', () => {
+    let s = resumeHolder(setup());
+    s = act(s, { type: 'cancelStationOrders', player: 'p1' });
+    expect(s.turn).toMatchObject({ step: 'command', captainId: null });
+  });
+});

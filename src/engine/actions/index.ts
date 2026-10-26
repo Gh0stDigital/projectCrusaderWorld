@@ -17,5 +17,6 @@ export type MatchAction =
   | { type: 'sendReserve'; player: PlayerId; toCaptainId: string; amount: number }
   | { type: 'sendKnight'; player: PlayerId; knightId: string; toCaptainId: string }
   | { type: 'assault'; player: PlayerId; region: RegionIndex }
+  | { type: 'cancelStationOrders'; player: PlayerId }
   | { type: 'stationCaptain'; player: PlayerId; captainId: string | null }
   | { type: 'endTurn'; player: PlayerId };

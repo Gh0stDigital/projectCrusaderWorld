@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   assaultTargets,
   captainMilitia,
+  hasFreeSlot,
   knightsOnBoard,
   sendTargets,
   sendableKnights,
@@ -9,6 +10,7 @@ import {
 } from '../../engine/queries';
 import type { Captain, MatchState, PlayerId } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
+import type { Report } from './reports';
 import '../battle/attackPreview.css';
 import './stationOrders.css';
 
@@ -24,12 +26,15 @@ export function StationOrders({
   onSendReserve,
   onSendKnight,
   onAssault,
+  onCancel,
 }: {
   match: MatchState;
   captain: Captain;
   onSendReserve: (toCaptainId: string, amount: number) => void;
   onSendKnight: (knightId: string, toCaptainId: string) => void;
   onAssault: (region: number) => void;
+  /** Back out: choose a different Captain this turn. */
+  onCancel: () => void;
 }) {
   const receivers = sendTargets(match, captain);
   const knights = sendableKnights(match, captain);
@@ -39,6 +44,32 @@ export function StationOrders({
   const [knightId, setKnightId] = useState(knights[0]?.id ?? '');
   const where = REGION_NAMES[captain.region!];
   const mine = captainMilitia(match, captain.id);
+  // Sending men asks for confirmation first, with the option to cancel.
+  const [confirm, setConfirm] = useState<{ text: string; run: () => void } | null>(null);
+  const toCaptain = receivers.find((c) => c.id === to);
+  const toLabel = toCaptain ? `${captainName(toCaptain)} in ${REGION_NAMES[toCaptain.region!]}` : '';
+  const roomy = toCaptain ? hasFreeSlot(match, toCaptain.id) : false;
+
+  if (confirm) {
+    return (
+      <div className="attack-preview" role="dialog" aria-modal="true" aria-labelledby="station-confirm-title">
+        <div className="attack-preview__window station station--confirm">
+          <h2 id="station-confirm-title" className="attack-preview__title">
+            Confirm orders
+          </h2>
+          <p className="battle-results__verdict">{confirm.text}</p>
+          <div className="attack-preview__actions">
+            <button className="btn" onClick={() => setConfirm(null)}>
+              Cancel
+            </button>
+            <button className="btn btn--primary" onClick={confirm.run} autoFocus>
+              Confirm
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="attack-preview" role="dialog" aria-modal="true" aria-labelledby="station-title">
@@ -84,7 +115,12 @@ export function StationOrders({
               <button
                 className="btn btn--primary"
                 disabled={!to || amount <= 0 || captain.reserve <= 0}
-                onClick={() => onSendReserve(to, amount)}
+                onClick={() =>
+                  setConfirm({
+                    text: `${captainName(captain)} sends ${amount} men from ${where} to ${toLabel}. They join that Captain's reserve.`,
+                    run: () => onSendReserve(to, amount),
+                  })
+                }
               >
                 Send reserve
               </button>
@@ -99,8 +135,18 @@ export function StationOrders({
                     </option>
                   ))}
                 </select>
-                <button className="btn btn--primary" disabled={!to || !knightId} onClick={() => onSendKnight(knightId, to)}>
-                  Send Knight
+                <button
+                  className="btn btn--primary"
+                  disabled={!to || !knightId || !roomy}
+                  title={roomy ? undefined : 'That Captain has no free Knight slot'}
+                  onClick={() =>
+                    setConfirm({
+                      text: `${captainName(captain)} sends ${knightName(match.knights[knightId]!)} from ${where} to ${toLabel}. The Knight joins that Captain, waiting to be placed.`,
+                      run: () => onSendKnight(knightId, to),
+                    })
+                  }
+                >
+                  {roomy ? 'Send Knight' : 'No free slot'}
                 </button>
               </div>
             )}
@@ -123,6 +169,35 @@ export function StationOrders({
             })}
           </section>
         )}
+
+        <div className="attack-preview__actions">
+          <button className="btn" onClick={onCancel}>
+            Cancel: choose another Captain
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** A pop-up report: a Region lost or won, Knights freed, or men the enemy sent. */
+export function ReportWindow({ report, onClose }: { report: Report; onClose: () => void }) {
+  return (
+    <div className="attack-preview" role="dialog" aria-modal="true" aria-labelledby="report-title">
+      <div className={`attack-preview__window battle-results__window battle-results__window--${report.tone} station`}>
+        <h2 id="report-title" className="attack-preview__title battle-results__title">
+          {report.title}
+        </h2>
+        {report.lines.map((line) => (
+          <p key={line} className="battle-results__verdict">
+            {line}
+          </p>
+        ))}
+        <div className="attack-preview__actions">
+          <button className="btn btn--primary" onClick={onClose} autoFocus>
+            Continue
+          </button>
+        </div>
       </div>
     </div>
   );

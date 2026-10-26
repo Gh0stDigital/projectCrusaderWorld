@@ -21,8 +21,6 @@ interface RegionBoardProps {
   playable?: ReadonlySet<RegionIndex>;
   /** Regions that belong to the currently selected Captain (deploy targets or their own Region). */
   selectedRegions?: ReadonlySet<RegionIndex>;
-  /** The selected Captain; their own Region gets a tag. */
-  selectedCaptainId?: string | null;
   /** Whether the player is choosing a Region; dims the ones they can't pick. */
   choosing: boolean;
   onClickRegion: (region: RegionIndex) => void;
@@ -34,7 +32,7 @@ interface RegionBoardProps {
  * portraits, and a large map of its own 3×3 board marked X (Player 1, blue) and
  * O (Player 2, red) so occupied squares read at a glance.
  */
-export function RegionBoard({ match, clickable, active, required = null, playable, selectedRegions, selectedCaptainId, choosing, onClickRegion, labelFor }: RegionBoardProps) {
+export function RegionBoard({ match, clickable, active, required = null, playable, selectedRegions, choosing, onClickRegion, labelFor }: RegionBoardProps) {
   return (
     <div className={`region-board${choosing ? ' region-board--choosing' : ''}`}>
       {REGIONS.map((region) => {
@@ -80,9 +78,6 @@ export function RegionBoard({ match, clickable, active, required = null, playabl
             {match.closed.includes(region) && <span className="region__closed">Stalemate · closed</span>}
             {required === region && <span className="region__required">Fated Move · play here</span>}
             {playable?.has(region) && <span className="region__required region__required--playable">Playable</span>}
-            {selectedRegions?.has(region) && match.captains[selectedCaptainId ?? '']?.region === region && (
-              <span className="region__selected-tag">Selected Captain</span>
-            )}
             {isClickable && <span className="region__action">{labelFor(region)}</span>}
           </button>
         );

@@ -16,6 +16,7 @@ export type MatchEvent =
   | { type: 'knightOrderUndone'; player: PlayerId; knightId: string }
   | { type: 'decisiveStarted'; region: RegionIndex; first: PlayerId }
   | { type: 'matchWon'; player: PlayerId }
+  | { type: 'commandCancelled'; player: PlayerId; captainId: string }
   | { type: 'reserveSent'; player: PlayerId; fromCaptainId: string; toCaptainId: string; amount: number }
   | { type: 'knightSent'; player: PlayerId; knightId: string; fromCaptainId: string; toCaptainId: string }
   | { type: 'regionTaken'; player: PlayerId; region: RegionIndex; captainId: string | null; rescuedKnightIds: string[] }

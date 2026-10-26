@@ -513,8 +513,10 @@ export function assaultTargets(state: MatchState, captain: Captain): RegionIndex
 
 /** Whether a stationed Captain has any order to give: send men somewhere, or assault. */
 export function stationedCanAct(state: MatchState, captain: Captain): boolean {
-  const hasMen = captain.reserve > 0 || sendableKnights(state, captain).length > 0;
-  return (hasMen && sendTargets(state, captain).length > 0) || assaultTargets(state, captain).length > 0;
+  const targets = sendTargets(state, captain);
+  const canSendReserve = captain.reserve > 0 && targets.length > 0;
+  const canSendKnight = sendableKnights(state, captain).length > 0 && targets.some((c) => hasFreeSlot(state, c.id));
+  return canSendReserve || canSendKnight || assaultTargets(state, captain).length > 0;
 }
 
 /** The acting Captain, if stationed and still owed its one order this turn. */
@@ -538,4 +540,9 @@ export function matchWinner(state: MatchState): PlayerId | null {
     if (LINES.some((line) => line.every((r) => state.secured[r as RegionIndex]?.player === player))) return player;
   }
   return null;
+}
+
+/** Whether a Captain has an empty (unmanned) Knight slot another Captain's Knight could join. */
+export function hasFreeSlot(state: MatchState, captainId: string): boolean {
+  return knightsOf(state, captainId).some((k) => k.status === 'unmanned');
 }

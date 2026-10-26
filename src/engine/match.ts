@@ -4,6 +4,7 @@ import type { MatchEvent } from './events';
 import type { MatchState } from './state';
 import {
   assault,
+  cancelStationOrders,
   sendKnight,
   sendReserve,
   stationCaptain,
@@ -55,6 +56,8 @@ export function applyAction(state: MatchState, action: MatchAction): EngineResul
       return sendKnight(state, action.player, action.knightId, action.toCaptainId);
     case 'assault':
       return assault(state, action.player, action.region);
+    case 'cancelStationOrders':
+      return cancelStationOrders(state, action.player);
     case 'stationCaptain':
       return stationCaptain(state, action.player, action.captainId);
     case 'endTurn':

@@ -80,11 +80,13 @@ export function sendKnight(
   if (typeof to === 'string') return reject(to);
   const knight = sendableKnights(state, from).find((k) => k.id === knightId);
   if (!knight) return reject('That Knight cannot be sent.');
+  const knights = { ...state.knights };
+  if (!joinCaptain(knights, knight.id, to.id)) return reject(`${'That Captain'} has no free Knight slot.`);
   return {
     ok: true,
     state: {
       ...state,
-      knights: { ...state.knights, [knight.id]: { ...knight, captainId: to.id, status: 'ready', position: null } },
+      knights,
       turn: { ...state.turn!, stationOrder: true, step: 'end' },
     },
     events: [{ type: 'knightSent', player, knightId: knight.id, fromCaptainId: from.id, toCaptainId: to.id }],
@@ -151,16 +153,11 @@ export function finishAssault(
   const attacker = state.turn!.player;
   const enemy = otherPlayer(attacker);
   const { winner, loserKilled } = d.outcome!;
+  const capturedKnightIds: string[] = [];
+  const returnedCaptainIds: string[] = [];
+  const fallenCaptainIds: string[] = [];
   const events: MatchEvent[] = [
-    {
-      type: 'decisiveEnded',
-      region: d.region,
-      winner,
-      loserKilled,
-      capturedKnightIds: [],
-      returnedCaptainIds: [],
-      fallenCaptainIds: [],
-    },
+    { type: 'decisiveEnded', region: d.region, winner, loserKilled, capturedKnightIds, returnedCaptainIds, fallenCaptainIds },
   ];
   const kill = (captainId: string) => {
     for (const k of knightsOf(state, captainId)) {
@@ -169,6 +166,7 @@ export function finishAssault(
       }
     }
     captains[captainId] = { ...captains[captainId]!, region: null, fallen: true, reserve: 0 };
+    fallenCaptainIds.push(captainId);
   };
 
   let secured = { ...state.secured };
@@ -176,7 +174,6 @@ export function finishAssault(
 
   if (winner === attacker) {
     const defenderId = d.captains[enemy];
-    const capturedKnightIds: string[] = [];
     if (loserKilled) {
       kill(defenderId);
     } else {
@@ -189,6 +186,7 @@ export function finishAssault(
       const c = captains[defenderId]!;
       const hasMen = c.reserve > 0 || Object.values(knights).some((k) => k.captainId === c.id && k.status === 'ready');
       captains[c.id] = { ...c, region: null, fallen: !hasMen };
+      (hasMen ? returnedCaptainIds : fallenCaptainIds).push(c.id);
     }
 
     // Free our Knights the enemy captured here: back to their own Captain if alive.
@@ -207,7 +205,7 @@ export function finishAssault(
     if (previous) {
       captains[previous.id] = { ...previous, region: d.region };
       secured[d.region] = { player: attacker, captainId: previous.id, capturedKnightIds };
-      orphanKnightIds.forEach((id) => (knights[id] = { ...knights[id]!, captainId: previous.id, status: 'ready' }));
+      orphanKnightIds.forEach((id) => joinCaptain(knights, id, previous.id));
       events.push({ type: 'regionTaken', player: attacker, region: d.region, captainId: previous.id, rescuedKnightIds: freed });
     } else {
       const next: MatchState = { ...state, knights, captains };
@@ -240,7 +238,7 @@ export function stationCaptain(
   const captain = stationCandidates(state, player).find((c) => c.id === captainId);
   if (!captain) return reject('Choose one of your Standby Captains who still has a Knight.');
   const knights = { ...state.knights };
-  pending.orphanKnightIds.forEach((id) => (knights[id] = { ...knights[id]!, captainId: captain.id, status: 'ready', position: null }));
+  pending.orphanKnightIds.forEach((id) => joinCaptain(knights, id, captain.id));
   const after: MatchState = {
     ...state,
     knights,
@@ -265,5 +263,31 @@ export function stationCaptain(
       },
       ...passed.events,
     ],
+  };
+}
+
+/**
+ * A Knight joins another Captain in one of their empty (unmanned) slots: the two
+ * swap places, so both Captains keep six slots. Returns false if there is no free slot.
+ */
+export function joinCaptain(knights: Record<string, Knight>, knightId: string, toCaptainId: string): boolean {
+  const knight = knights[knightId]!;
+  const slot = Object.values(knights)
+    .filter((k) => k.captainId === toCaptainId && k.status === 'unmanned')
+    .sort((a, b) => a.number - b.number)[0];
+  if (!slot) return false;
+  knights[slot.id] = { ...slot, captainId: knight.captainId, number: knight.number };
+  knights[knightId] = { ...knight, captainId: toCaptainId, number: slot.number, status: 'ready', position: null };
+  return true;
+}
+
+/** Back out of a stationed Captain's orders before giving one: choose a Captain again. */
+export function cancelStationOrders(state: MatchState, player: PlayerId): EngineResult<MatchState, MatchEvent> {
+  const from = checkStationed(state, player);
+  if (typeof from === 'string') return reject(from);
+  return {
+    ok: true,
+    state: { ...state, turn: { ...state.turn!, step: 'command', captainId: null } },
+    events: [{ type: 'commandCancelled', player, captainId: from.id }],
   };
 }

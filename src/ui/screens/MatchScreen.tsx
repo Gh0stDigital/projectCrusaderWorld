@@ -15,7 +15,7 @@ import { OrdersNotice } from '../overlays/OrdersNotice';
 import { AttackPreview } from '../battle/AttackPreview';
 import { BattleView } from '../battle/BattleView';
 import { DecisiveView } from '../battle/DecisiveView';
-import { MatchOver, StationOrders, StationPrompt } from '../campaign/StationOrders';
+import { MatchOver, ReportWindow, StationOrders, StationPrompt } from '../campaign/StationOrders';
 import regionBoardSkin from '../../assets/ui/region-board-skin.webp';
 import regionViewSkin from '../../assets/ui/region-view-skin.webp';
 import './match.css';
@@ -96,6 +96,14 @@ export function MatchScreen() {
     focusedRegion !== null
       ? { region: focusedRegion, selectedKnightId, onSelectKnight: (id: string) => !locked && store.selectKnight(id) }
       : undefined;
+  // During a decisive battle each side panel shows its Captain's hub (in an
+  // assault the attacker's Captain is in their own Region).
+  const companyFor = (player: 'p1' | 'p2') => {
+    const d = match.decisive;
+    if (!store.decisiveOpen || !d) return companyControls;
+    const region = d.kind === 'assault' && player === d.first && d.fromRegion !== null ? d.fromRegion : d.region;
+    return { region, selectedKnightId: null, onSelectKnight: () => {} };
+  };
 
   const leave = () => {
     store.newMatch();
@@ -170,7 +178,7 @@ export function MatchScreen() {
         selectedCaptainId={selectedCaptainId}
         onSelectCaptain={(id) => !locked && store.selectCaptain(id)}
         draft={ordering === 'p1' ? draftControls : undefined}
-        company={companyControls}
+        company={companyFor('p1')}
         battleHud={battleOpen}
       />
 
@@ -198,7 +206,6 @@ export function MatchScreen() {
               onClickRegion={clickRegion}
               labelFor={regionLabel}
               selectedRegions={selectedRegions}
-              selectedCaptainId={selectedCaptainId}
             />
           )
         }
@@ -268,6 +275,7 @@ export function MatchScreen() {
                 onSendReserve={(toCaptainId, amount) => store.dispatch({ type: 'sendReserve', player: 'p1', toCaptainId, amount })}
                 onSendKnight={(knightId, toCaptainId) => store.dispatch({ type: 'sendKnight', player: 'p1', knightId, toCaptainId })}
                 onAssault={(region) => store.dispatch({ type: 'assault', player: 'p1', region: region as RegionIndex })}
+                onCancel={() => store.dispatch({ type: 'cancelStationOrders', player: 'p1' })}
               />
             )}
             {match.pendingStation?.player === 'p1' && !store.decisiveOpen && (
@@ -276,8 +284,11 @@ export function MatchScreen() {
                 onStation={(captainId) => store.dispatch({ type: 'stationCaptain', player: 'p1', captainId })}
               />
             )}
-            {match.phase === 'over' && match.winner && !store.decisiveOpen && !battleOpen && (
+            {match.phase === 'over' && match.winner && !store.decisiveOpen && !battleOpen && store.reports.length === 0 && (
               <MatchOver winner={match.winner} onMenu={leave} />
+            )}
+            {store.reports.length > 0 && !battleOpen && !store.decisiveOpen && !defensePromptOpen && (
+              <ReportWindow report={store.reports[0]!} onClose={store.dismissReport} />
             )}
             {notice && <OrdersNotice player={notice.player} detail={noticeDetail} />}
             {announcement && <TurnAnnouncement announcement={announcement} onDone={store.dismissAnnouncement} />}
@@ -291,7 +302,7 @@ export function MatchScreen() {
         selectedCaptainId={selectedCaptainId}
         onSelectCaptain={(id) => !locked && store.selectCaptain(id)}
         draft={undefined}
-        company={companyControls}
+        company={companyFor('p2')}
         battleHud={battleOpen}
       />
 

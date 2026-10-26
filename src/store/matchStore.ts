@@ -4,6 +4,7 @@ import type { MatchEvent } from '../engine/events';
 import { applyAction } from '../engine/match';
 import { chooseAttack, chooseCommand, chooseLordOrder, choosePlacement, chooseSergeant, chooseRetreat as chooseComputerRetreat, chooseMove, chooseStation, chooseStationOrder } from '../ai';
 import { commandSummary } from '../ui/campaign/commandText';
+import { reportsFor, type Report } from '../ui/campaign/reports';
 import {
   actingCaptain,
   actionableCaptains,
@@ -75,6 +76,8 @@ interface MatchStore {
   defensePromptOpen: boolean;
   /** The decisive battle screen is showing (from its start until the player returns). */
   decisiveOpen: boolean;
+  /** Pop-up reports waiting to be read (Regions lost or won, men sent). The computer waits for them. */
+  reports: Report[];
   /** "Orders complete" confirmation shown at the end of a turn. */
   notice: { player: PlayerId } | null;
   error: string | null;
@@ -94,6 +97,8 @@ interface MatchStore {
   rollDecisive: () => void;
   /** Leave the finished decisive battle: its results apply and the turn passes. */
   closeDecisive: () => void;
+  /** Close the report on top. */
+  dismissReport: () => void;
   /** The human, under attack, sends `amount` reserve militia (0 for none) and the battle begins. */
   confirmDefense: (amount: number) => void;
   dismissAnnouncement: () => void;
@@ -113,6 +118,7 @@ const freshScreenState = {
   battleSnapshot: null,
   defensePromptOpen: false,
   decisiveOpen: false,
+  reports: [],
   departure: null,
 };
 
@@ -144,7 +150,12 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
       set({ error: result.reason });
       return false;
     }
-    set({ match: result.state, error: null, ...screenUpdatesFor(result.state, result.events) });
+    set({
+      match: result.state,
+      error: null,
+      ...screenUpdatesFor(result.state, result.events),
+      reports: [...get().reports, ...reportsFor(result.state, result.events)],
+    });
     // The computer picks Player 2's Sergeants in a duel, whether attacking or
     // defending. It commits before the human picks and never sees their choice.
     if (result.events.some((e) => e.type === 'duelStarted' || e.type === 'clashResolved')) {
@@ -220,6 +231,11 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
     if (get().dispatch(action)) {
       set({ battleOpen: true, battleSnapshot: before });
     }
+  },
+
+  dismissReport: () => {
+    set({ reports: get().reports.slice(1) });
+    scheduleComputer();
   },
 
   rollDecisive: () => {
@@ -315,8 +331,8 @@ function scheduleComputer() {
  */
 function runComputerStep() {
   const store = useMatchStore.getState();
-  const { match, busy, announcement, battleOpen, defensePromptOpen, focusedRegion, departure, decisiveOpen } = store;
-  if (busy || announcement || battleOpen || defensePromptOpen || departure || decisiveOpen) return;
+  const { match, busy, announcement, battleOpen, defensePromptOpen, focusedRegion, departure, decisiveOpen, reports } = store;
+  if (busy || announcement || battleOpen || defensePromptOpen || departure || decisiveOpen || reports.length > 0) return;
 
   if (match.phase === 'lordOrder') {
     if (match.orderingPlayer === COMPUTER) {
