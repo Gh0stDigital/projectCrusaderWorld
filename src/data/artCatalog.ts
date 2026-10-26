@@ -37,7 +37,7 @@ export const artCatalog = {
   /** Recolored crimson and mirrored to face inward from the enemy side. */
   enemyCaptain: { src: enemyCaptain, face: { x: 39, y: 40, zoom: 3.4 } },
   /** Player 1's Raiders Captains: masked, wide-brimmed helmet. */
-  raidersCaptain: { src: raidersCaptain, face: { x: 52, y: 22, zoom: 3.4 } },
+  raidersCaptain: { src: raidersCaptain, face: { x: 52, y: 26, zoom: 3.4 } },
   knight: { src: knight, face: { x: 51, y: 24, zoom: 3.4 } },
   /** Recolored (red armor, crimson frame) and mirrored to face inward from the enemy side. */
   enemyKnight: { src: enemyKnight, face: { x: 49, y: 24, zoom: 3.4 } },
