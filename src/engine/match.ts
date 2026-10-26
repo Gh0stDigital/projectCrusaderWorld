@@ -3,6 +3,7 @@ import type { MatchAction } from './actions';
 import type { MatchEvent } from './events';
 import type { MatchState } from './state';
 import {
+  chooseRetreat,
   commitSergeant,
   declareAttack,
   deployCaptain,
@@ -30,6 +31,8 @@ export function applyAction(state: MatchState, action: MatchAction): EngineResul
       return reinforceKnight(state, action.player, action.knightId, action.amount);
     case 'commitSergeant':
       return commitSergeant(state, action.player, action.sergeantId);
+    case 'chooseRetreat':
+      return chooseRetreat(state, action.player, action.retreat);
     case 'endTurn':
       return endTurn(state, action.player);
   }

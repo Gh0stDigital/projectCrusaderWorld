@@ -2,9 +2,9 @@ import { create } from 'zustand';
 import type { MatchAction } from '../engine/actions';
 import type { MatchEvent } from '../engine/events';
 import { applyAction } from '../engine/match';
-import { chooseAttack, chooseCommand, chooseLordOrder, choosePlacement, chooseSergeant } from '../ai';
+import { chooseAttack, chooseCommand, chooseLordOrder, choosePlacement, chooseSergeant, chooseRetreat as chooseComputerRetreat } from '../ai';
 import { commandSummary } from '../ui/campaign/commandText';
-import { actionableCaptains, canEndTurn, reserveKnights } from '../engine/queries';
+import { actionableCaptains, canEndTurn, reserveKnights, retreatDecider } from '../engine/queries';
 import { createMatch } from '../engine/setup';
 import type { LordClass, MatchState, PlayerId, RegionIndex, SquareIndex } from '../engine/state';
 
@@ -76,6 +76,8 @@ interface MatchStore {
   openAttackPreview: (knightId: string | null) => void;
   commenceAttack: () => void;
   closeBattle: () => void;
+  /** The human's surviving loser retreats to its Captain (true) or holds its square (false); then the battle closes. */
+  chooseRetreat: (retreat: boolean) => void;
   /** The human, under attack, sends `amount` reserve militia (0 for none) and the battle begins. */
   confirmDefense: (amount: number) => void;
   dismissAnnouncement: () => void;
@@ -131,6 +133,11 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
         if (reply) get().dispatch(reply);
       }
     }
+    // The computer decides at once whether its surviving loser retreats or holds.
+    if (retreatDecider(result.state) === COMPUTER) {
+      const choice = chooseComputerRetreat(result.state, COMPUTER);
+      if (choice) get().dispatch(choice);
+    }
     scheduleComputer();
     return true;
   },
@@ -178,12 +185,18 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
     }
   },
 
+  chooseRetreat: (retreat) => {
+    const player = retreatDecider(get().match);
+    if (player && get().dispatch({ type: 'chooseRetreat', player, retreat })) get().closeBattle();
+  },
+
   closeBattle: () => {
     // The loser's piece stays on its old square for a moment, then retreats or is destroyed.
     const { match, battleSnapshot } = get();
     const duel = match.duel;
     let departure: Departure | null = null;
-    if (duel?.outcome?.winner && duel.outcome.loserFate) {
+    const fate = duel?.outcome?.loserFate;
+    if (duel?.outcome?.winner && (fate === 'killed' || fate === 'retreated')) {
       const loserRole = duel.outcome.winner === 'attacker' ? 'defender' : 'attacker';
       const loserId = duel[loserRole].knightId;
       const before = (battleSnapshot ?? match).knights[loserId];
@@ -193,7 +206,7 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
           owner: before.owner,
           region: before.position.region,
           square: before.position.square,
-          fate: duel.outcome.loserFate,
+          fate,
         };
       }
     }

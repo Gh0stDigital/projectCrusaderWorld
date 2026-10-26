@@ -267,11 +267,19 @@ export function lineSquares(square: SquareIndex): SquareIndex[] {
 export function canEndTurn(state: MatchState): boolean {
   const turn = state.turn;
   if (!turn) return false;
+  if (retreatDecider(state)) return false;
   if (turn.step === 'end' || turn.step === 'attack') return true;
   return turn.step === 'command' && actionableCaptains(state).length === 0;
 }
 
 // --- Duels ---
+
+/** The player who must choose whether their losing Knight retreats or holds, if any. */
+export function retreatDecider(state: MatchState): PlayerId | null {
+  const outcome = state.duel?.outcome;
+  if (!outcome?.winner || outcome.loserFate !== 'deciding') return null;
+  return state.duel![outcome.winner === 'attacker' ? 'defender' : 'attacker'].player;
+}
 
 export function duelKnight(state: MatchState, duel: Duel, role: DuelRole): Knight {
   return state.knights[duel[role].knightId]!;

@@ -9,4 +9,5 @@ export type MatchAction =
   | { type: 'declareAttack'; player: PlayerId; targetKnightId: string }
   | { type: 'reinforceKnight'; player: PlayerId; knightId: string; amount: number }
   | { type: 'commitSergeant'; player: PlayerId; sergeantId: string }
+  | { type: 'chooseRetreat'; player: PlayerId; retreat: boolean }
   | { type: 'endTurn'; player: PlayerId };

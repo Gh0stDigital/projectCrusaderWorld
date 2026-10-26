@@ -82,11 +82,11 @@ describe('Infantry: Regroup', () => {
     expect(s.duel!.aftermath).toEqual([{ type: 'regroup', knightId: ATTACKER, restored: 5, sergeantIds: [`${ATTACKER}-s1`] }]);
   });
 
-  it('also works when the Infantry loses but retreats alive, and not for beaten Sergeants', () => {
+  it('also works when the Infantry loses but survives, and not for beaten Sergeants', () => {
     let s = setup({ tactics: ['rush', 'rush'], subclass: 'infantry' }, { tactics: ['rush', 'counter'] });
     s = clash(s, 1, 1); // tie
     s = clash(s, 2, 2); // Counter beats Rush: attacker loses its 2nd Sergeant and 10 HP
-    expect(s.duel!.outcome).toEqual({ winner: 'defender', loserFate: 'retreated' });
+    expect(s.duel!.outcome).toEqual({ winner: 'defender', loserFate: 'deciding' });
     const sergeants = s.knights[ATTACKER]!.sergeants;
     expect(sergeants.map((x) => [x.id, x.militia])).toEqual([[`${ATTACKER}-s1`, 10]]);
   });
@@ -101,12 +101,12 @@ describe('Infantry: Regroup', () => {
 });
 
 describe('Cavalry: Second Pass', () => {
-  it('strikes the retreating loser for half its remaining HP', () => {
+  it('strikes the surviving loser for half its remaining HP, before it chooses to retreat or hold', () => {
     let s = setup({ tactics: ['rush'], subclass: 'cavalry' }, { tactics: ['flank'], hp: 50 });
     s = clash(s, 1, 1); // attacker 50 HP, defender 40 HP: defender retreats
     expect(s.duel!.aftermath).toEqual([{ type: 'secondPass', knightId: ATTACKER, targetId: DEFENDER, damage: 25, killed: false }]);
-    expect(s.knights[DEFENDER]).toMatchObject({ hp: 15, status: 'ready' });
-    expect(s.duel!.outcome!.loserFate).toBe('retreated');
+    expect(s.knights[DEFENDER]).toMatchObject({ hp: 15, status: 'fielded' });
+    expect(s.duel!.outcome!.loserFate).toBe('deciding');
   });
 
   it('can kill the retreating Knight', () => {
@@ -173,7 +173,7 @@ describe('Archers', () => {
 
   it('Cover Retreat blocks Second Pass and strikes the victor with the strongest Sergeant', () => {
     const s = coverSetup(50, 15);
-    expect(s.duel!.outcome).toEqual({ winner: 'attacker', loserFate: 'retreated' });
+    expect(s.duel!.outcome).toEqual({ winner: 'attacker', loserFate: 'deciding' });
     expect(s.duel!.aftermath[0]).toMatchObject({
       type: 'coverRetreat',
       knightId: 'p1-army-1-k3',

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { applyAction } from '../src/engine/match';
 import { createMatch } from '../src/engine/setup';
 import { captainMilitia, playerMilitia } from '../src/engine/queries';
-import { chooseLordOrder, choosePlacement, nextComputerAction } from '../src/ai';
+import { chooseLordOrder, choosePlacement, chooseRetreat, nextComputerAction } from '../src/ai';
 import type { MatchAction } from '../src/engine/actions';
 import type { MatchState, SquareIndex } from '../src/engine/state';
 
@@ -106,5 +106,33 @@ describe('Reinforcements', () => {
       s = act(s, { type: 'commitSergeant', player: 'p1', sergeantId: match.id });
     }
     expect(s.knights['p1-raiders-1-k1']!.hp).toBe(90);
+  });
+});
+
+describe('Computer: retreat or hold', () => {
+  function lost(loserHp: number, winnerHp: number): MatchState {
+    const s = createMatch();
+    const w = 'p1-army-1-k1';
+    const l = 'p2-army-1-k1';
+    return {
+      ...s,
+      knights: { ...s.knights, [w]: { ...s.knights[w]!, hp: winnerHp }, [l]: { ...s.knights[l]!, hp: loserHp } },
+      duel: {
+        region: 4,
+        attacker: { player: 'p1', knightId: w, startHp: 50, startSergeants: [] },
+        defender: { player: 'p2', knightId: l, startHp: 50, startSergeants: [] },
+        clashes: [],
+        outcome: { winner: 'attacker', loserFate: 'deciding' },
+        prelude: [],
+        blocked: { attacker: [], defender: [] },
+        aftermath: [],
+      },
+    } as unknown as MatchState;
+  }
+
+  it('holds when it has at least the winner’s HP left, otherwise retreats', () => {
+    expect(chooseRetreat(lost(20, 20), 'p2')).toEqual({ type: 'chooseRetreat', player: 'p2', retreat: false });
+    expect(chooseRetreat(lost(19, 20), 'p2')).toEqual({ type: 'chooseRetreat', player: 'p2', retreat: true });
+    expect(chooseRetreat(lost(19, 20), 'p1')).toBeNull();
   });
 });

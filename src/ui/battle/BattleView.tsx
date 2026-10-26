@@ -71,6 +71,8 @@ interface BattleViewProps {
   duel: Duel;
   onCommit: (sergeantId: string) => void;
   onClose: () => void;
+  /** The human's surviving loser retreats (true) or holds its square (false); closes the battle. */
+  onChooseRetreat: (retreat: boolean) => void;
 }
 
 /**
@@ -79,7 +81,7 @@ interface BattleViewProps {
  * Sergeants above them. Clashes are revealed one at a time with pauses, even
  * though the rules resolve them instantly.
  */
-export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) {
+export function BattleView({ match, duel, onCommit, onClose, onChooseRetreat }: BattleViewProps) {
   // How many clashes have been fully shown so far.
   const [shown, setShown] = useState(0);
   const [phase, setPhase] = useState<Phase>('intro');
@@ -128,6 +130,10 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
   const close = () => {
     setClosing(true);
     window.setTimeout(onClose, CLOSE_MS);
+  };
+  const chooseRetreat = (retreat: boolean) => {
+    setClosing(true);
+    window.setTimeout(() => onChooseRetreat(retreat), CLOSE_MS);
   };
 
   // What the screen shows: the state after the clashes revealed so far.
@@ -198,7 +204,7 @@ export function BattleView({ match, duel, onCommit, onClose }: BattleViewProps) 
       </div>
 
       {phase === 'over' && duel.outcome && (
-        <BattleResults match={match} duel={duel} myRole={myRole} onReturn={close} />
+        <BattleResults match={match} duel={duel} myRole={myRole} onReturn={close} onChooseRetreat={chooseRetreat} />
       )}
     </div>
   );

@@ -199,8 +199,11 @@ export interface Clash {
 export interface DuelOutcome {
   /** null when both Knights end on equal HP: the defender holds and both stay. */
   winner: DuelRole | null;
-  /** What happened to the losing Knight. */
-  loserFate: 'killed' | 'retreated' | null;
+  /**
+   * What happened to the losing Knight. A surviving loser's owner chooses:
+   * 'deciding' until they do, then 'retreated' (back to its Captain) or 'held' (stays on its square).
+   */
+  loserFate: 'killed' | 'deciding' | 'retreated' | 'held' | null;
 }
 
 export interface Duel {

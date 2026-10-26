@@ -10,22 +10,29 @@ interface BattleResultsProps {
   /** The human's side in this duel. */
   myRole: DuelRole;
   onReturn: () => void;
+  /** Shown when the human's Knight lost but survived: retreat (true) or hold its square (false). */
+  onChooseRetreat: (retreat: boolean) => void;
 }
 
 const men = (sergeants: Sergeant[]) => sergeants.reduce((sum, s) => sum + s.militia, 0);
 
 /** Summary shown in the middle of the battlefield once a battle is decided. */
-export function BattleResults({ match, duel, myRole, onReturn }: BattleResultsProps) {
+export function BattleResults({ match, duel, myRole, onReturn, onChooseRetreat }: BattleResultsProps) {
   const outcome = duel.outcome!;
   const title =
     outcome.winner === null ? 'Stand-off' : outcome.winner === myRole ? 'Victory!' : 'Defeat';
 
   const loserRole: DuelRole | null = outcome.winner === null ? null : outcome.winner === 'attacker' ? 'defender' : 'attacker';
   const loser = loserRole ? match.knights[duel[loserRole].knightId]! : null;
+  const myChoice = outcome.loserFate === 'deciding' && loserRole === myRole;
   const verdict = loser
     ? outcome.loserFate === 'killed'
       ? `${PLAYER_NAMES[loser.owner]}’s ${knightName(loser)} has fallen.`
-      : `${PLAYER_NAMES[loser.owner]}’s ${knightName(loser)} retreats from the field.`
+      : outcome.loserFate === 'held'
+        ? `${PLAYER_NAMES[loser.owner]}’s ${knightName(loser)} holds its square.`
+        : myChoice
+          ? `${knightName(loser)} survives. Retreat to its Captain, or hold its square?`
+          : `${PLAYER_NAMES[loser.owner]}’s ${knightName(loser)} retreats from the field.`
     : 'Neither Knight gives ground; both keep their squares.';
 
   const enemyRole: DuelRole = myRole === 'attacker' ? 'defender' : 'attacker';
@@ -99,7 +106,7 @@ export function BattleResults({ match, duel, myRole, onReturn }: BattleResultsPr
               return (
                 <li key={i}>
                   {e.type === 'secondPass'
-                    ? `Second Pass: ${knightName(actor)} struck the retreating ${knightName(match.knights[e.targetId]!)} for ${e.damage}${e.killed ? ', killing them' : ''}.`
+                    ? `Second Pass: ${knightName(actor)} struck the beaten ${knightName(match.knights[e.targetId]!)} for ${e.damage}${e.killed ? ', killing them' : ''}.`
                     : e.type === 'coverRetreat'
                       ? `Cover Retreat: ${knightName(actor)} covered ${knightName(match.knights[e.coveredId]!)}${e.blockedSecondPass ? ', blocked Second Pass,' : ''} and struck ${knightName(match.knights[e.targetId]!)} for ${e.damage}${e.killed ? ', killing them' : ''}.`
                       : `Regroup: ${knightName(actor)} recovered ${e.restored} men.`}
@@ -110,9 +117,20 @@ export function BattleResults({ match, duel, myRole, onReturn }: BattleResultsPr
         ) : null}
 
         <div className="attack-preview__actions">
-          <button className="btn btn--primary" onClick={onReturn} autoFocus>
-            Return to {REGION_NAMES[duel.region]}
-          </button>
+          {myChoice ? (
+            <>
+              <button className="btn" onClick={() => onChooseRetreat(true)}>
+                Retreat
+              </button>
+              <button className="btn btn--primary" onClick={() => onChooseRetreat(false)} autoFocus>
+                Hold position
+              </button>
+            </>
+          ) : (
+            <button className="btn btn--primary" onClick={onReturn} autoFocus>
+              Return to {REGION_NAMES[duel.region]}
+            </button>
+          )}
         </div>
       </div>
     </div>

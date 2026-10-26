@@ -337,11 +337,10 @@ function finishDuel(state: MatchState): { state: MatchState; events: MatchEvent[
       }
     }
 
+    // A surviving loser stays on its square until its owner chooses to retreat or hold.
     const killed = loser.hp <= 0;
-    current[loserRole] = killed
-      ? { ...loser, status: 'dead', position: null, hp: 0, sergeants: [] }
-      : { ...loser, status: 'ready', position: null };
-    outcome = { winner, loserFate: killed ? 'killed' : 'retreated' };
+    if (killed) current[loserRole] = { ...loser, status: 'dead', position: null, hp: 0, sergeants: [] };
+    outcome = { winner, loserFate: killed ? 'killed' : 'deciding' };
   }
 
   // Infantry: Regroup. A surviving Knight's Sergeants that tied a clash recover
@@ -378,5 +377,28 @@ function finishDuel(state: MatchState): { state: MatchState; events: MatchEvent[
       turn: state.turn ? { ...state.turn, step: 'end' } : null,
     },
     events: [{ type: 'duelEnded', outcome, attackerId: attacker.id, defenderId: defender.id }],
+  };
+}
+
+/**
+ * After losing a battle and surviving, the loser's owner chooses: retreat to its
+ * Captain (it can be placed again later) or hold its square.
+ */
+export function chooseRetreat(state: MatchState, player: PlayerId, retreat: boolean): EngineResult<MatchState, MatchEvent> {
+  const duel = state.duel;
+  if (!duel?.outcome || duel.outcome.loserFate !== 'deciding' || !duel.outcome.winner) {
+    return reject('There is no retreat to decide.');
+  }
+  const loserRole: DuelRole = OTHER[duel.outcome.winner];
+  if (duel[loserRole].player !== player) return reject('Only the losing Knight’s side decides whether it retreats.');
+  const knight = state.knights[duel[loserRole].knightId]!;
+  return {
+    ok: true,
+    state: {
+      ...state,
+      knights: retreat ? { ...state.knights, [knight.id]: { ...knight, status: 'ready', position: null } } : state.knights,
+      duel: { ...duel, outcome: { ...duel.outcome, loserFate: retreat ? 'retreated' : 'held' } },
+    },
+    events: [{ type: 'loserChose', player, knightId: knight.id, retreat }],
   };
 }

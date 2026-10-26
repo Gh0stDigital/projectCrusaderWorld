@@ -234,6 +234,7 @@ export function MatchScreen() {
                 duel={match.duel}
                 onCommit={(sergeantId) => store.dispatch({ type: 'commitSergeant', player: 'p1', sergeantId })}
                 onClose={store.closeBattle}
+                onChooseRetreat={store.chooseRetreat}
               />
             )}
             {notice && <OrdersNotice player={notice.player} detail={noticeDetail} />}

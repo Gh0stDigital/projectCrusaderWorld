@@ -15,6 +15,7 @@ import {
   knightMilitia,
   legalSquares,
   reserveKnights,
+  retreatDecider,
 } from '../engine/queries';
 import {
   LORD_CLASSES,
@@ -165,6 +166,18 @@ export function chooseAttack(state: MatchState): MatchAction | null {
  * The computer's next action as `player`, or null when it is waiting (not its
  * turn, or a battle needs the other side). Ends its own turns.
  */
+/**
+ * A surviving loser holds its square only if it has at least as much HP left as
+ * the Knight that beat it; otherwise it retreats to its Captain.
+ */
+export function chooseRetreat(state: MatchState, player: PlayerId): MatchAction | null {
+  const duel = state.duel;
+  if (retreatDecider(state) !== player || !duel?.outcome?.winner) return null;
+  const winner = state.knights[duel[duel.outcome.winner].knightId]!;
+  const loser = state.knights[duel[duel.outcome.winner === 'attacker' ? 'defender' : 'attacker'].knightId]!;
+  return { type: 'chooseRetreat', player, retreat: loser.hp < winner.hp };
+}
+
 export function nextComputerAction(state: MatchState, player: PlayerId, random: Random = Math.random): MatchAction | null {
   if (state.phase === 'lordOrder') {
     return state.orderingPlayer === player ? { type: 'setLordOrder', player, order: chooseLordOrder(random) } : null;
@@ -172,6 +185,7 @@ export function nextComputerAction(state: MatchState, player: PlayerId, random: 
   const turn = state.turn;
   if (!turn) return null;
   if (state.duel && !state.duel.outcome) return chooseSergeant(state, player, random);
+  if (retreatDecider(state)) return chooseRetreat(state, player);
   if (turn.player !== player) return null;
   switch (turn.step) {
     case 'command':

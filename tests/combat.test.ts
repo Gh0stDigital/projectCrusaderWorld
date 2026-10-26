@@ -182,17 +182,39 @@ describe('Clashes', () => {
 });
 
 describe('Ending a duel', () => {
-  it('removes the Knight with less HP left: retreating if alive', () => {
+  function lostAlive(): MatchState {
     let s = readyToAttack();
     s = setSergeants(s, ATTACKER, ['rush', 'rush']);
     s = setSergeants(s, DEFENDER, ['flank', 'flank']);
     s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: DEFENDER });
     s = clash(s, 1, 1);
-    s = clash(s, 2, 2);
-    expect(s.duel!.outcome).toEqual({ winner: 'attacker', loserFate: 'retreated' });
-    expect(s.knights[DEFENDER]).toMatchObject({ status: 'ready', position: null, hp: 30, sergeants: [] });
+    return clash(s, 2, 2);
+  }
+
+  it('lets a surviving loser’s side choose: until then it stays and the turn cannot end', () => {
+    const s = lostAlive();
+    expect(s.duel!.outcome).toEqual({ winner: 'attacker', loserFate: 'deciding' });
+    expect(s.knights[DEFENDER]).toMatchObject({ status: 'fielded', hp: 30 });
     expect(s.knights[ATTACKER]!.position).toEqual({ region: 4, square: 1 });
     expect(s.turn!.step).toBe('end');
+    expect(rejected(s, { type: 'endTurn', player: 'p1' })).toMatch(/retreat or hold/);
+    expect(rejected(s, { type: 'chooseRetreat', player: 'p1', retreat: true })).toMatch(/losing Knight/);
+  });
+
+  it('retreating sends the loser back to its Captain', () => {
+    const s = act(lostAlive(), { type: 'chooseRetreat', player: 'p2', retreat: true });
+    expect(s.duel!.outcome!.loserFate).toBe('retreated');
+    expect(s.knights[DEFENDER]).toMatchObject({ status: 'ready', position: null, hp: 30, sergeants: [] });
+    expect(rejected(s, { type: 'chooseRetreat', player: 'p2', retreat: false })).toMatch(/no retreat/);
+    act(s, { type: 'endTurn', player: 'p1' });
+  });
+
+  it('holding keeps the loser on its square', () => {
+    const before = lostAlive().knights[DEFENDER]!.position;
+    const s = act(lostAlive(), { type: 'chooseRetreat', player: 'p2', retreat: false });
+    expect(s.duel!.outcome!.loserFate).toBe('held');
+    expect(s.knights[DEFENDER]).toMatchObject({ status: 'fielded', position: before, hp: 30 });
+    act(s, { type: 'endTurn', player: 'p1' });
   });
 
   it('decides by HP left, not by damage taken in this duel', () => {
@@ -205,7 +227,7 @@ describe('Ending a duel', () => {
     s = clash(s, 1, 1);
     expect(s.knights[DEFENDER]!.hp).toBe(40);
     expect(s.duel!.outcome!.winner).toBe('defender');
-    expect(s.knights[ATTACKER]!.status).toBe('ready');
+    expect(s.duel!.outcome!.loserFate).toBe('deciding');
   });
 
   it('kills a Knight brought to 0 HP and ends the duel at once', () => {

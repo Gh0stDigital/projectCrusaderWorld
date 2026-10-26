@@ -1,4 +1,4 @@
-import { actingCaptain, actionableCaptains, attackTargets, canEndTurn, commandOptions, moveType } from '../../engine/queries';
+import { actingCaptain, actionableCaptains, attackTargets, canEndTurn, commandOptions, moveType, retreatDecider } from '../../engine/queries';
 import { MOVE_TYPE_NAMES, commandSummary } from './commandText';
 import type { MatchState, RegionIndex } from '../../engine/state';
 import { LORD_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
@@ -74,7 +74,9 @@ export function PhaseWindow({
               ? 'The enemy is taking their turn…'
             : battleOpen
               ? match.duel?.outcome
-                ? 'The battle is over. Return to the Region.'
+                ? retreatDecider(match) === 'p1'
+                  ? 'Your Knight lost but survives: retreat or hold its square.'
+                  : 'The battle is over. Return to the Region.'
                 : 'Battle! Choose a Sergeant for each clash.'
               : instructionFor(match, selectedCaptainId, focusedRegion)}
         </p>

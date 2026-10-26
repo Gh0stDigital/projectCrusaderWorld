@@ -2,6 +2,6 @@
 export { setLordOrder } from './lordOrder';
 export { deployCaptain, resumeCaptain } from './captainDeployment';
 export { placeKnight } from './knightPlacement';
-export { commitSergeant, declareAttack } from './combat';
+export { chooseRetreat, commitSergeant, declareAttack } from './combat';
 export { reinforceKnight } from './reinforcement';
 export { endTurn, startTurn } from './turns';

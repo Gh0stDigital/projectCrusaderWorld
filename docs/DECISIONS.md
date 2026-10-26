@@ -148,7 +148,8 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - The Knight with less HP at the end loses and is removed from the board. The winner stays on its square and the square becomes empty.
 - Clashes are revealed one at a time with pauses (intro, reveal, result) so the information is easy to follow. After the result the player returns to the Region and ends the turn manually.
 - When a battle ends, a results window appears over the battlefield: Victory / Defeat / Stand-off from the human's side, what happened to the loser, and for each Knight HP before → after, Sergeants lost and militia lost. The player confirms with Return.
-- Back on the Region board, the loser's piece stays on its square for a moment, then retreats (slides off toward its own side and fades) or is destroyed (flashes, a red cross, collapses). End turn, and the computer, wait until it has finished (about 2 seconds).
+- Retreating is optional. A losing Knight that survives (after every after-battle ability) stays on its square until its side chooses: **Retreat** (back to its Captain with its remaining HP and Sergeants; it can be placed again later) or **Hold position** (it keeps its square). The human chooses in the battle results window; the computer holds only if its Knight has at least as much HP left as the winner, otherwise it retreats. The turn cannot end until the choice is made.
+- Back on the Region board, a loser that retreats or is killed stays on its square for a moment, then retreats (slides off toward its own side and fades) or is destroyed (flashes, a red cross, collapses). End turn, and the computer, wait until it has finished (about 2 seconds).
 - Side panels hold their numbers during a battle and update when the player returns, so they never reveal a result early.
 - During a battle each side panel shows that player's fighting Knight: card, name, HP, and their Sergeants listed below as slanted blocks. The human picks from the left panel. The field shows the two Knight sprites, HP boxes and clash results.
 
@@ -166,9 +167,9 @@ Each Sergeant starts with 10 men. Men a Knight type doesn't use (versus 5 Sergea
 
 Each Lord class gives its Knights types. Army effects happen after a battle; Garrison (before) and Raiders (after) come later.
 
-- **Infantry: Regroup.** After a battle the Knight survives (won, tied, or retreating alive), its Sergeants that tied a clash recover the men they lost, back to what they had when the battle began. Automatic.
-- **Cavalry: Second Pass.** After winning while the loser retreats alive, it strikes the loser for half its remaining HP (rounded down). This can kill the retreating Knight. Automatic.
-- **Archers.** Lead 3 Sergeants instead of 5 (the 20 spare militia sit in their Captain's reserve, so each Lord still totals 1,000). Can attack any enemy in the same row or column of the Region, at any distance. **Cover Retreat:** when a friendly Infantry directly next to them loses and retreats alive, they block the enemy's Second Pass and strike the victor for their strongest Sergeant's men; this can kill the victor. Automatic.
+- **Infantry: Regroup.** After a battle the Knight survives (won, tied, or lost but alive), its Sergeants that tied a clash recover the men they lost, back to what they had when the battle began. Automatic.
+- **Cavalry: Second Pass.** After winning while the loser is still alive, it strikes the loser for half its remaining HP (rounded down), whether the loser then retreats or holds. This can kill the loser. Automatic.
+- **Archers.** Lead 3 Sergeants instead of 5 (the 20 spare militia sit in their Captain's reserve, so each Lord still totals 1,000). Can attack any enemy in the same row or column of the Region, at any distance. **Cover Retreat:** when a friendly Infantry directly next to them loses and survives (whether it then retreats or holds), they block the enemy's Second Pass and strike the victor for their strongest Sergeant's men; this can kill the victor. Automatic.
 - Provisional choices: Army Knights cycle Infantry, Cavalry, Archers by slot (1–3 and 4–6); all three abilities trigger automatically rather than by prompt.
 - Abilities play out on the battlefield after the last clash ("Second Pass!", "Cover Retreat!", "Regroup") and are listed in the results window. Knight type shows on board pieces, Knight tokens, battle HUD, attack preview and Captain details.
 
@@ -213,7 +214,7 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 3. Same tactic: both Sergeants lose half their men (loss rounded up), and no HP damage.
 4. Up to 5 clashes; each Sergeant fights once per duel. The duel ends early at 0 HP. If one side runs out of Sergeants, the other's remaining Sergeants strike unopposed.
 5. Equal HP at the end: the defender holds and both Knights stay.
-6. The losing Knight dies at 0 HP; otherwise it retreats to its Captain with its remaining HP and Sergeants, and can be placed again later.
+6. The losing Knight dies at 0 HP; otherwise its side chooses to retreat it to its Captain (with its remaining HP and Sergeants, to be placed again later) or hold its square.
 7. Only the Knight placed this turn may attack, once, and only an enemy directly up, down, left or right of it. Attacking is optional.
 8. HP, Sergeant losses and deaths carry over to every later battle. Nothing regenerates.
 9. The human always picks Player 1's (blue) Sergeants and the computer always picks Player 2's (red), whether attacking or defending. The computer picks at random, commits first, and never looks at the human's pick.

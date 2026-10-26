@@ -1,6 +1,6 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
-import { actionableCaptains, canEndTurn, nextLordFor } from '../queries';
+import { actionableCaptains, canEndTurn, nextLordFor, retreatDecider } from '../queries';
 import { otherPlayer, type MatchState, type PlayerId } from '../state';
 
 /** Begin a player's turn with their next Lord. The Lord is fixed here, not when the previous turn ends. */
@@ -30,6 +30,7 @@ export function endTurn(state: MatchState, player: PlayerId): EngineResult<Match
   const turn = state.turn;
   if (state.phase !== 'turns' || !turn) return reject('There is no turn to end.');
   if (turn.player !== player) return reject('It is not your turn.');
+  if (retreatDecider(state)) return reject('The losing Knight must first retreat or hold its square.');
   if (!canEndTurn(state)) {
     const reasons: Record<string, string> = {
       command: 'Choose a Captain before ending your turn.',
