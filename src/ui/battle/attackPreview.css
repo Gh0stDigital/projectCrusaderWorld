@@ -245,3 +245,33 @@
 .knight-summary__type {
   color: var(--gold) !important;
 }
+
+/* Arrow between the two Knights: points from the attacker to the defender. */
+.attack-preview__arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  align-self: center;
+  color: #e2604f;
+}
+
+.attack-preview__arrow svg {
+  width: 72px;
+  height: 36px;
+  fill: currentColor;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.6));
+}
+
+.attack-preview__arrow--right {
+  color: #5b9cf0;
+}
+
+.attack-preview__arrow--left svg {
+  transform: scaleX(-1);
+}
+
+.attack-preview__arrow-label {
+  font-size: 10px;
+  color: var(--parchment);
+}

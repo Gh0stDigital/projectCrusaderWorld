@@ -36,13 +36,26 @@ export function AttackPreview({ match, attacker, defender, mode = 'attack', onCa
           {defending ? `${PLAYER_NAMES[attacker.owner]} is attacking you! Deploy reinforcements?` : 'Attack?'}
         </h2>
 
+        {/* Your Knight always on the left, the enemy on the right; the arrow shows who attacks whom. */}
         <div className="attack-preview__sides">
-          <KnightSummary match={match} knight={attacker} role={defending ? 'Enemy Knight' : 'Your Knight'} />
-          <span className="attack-preview__versus">vs</span>
           <KnightSummary
             match={match}
-            knight={defending ? { ...defender, hp: newHp } : defender}
-            role={defending ? 'Your Knight' : 'Enemy Knight'}
+            knight={defending ? { ...defender, hp: newHp } : attacker}
+            role={defending ? 'Your Knight · defending' : 'Your Knight · attacking'}
+          />
+          <span
+            className={`attack-preview__arrow attack-preview__arrow--${defending ? 'left' : 'right'}`}
+            aria-label={defending ? 'The enemy attacks your Knight' : 'Your Knight attacks the enemy'}
+          >
+            <svg viewBox="0 0 80 40" aria-hidden="true">
+              <path d="M4 14 H52 V4 L76 20 L52 36 V26 H4 Z" />
+            </svg>
+            <span className="attack-preview__arrow-label">attacks</span>
+          </span>
+          <KnightSummary
+            match={match}
+            knight={defending ? attacker : defender}
+            role={defending ? 'Enemy Knight · attacking' : 'Enemy Knight · defending'}
           />
         </div>
 

@@ -10,7 +10,9 @@
    */
   background:
     linear-gradient(180deg, rgba(10, 14, 18, 0.5) 0%, rgba(10, 14, 18, 0.62) 100%),
-    #1d3a1b url('../../assets/ui/battle-field.webp') center 30% / cover no-repeat;
+    #1d3a1b url('../../assets/ui/battle-field.png') center 30% / cover no-repeat;
+  /* Pixel-art field: keep the pixels crisp when scaled. */
+  image-rendering: pixelated;
   animation: battle-in 500ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 

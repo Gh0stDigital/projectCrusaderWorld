@@ -58,13 +58,13 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - Knights on a Region's 3×3 board are a pixel-art Knight sprite (`src/assets/sprites`), not cards: blue for Player 1, red and mirrored for the enemy. It idles between its two frames at 1 frame per second (off with reduced motion).
 - The Captain panel's Knight tokens use the same sprite, still and slightly greyed out (darker when in the field, faint when unmanned, sepia when fallen).
 - Battles use a pixel Knight bust per Knight type, two frames idling at 1 frame per second; the enemy's is red and mirrored. Army (for now): sword Knight (`knight-battle-anim.png`) for Infantry, crossbow (`crossbow-battle-anim.png`) for Archers, lance rider (`lance-battle-anim.png`) for Cavalry. Garrison: Gatekeeper (spear, `gatekeeper-battle-anim.png`, drawn smaller since it is a close-up), Watchman (crossbow, `watchman-battle-anim.png`), Warden (mace and shield, `warden-battle-anim.png`). Raiders: Skirmisher (sword and buckler, `skirmisher-battle-anim.png`), Ambusher (bow, `ambusher-battle-anim.png`), Saboteur (dagger and flail, `saboteur-battle-anim.png`). The clash winner lunges straight forward and back, its info box moving with it; a Knight that takes damage shakes while a slash sweeps across it.
-- Knight cards are still used in the attack preview.
+- Knight cards are still used in the attack preview. The pre-battle window always shows your Knight on the left and the enemy on the right, whoever attacks; an arrow between them points from attacker to defender (blue when you attack, red when you are attacked), and each side is labelled attacking or defending.
 
 ## Region board skin — Settled
 
 - The match screen uses the owner's 16:9 artwork `src/assets/ui/region-board-skin.webp` (built over the layout wireframe in `design/templates`). Each area (top bar, side panels, Region board, phase window) shows its own slice of it, so the game's boxes sit on the art's frames; the Region board slice zooms with the camera.
 - When zoomed into a Region, the frame, side panels and board switch to the Region view artwork `src/assets/ui/region-view-skin.webp`; its board slice zooms in from the tile. Its board squares are 175×250. The Captain panel shows "In <Region>" on the third header bar, the Captain's name and Lord on the plaques beside the portrait, and militia and reserve on the stats plaque.
-- Battles take place on the field artwork `src/assets/ui/battle-field.webp` (sky, mountains and grass), scaled to cover the battle area.
+- Battles take place on the pixel field artwork `src/assets/ui/battle-field.png` (sky, mountains, grass, banners), scaled to cover the battle area with crisp pixels under a dark wash.
 - Styles live in `src/ui/screens/skin.css`.
 - The board art can be switched off (`USE_BOARD_ART` in `MatchScreen.tsx`), which draws a plain wireframe look in the same layout (`wireframe.css`). It is currently off while the layout is being adjusted. Any new skin must keep the wireframe's zone positions and sizes.
 
