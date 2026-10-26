@@ -297,3 +297,17 @@
 .inner-board__square[aria-disabled='true'] {
   cursor: help;
 }
+
+/* One of your Knights that can attack this turn: click it to pick it as the attacker. */
+.inner-board__square--may-attack {
+  cursor: pointer;
+}
+
+.inner-board__square--may-attack .board-piece {
+  box-shadow: 0 0 0 2px #6fcf6a;
+}
+
+.attack-marker--ready {
+  background: #6fcf6a;
+  color: var(--ink);
+}

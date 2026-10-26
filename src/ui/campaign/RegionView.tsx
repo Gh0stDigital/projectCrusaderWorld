@@ -1,4 +1,4 @@
-import { attackTargets, knightAt, legalSquares, normalMaxHp } from '../../engine/queries';
+import { attackTargets, attackers, knightAt, legalSquares, normalMaxHp } from '../../engine/queries';
 import { SQUARES, type MatchState, type RegionIndex, type SquareIndex } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, SUBCLASS_NAMES, captainName, knightName, knightPersonalName } from '../../data/names';
 import { KnightSprite } from '../components/KnightSprite';
@@ -15,6 +15,8 @@ interface RegionViewProps {
   selectedKnightId: string | null;
   onPlaceKnight: (square: SquareIndex) => void;
   onChooseTarget: (knightId: string) => void;
+  /** Pick one of your Knights on the board as this turn's attacker. */
+  onSelectAttacker: (knightId: string) => void;
   /** A defeated Knight leaving the board, drawn on its old square while it animates away. */
   departure?: Departure | null;
 }
@@ -23,13 +25,15 @@ interface RegionViewProps {
  * Zoomed-in view of one Region: its 3×3 board fills the center. The Captains
  * and their Knights appear in the side panels while zoomed in.
  */
-export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onChooseTarget, departure }: RegionViewProps) {
+export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onChooseTarget, onSelectAttacker, departure }: RegionViewProps) {
   const turn = match.turn;
-  const placingHere =
-    turn?.step === 'placement' && turn.captainId !== null && match.captains[turn.captainId]?.region === region;
-  const legal = new Set(placingHere && selectedKnightId ? legalSquares(match) : []);
-  const targets = new Set(attackTargets(match).map((k) => k.id));
-  const attackerId = turn?.step === 'attack' ? turn.placedKnightId : null;
+  const actingHere = turn?.captainId != null && match.captains[turn.captainId]?.region === region;
+  const selected = selectedKnightId ? match.knights[selectedKnightId] : undefined;
+  // A waiting Knight is selected: show where it can go. One on the board: show who it can attack.
+  const legal = new Set(actingHere && selected?.status === 'ready' ? legalSquares(match) : []);
+  const canAttack = new Set(actingHere ? attackers(match).map((k) => k.id) : []);
+  const attackerId = selected && canAttack.has(selected.id) ? selected.id : null;
+  const targets = new Set(attackTargets(match, attackerId).map((k) => k.id));
 
   return (
     <div className="region-view">
@@ -46,11 +50,13 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
           const isLegal = legal.has(square);
           const isTarget = knight !== null && targets.has(knight.id);
           const isAttacker = knight !== null && knight.id === attackerId;
+          const mayAttack = knight !== null && canAttack.has(knight.id) && !isAttacker;
           const classes = [
             'inner-board__square',
             isLegal && 'inner-board__square--legal',
             isTarget && 'inner-board__square--target',
             isAttacker && 'inner-board__square--attacker',
+            mayAttack && 'inner-board__square--may-attack',
           ]
             .filter(Boolean)
             .join(' ');
@@ -64,8 +70,16 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
               key={square}
               className={classes}
               disabled={!isLegal && !isTarget && !knight}
-              aria-disabled={!isLegal && !isTarget}
-              onClick={() => (isTarget ? onChooseTarget(knight.id) : isLegal ? onPlaceKnight(square) : undefined)}
+              aria-disabled={!isLegal && !isTarget && !mayAttack}
+              onClick={() =>
+                isTarget
+                  ? onChooseTarget(knight.id)
+                  : mayAttack
+                    ? onSelectAttacker(knight.id)
+                    : isLegal
+                      ? onPlaceKnight(square)
+                      : undefined
+              }
               aria-label={label}
             >
               {!knight && departure && departure.region === region && departure.square === square && (
@@ -93,6 +107,7 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
                   <span className="knight-plate">{knightPersonalName(knight)}</span>
                   {knight.subclass && <span className={`type-badge type-badge--${knight.subclass}`}>{SUBCLASS_NAMES[knight.subclass]}</span>}
                   {isTarget && <span className="attack-marker">Attack</span>}
+                  {mayAttack && <span className="attack-marker attack-marker--ready">Can attack</span>}
                 </HoldablePiece>
               )}
             </button>

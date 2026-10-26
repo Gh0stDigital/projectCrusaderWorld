@@ -4,7 +4,16 @@ import type { MatchEvent } from '../engine/events';
 import { applyAction } from '../engine/match';
 import { chooseAttack, chooseCommand, chooseLordOrder, choosePlacement, chooseSergeant, chooseRetreat as chooseComputerRetreat } from '../ai';
 import { commandSummary } from '../ui/campaign/commandText';
-import { actionableCaptains, canEndTurn, reserveKnights, retreatDecider } from '../engine/queries';
+import {
+  actingCaptain,
+  actionableCaptains,
+  attackers,
+  canEndTurn,
+  canPlaceNow,
+  decisiveRoller,
+  reserveKnights,
+  retreatDecider,
+} from '../engine/queries';
 import { createMatch } from '../engine/setup';
 import type { LordClass, MatchState, PlayerId, RegionIndex, SquareIndex } from '../engine/state';
 
@@ -63,6 +72,8 @@ interface MatchStore {
   departure: Departure | null;
   /** The computer has attacked the human: the pre-battle window offers reinforcements. */
   defensePromptOpen: boolean;
+  /** The decisive battle screen is showing (from its start until the player returns). */
+  decisiveOpen: boolean;
   /** "Orders complete" confirmation shown at the end of a turn. */
   notice: { player: PlayerId } | null;
   error: string | null;
@@ -78,6 +89,10 @@ interface MatchStore {
   closeBattle: () => void;
   /** The human's surviving loser retreats to its Captain (true) or holds its square (false); then the battle closes. */
   chooseRetreat: (retreat: boolean) => void;
+  /** The human rolls their die in the decisive battle. */
+  rollDecisive: () => void;
+  /** Leave the finished decisive battle: its results apply and the turn passes. */
+  closeDecisive: () => void;
   /** The human, under attack, sends `amount` reserve militia (0 for none) and the battle begins. */
   confirmDefense: (amount: number) => void;
   dismissAnnouncement: () => void;
@@ -96,8 +111,13 @@ const freshScreenState = {
   battleOpen: false,
   battleSnapshot: null,
   defensePromptOpen: false,
+  decisiveOpen: false,
   departure: null,
 };
+
+/** Pause between dice rolls in the decisive battle, so each can be followed. */
+export const DECISIVE_ROLL_MS = 1800;
+let decisiveTimer: number | null = null;
 
 let departureTimer: number | null = null;
 
@@ -133,6 +153,16 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
         if (reply) get().dispatch(reply);
       }
     }
+    // The computer rolls its own dice in a decisive battle, one roll at a time.
+    if (decisiveRoller(result.state) === COMPUTER && decisiveTimer === null) {
+      decisiveTimer = window.setTimeout(() => {
+        decisiveTimer = null;
+        const now = get().match;
+        if (decisiveRoller(now) === COMPUTER) {
+          get().dispatch({ type: 'rollDie', player: COMPUTER, value: 1 + Math.floor(Math.random() * 6) });
+        }
+      }, DECISIVE_ROLL_MS);
+    }
     // The computer decides at once whether its surviving loser retreats or holds.
     if (retreatDecider(result.state) === COMPUTER) {
       const choice = chooseComputerRetreat(result.state, COMPUTER);
@@ -151,9 +181,9 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
    * pause, then hand over to the next player.
    */
   requestEndTurn: () => {
-    const { match, busy, focusedRegion, battleOpen, departure } = get();
+    const { match, busy, focusedRegion, battleOpen, departure, decisiveOpen } = get();
     const turn = match.turn;
-    if (busy || battleOpen || departure || !turn) return;
+    if (busy || battleOpen || departure || decisiveOpen || !turn) return;
     if (!canEndTurn(match)) {
       // Let the engine explain why.
       get().dispatch({ type: 'endTurn', player: turn.player });
@@ -176,13 +206,31 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
 
   /** Confirm the attack from the preview: start the duel and open the battle screen. */
   commenceAttack: () => {
-    const { match, attackPreviewId } = get();
-    if (!match.turn || !attackPreviewId) return;
+    const { match, attackPreviewId, selectedKnightId } = get();
+    if (!match.turn || !attackPreviewId || !selectedKnightId) return;
     set({ attackPreviewId: null });
     const before = get().match;
-    if (get().dispatch({ type: 'declareAttack', player: match.turn.player, targetKnightId: attackPreviewId })) {
+    const action = {
+      type: 'declareAttack',
+      player: match.turn.player,
+      attackerKnightId: selectedKnightId,
+      targetKnightId: attackPreviewId,
+    } as const;
+    if (get().dispatch(action)) {
       set({ battleOpen: true, battleSnapshot: before });
     }
+  },
+
+  rollDecisive: () => {
+    if (decisiveRoller(get().match) !== 'p1') return;
+    get().dispatch({ type: 'rollDie', player: 'p1', value: 1 + Math.floor(Math.random() * 6) });
+  },
+
+  closeDecisive: () => {
+    const { match } = get();
+    if (!match.decisive?.outcome || !match.turn) return;
+    set({ decisiveOpen: false });
+    get().dispatch({ type: 'finishDecisive', player: match.turn.player });
   },
 
   chooseRetreat: (retreat) => {
@@ -210,7 +258,10 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
         };
       }
     }
-    set({ battleOpen: false, battleSnapshot: null, departure });
+    // Still able to place after the battle: have a waiting Knight ready to go.
+    const acting = actingCaptain(match);
+    const nextKnight = acting && canPlaceNow(match) ? (reserveKnights(match, acting.id)[0]?.id ?? null) : null;
+    set({ battleOpen: false, battleSnapshot: null, departure, selectedKnightId: nextKnight });
     if (departure) {
       if (departureTimer !== null) window.clearTimeout(departureTimer);
       departureTimer = window.setTimeout(() => {
@@ -241,6 +292,8 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
     clearComputer();
     if (departureTimer !== null) window.clearTimeout(departureTimer);
     departureTimer = null;
+    if (decisiveTimer !== null) window.clearTimeout(decisiveTimer);
+    decisiveTimer = null;
     set({ match: createMatch(), ...freshScreenState });
   },
 }));
@@ -261,8 +314,8 @@ function scheduleComputer() {
  */
 function runComputerStep() {
   const store = useMatchStore.getState();
-  const { match, busy, announcement, battleOpen, defensePromptOpen, focusedRegion, departure } = store;
-  if (busy || announcement || battleOpen || defensePromptOpen || departure) return;
+  const { match, busy, announcement, battleOpen, defensePromptOpen, focusedRegion, departure, decisiveOpen } = store;
+  if (busy || announcement || battleOpen || defensePromptOpen || departure || decisiveOpen) return;
 
   if (match.phase === 'lordOrder') {
     if (match.orderingPlayer === COMPUTER) {
@@ -288,19 +341,20 @@ function runComputerStep() {
       }
       return;
     }
-    case 'placement': {
+    case 'orders': {
       const region = turn.captainId ? match.captains[turn.captainId]?.region : null;
       if (region != null && focusedRegion !== region) {
         store.focusRegion(region);
         scheduleComputer();
         return;
       }
-      const action = choosePlacement(match);
-      if (action) store.dispatch(action);
-      return;
-    }
-    case 'attack': {
-      const action = chooseAttack(match);
+      const placement = choosePlacement(match);
+      if (placement) {
+        store.dispatch(placement);
+        return;
+      }
+      // A Captain that can only attack must; otherwise attack only at fair odds.
+      const action = canEndTurn(match) ? chooseAttack(match) : chooseAttack(match, true);
       if (action && store.dispatch(action)) {
         const state = useMatchStore.getState();
         if (state.match.duel?.outcome) {
@@ -336,10 +390,16 @@ function screenUpdatesFor(state: MatchState, events: MatchEvent[]): Partial<Matc
       case 'captainDeployed':
       case 'captainResumed':
         updates.selectedCaptainId = null;
-        updates.selectedKnightId = reserveKnights(state, event.captainId)[0]?.id ?? null;
+        updates.selectedKnightId =
+          reserveKnights(state, event.captainId)[0]?.id ?? attackers(state)[0]?.id ?? null;
         break;
       case 'knightPlaced':
-        updates.selectedKnightId = null;
+        // Ready to attack with the new Knight if it has a target.
+        updates.selectedKnightId = attackers(state).some((k) => k.id === event.knightId) ? event.knightId : null;
+        break;
+      case 'decisiveStarted':
+        updates.decisiveOpen = true;
+        updates.focusedRegion = null;
         break;
     }
   }

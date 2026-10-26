@@ -146,12 +146,13 @@ export type MatchPhase = 'lordOrder' | 'turns';
 /**
  * Step within a turn:
  * - command: choose a Captain of the current Lord (deploy a new one or resume a stationed one)
- * - placement: place one of that Captain's Knights in their Region
- * - attack: the placed Knight may attack an adjacent enemy Knight, or the turn can end
+ * - orders: in either order, place one of that Captain's Knights and/or attack
+ *   once with one of their Knights on the board (only if it has a target)
  * - battle: a duel is being fought
+ * - decisive: the Region stalemated as the turn ended; its Captains fight a decisive battle
  * - end: orders are done; waiting for End Turn
  */
-export type TurnStep = 'command' | 'placement' | 'attack' | 'battle' | 'end';
+export type TurnStep = 'command' | 'orders' | 'battle' | 'decisive' | 'end';
 
 export interface TurnState {
   player: PlayerId;
@@ -162,6 +163,8 @@ export interface TurnState {
   captainId: string | null;
   /** The Knight placed this turn, if any. */
   placedKnightId: string | null;
+  /** Whether this turn's one attack has been used. */
+  attacked: boolean;
 }
 
 export type DuelRole = 'attacker' | 'defender';
@@ -265,8 +268,40 @@ export interface MatchState {
    * the square of the last Knight placed. null before the first placement.
    */
   route: RegionIndex | null;
-  /** Regions won with three Knights in a row: who holds each, and through which Captain. */
+  /** Regions won with three Knights in a row (or a decisive battle): who holds each, and through which Captain. */
   secured: Partial<Record<RegionIndex, SecuredRegion>>;
+  /** Regions closed by a decisive battle that ended level: nobody holds them and nothing more happens there. */
+  closed: RegionIndex[];
+  /** The decisive battle being fought, if any. Cleared when the turn passes. */
+  decisive: DecisiveBattle | null;
+}
+
+/** Each roll does (roller's men × die) ÷ 10 damage, rounded down. */
+export const DECISIVE_DIVISOR = 10;
+
+export interface DecisiveRoll {
+  player: PlayerId;
+  value: number;
+  damage: number;
+}
+
+/**
+ * A stalemated Region's two Captains fight with all their men. Each rolls a
+ * six-sided die once per Knight of theirs on that board, taking turns (the player
+ * whose turn ended first). Most men left wins; at 0 the Captain dies.
+ */
+export interface DecisiveBattle {
+  region: RegionIndex;
+  /** Who rolls first. */
+  first: PlayerId;
+  captains: Record<PlayerId, string>;
+  startMen: Record<PlayerId, number>;
+  men: Record<PlayerId, number>;
+  /** Total rolls each side gets. */
+  chances: Record<PlayerId, number>;
+  rolls: DecisiveRoll[];
+  /** Set once every roll is used or a side is wiped out. null winner means level: the Region closes. */
+  outcome: { winner: PlayerId | null; loserKilled: boolean } | null;
 }
 
 export interface SecuredRegion {

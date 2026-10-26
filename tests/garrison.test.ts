@@ -53,7 +53,7 @@ describe('Garrison Knight types', () => {
 describe('Warden: First Strike', () => {
   it('hits the attacker with its strongest Sergeant before the first clash', () => {
     let s = arena([{ id: 'p2-garrison-1-k3', square: 4, subclass: 'warden', strongest: 15 }]);
-    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: 'p2-garrison-1-k3' });
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: 'p2-garrison-1-k3' });
     expect(s.duel!.prelude).toEqual([
       { type: 'firstStrike', knightId: 'p2-garrison-1-k3', targetId: ATTACKER, damage: 15, killed: false },
     ]);
@@ -64,7 +64,7 @@ describe('Warden: First Strike', () => {
 
   it('can kill the attacker, ending the battle at once', () => {
     let s = arena([{ id: 'p2-garrison-1-k3', square: 4, subclass: 'warden', strongest: 15 }], 12);
-    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: 'p2-garrison-1-k3' });
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: 'p2-garrison-1-k3' });
     expect(s.duel!.prelude[0]).toMatchObject({ damage: 12, killed: true });
     expect(s.duel!.outcome).toEqual({ winner: 'defender', loserFate: 'killed' });
     expect(s.knights[ATTACKER]!.status).toBe('dead');
@@ -77,7 +77,7 @@ describe('Watchman: Snipe', () => {
       { id: 'p2-garrison-1-k1', square: 4, subclass: 'gatekeeper' },
       { id: 'p2-garrison-1-k2', square: 5, subclass: 'watchman', strongest: 20 },
     ]);
-    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: 'p2-garrison-1-k1' });
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: 'p2-garrison-1-k1' });
     expect(s.duel!.prelude.filter((e) => e.type !== 'brace')).toEqual([
       { type: 'snipe', knightId: 'p2-garrison-1-k2', targetId: ATTACKER, damage: 20, killed: false },
     ]);
@@ -88,17 +88,17 @@ describe('Watchman: Snipe', () => {
       { id: 'p2-garrison-1-k2', square: 4, subclass: 'watchman' },
       { id: 'p2-garrison-1-k1', square: 7, subclass: 'gatekeeper' },
     ]);
-    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: 'p2-garrison-1-k2' });
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: 'p2-garrison-1-k2' });
     expect(s.duel!.prelude.map((e) => e.type)).toEqual(['snipe']);
 
     let alone = arena([{ id: 'p2-garrison-1-k2', square: 4, subclass: 'watchman' }]);
-    alone = act(alone, { type: 'declareAttack', player: 'p1', targetKnightId: 'p2-garrison-1-k2' });
+    alone = act(alone, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: 'p2-garrison-1-k2' });
     expect(alone.duel!.prelude).toEqual([]);
   });
 
   it('does not fire when a Gatekeeper is attacked with no Watchman beside it', () => {
     let s = arena([{ id: 'p2-garrison-1-k1', square: 4, subclass: 'gatekeeper' }]);
-    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: 'p2-garrison-1-k1' });
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: 'p2-garrison-1-k1' });
     expect(s.duel!.prelude.filter((e) => e.type !== 'brace')).toEqual([]);
   });
 });
@@ -108,7 +108,7 @@ describe('Gatekeeper: Brace', () => {
     let s = arena([{ id: 'p2-garrison-1-k1', square: 4, subclass: 'gatekeeper' }]);
     const reserve = s.captains['p2-garrison-1']!.reserve;
     const total = lordMilitia(s, 'p2', 'garrison');
-    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: 'p2-garrison-1-k1' });
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: 'p2-garrison-1-k1' });
     expect(s.duel!.prelude[0]).toEqual({ type: 'brace', knightId: 'p2-garrison-1-k1', amount: 50 });
     expect(s.knights['p2-garrison-1-k1']).toMatchObject({ hp: 100, braced: true });
     expect(s.duel!.defender.startHp).toBe(100);
@@ -121,7 +121,7 @@ describe('Gatekeeper: Brace', () => {
   it('is used only once per game', () => {
     let s = arena([{ id: 'p2-garrison-1-k1', square: 4, subclass: 'gatekeeper' }]);
     s.knights['p2-garrison-1-k1'] = { ...s.knights['p2-garrison-1-k1']!, braced: true };
-    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: 'p2-garrison-1-k1' });
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: 'p2-garrison-1-k1' });
     expect(s.duel!.prelude).toEqual([]);
     expect(s.knights['p2-garrison-1-k1']!.hp).toBe(50);
   });

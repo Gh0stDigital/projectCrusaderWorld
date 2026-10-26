@@ -45,7 +45,7 @@ function setup(
       [DEFENDER]: { ...s.knights[DEFENDER]!, sergeants: sg(DEFENDER, defender.tactics), hp: defender.hp ?? 50 },
     },
   };
-  return act(s, { type: 'declareAttack', player: 'p1', targetKnightId: DEFENDER });
+  return act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
 }
 
 function clash(s: MatchState, a: number, d: number): MatchState {
@@ -139,9 +139,9 @@ describe('Archers', () => {
     // Turn Player 1's placed Knight into an Archer on square 1, with the enemy on 7 (same column, not adjacent).
     s.knights[DEFENDER] = { ...s.knights[DEFENDER]!, position: { region: 4, square: 7 } };
     s.knights[ATTACKER] = { ...s.knights[ATTACKER]!, subclass: 'archers' };
-    expect(attackTargets(s).map((k) => k.id)).toEqual([DEFENDER]);
+    expect(attackTargets(s, ATTACKER).map((k) => k.id)).toEqual([DEFENDER]);
     s.knights[ATTACKER] = { ...s.knights[ATTACKER]!, subclass: 'infantry' };
-    expect(attackTargets(s)).toEqual([]);
+    expect(attackTargets(s, ATTACKER)).toEqual([]);
   });
 
   /** Player 2's Cavalry attacks Player 1's Infantry, which has an Archer next to it. */
@@ -165,8 +165,8 @@ describe('Archers', () => {
       sergeants: [{ id: `${cav}-s1`, tactic: 'rush', militia: 10 }],
     };
     // Player 2's turn: pretend their Knight was just placed and attacks.
-    s = { ...s, turn: { ...s.turn!, step: 'attack', placedKnightId: cav, captainId: 'p2-garrison-1' } };
-    s = act(s, { type: 'declareAttack', player: 'p2', targetKnightId: p1Inf });
+    s = { ...s, turn: { ...s.turn!, step: 'orders', attacked: false, placedKnightId: cav, captainId: 'p2-garrison-1' } };
+    s = act(s, { type: 'declareAttack', player: 'p2', attackerKnightId: cav, targetKnightId: p1Inf });
     s = act(s, { type: 'commitSergeant', player: 'p2', sergeantId: `${cav}-s1` });
     return act(s, { type: 'commitSergeant', player: 'p1', sergeantId: `${p1Inf}-s1` });
   }

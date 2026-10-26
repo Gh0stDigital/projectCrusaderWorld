@@ -4,4 +4,5 @@ export { deployCaptain, resumeCaptain } from './captainDeployment';
 export { placeKnight } from './knightPlacement';
 export { chooseRetreat, commitSergeant, declareAttack } from './combat';
 export { reinforceKnight } from './reinforcement';
-export { endTurn, startTurn } from './turns';
+export { endTurn, passTurn, startTurn } from './turns';
+export { finishDecisive, rollDie } from './decisive';

@@ -12,6 +12,17 @@ export type MatchEvent =
   | { type: 'sergeantCommitted'; player: PlayerId; role: DuelRole }
   | { type: 'clashResolved'; clash: Clash }
   | { type: 'duelEnded'; outcome: DuelOutcome; attackerId: string; defenderId: string }
+  | { type: 'decisiveStarted'; region: RegionIndex; first: PlayerId }
+  | { type: 'dieRolled'; player: PlayerId; value: number; damage: number }
+  | {
+      type: 'decisiveEnded';
+      region: RegionIndex;
+      winner: PlayerId | null;
+      loserKilled: boolean;
+      capturedKnightIds: string[];
+      returnedCaptainIds: string[];
+      fallenCaptainIds: string[];
+    }
   | { type: 'loserChose'; player: PlayerId; knightId: string; retreat: boolean }
   | { type: 'knightReinforced'; player: PlayerId; knightId: string; captainId: string; amount: number }
   | {

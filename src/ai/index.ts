@@ -16,6 +16,8 @@ import {
   legalSquares,
   reserveKnights,
   retreatDecider,
+  attackers,
+  decisiveRoller,
 } from '../engine/queries';
 import {
   LORD_CLASSES,
@@ -138,7 +140,7 @@ export function chooseCommand(state: MatchState, random: Random = Math.random): 
 export function choosePlacement(state: MatchState, random: Random = Math.random): MatchAction | null {
   const turn = state.turn;
   const captain = actingCaptain(state);
-  if (!turn || turn.step !== 'placement' || !captain || captain.region === null) return null;
+  if (!turn || turn.step !== 'orders' || !captain || captain.region === null) return null;
   const squares = legalSquares(state);
   const knights = reserveKnights(state, captain.id);
   if (squares.length === 0 || knights.length === 0) return null;
@@ -150,16 +152,29 @@ export function choosePlacement(state: MatchState, random: Random = Math.random)
   return { type: 'placeKnight', player: turn.player, knightId: knight.id, square };
 }
 
-/** Attack step: attack the weakest adjacent enemy if the odds look fair. */
-export function chooseAttack(state: MatchState): MatchAction | null {
+/** Attack: any Knight of the acting Captain on the board may attack the weakest enemy in reach, if the odds look fair. */
+/** With `force`, attacks even at bad odds (a Captain that can only attack must). */
+export function chooseAttack(state: MatchState, force = false): MatchAction | null {
   const turn = state.turn;
-  if (!turn || turn.step !== 'attack' || !turn.placedKnightId) return null;
-  const attacker = state.knights[turn.placedKnightId]!;
-  const targets = [...attackTargets(state)].sort((a, b) => strength(a) - strength(b));
-  const target = targets[0];
-  if (!target) return null;
-  if (strength(attacker) < strength(target) * 0.9) return null;
-  return { type: 'declareAttack', player: turn.player, targetKnightId: target.id };
+  if (!turn) return null;
+  let best: { attacker: string; target: string; edge: number } | null = null;
+  for (const attacker of attackers(state)) {
+    for (const target of attackTargets(state, attacker.id)) {
+      const edge = strength(attacker) / Math.max(1, strength(target));
+      if ((force || edge >= 0.9) && (!best || edge > best.edge)) best = { attacker: attacker.id, target: target.id, edge };
+    }
+  }
+  return best
+    ? { type: 'declareAttack', player: turn.player, attackerKnightId: best.attacker, targetKnightId: best.target }
+    : null;
+}
+
+/** Decisive battle: roll when it is this player's roll; the player whose turn it is closes it once it is over. */
+export function chooseDecisive(state: MatchState, player: PlayerId, random: Random = Math.random): MatchAction | null {
+  const d = state.decisive;
+  if (!d) return null;
+  if (d.outcome) return state.turn?.player === player ? { type: 'finishDecisive', player } : null;
+  return decisiveRoller(state) === player ? { type: 'rollDie', player, value: 1 + Math.floor(random() * 6) } : null;
 }
 
 /**
@@ -186,14 +201,17 @@ export function nextComputerAction(state: MatchState, player: PlayerId, random: 
   if (!turn) return null;
   if (state.duel && !state.duel.outcome) return chooseSergeant(state, player, random);
   if (retreatDecider(state)) return chooseRetreat(state, player);
+  if (state.decisive) return chooseDecisive(state, player, random);
   if (turn.player !== player) return null;
   switch (turn.step) {
     case 'command':
       return chooseCommand(state, random) ?? (canEndTurn(state) ? { type: 'endTurn', player } : null);
-    case 'placement':
-      return choosePlacement(state, random);
-    case 'attack':
-      return chooseAttack(state) ?? { type: 'endTurn', player };
+    case 'orders':
+      return (
+        choosePlacement(state, random) ??
+        chooseAttack(state) ??
+        (canEndTurn(state) ? { type: 'endTurn', player } : chooseAttack(state, true))
+      );
     case 'end':
       return { type: 'endTurn', player };
     default:

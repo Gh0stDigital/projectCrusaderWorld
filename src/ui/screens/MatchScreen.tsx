@@ -14,6 +14,7 @@ import { TurnAnnouncement } from '../overlays/TurnAnnouncement';
 import { OrdersNotice } from '../overlays/OrdersNotice';
 import { AttackPreview } from '../battle/AttackPreview';
 import { BattleView } from '../battle/BattleView';
+import { DecisiveView } from '../battle/DecisiveView';
 import regionBoardSkin from '../../assets/ui/region-board-skin.webp';
 import regionViewSkin from '../../assets/ui/region-view-skin.webp';
 import './match.css';
@@ -117,7 +118,7 @@ export function MatchScreen() {
         : '';
 
   const previewTarget = attackPreviewId ? match.knights[attackPreviewId] : undefined;
-  const previewAttacker = turn?.placedKnightId ? match.knights[turn.placedKnightId] : undefined;
+  const previewAttacker = selectedKnightId ? match.knights[selectedKnightId] : undefined;
   const attackPreview =
     previewTarget && previewAttacker ? { attacker: previewAttacker, defender: previewTarget } : null;
   const incoming =
@@ -199,6 +200,7 @@ export function MatchScreen() {
             region={region}
             selectedKnightId={selectedKnightId}
             onChooseTarget={(id) => !locked && store.openAttackPreview(id)}
+            onSelectAttacker={(id) => !locked && store.selectKnight(id)}
             departure={departure}
             onPlaceKnight={(square) =>
               turn &&
@@ -237,6 +239,14 @@ export function MatchScreen() {
                 onChooseRetreat={store.chooseRetreat}
               />
             )}
+            {store.decisiveOpen && match.decisive && (
+              <DecisiveView
+                match={match}
+                decisive={match.decisive}
+                onRoll={store.rollDecisive}
+                onReturn={store.closeDecisive}
+              />
+            )}
             {notice && <OrdersNotice player={notice.player} detail={noticeDetail} />}
             {announcement && <TurnAnnouncement announcement={announcement} onDone={store.dismissAnnouncement} />}
           </>
@@ -258,7 +268,7 @@ export function MatchScreen() {
         selectedCaptainId={selectedCaptainId}
         focusedRegion={focusedRegion}
         busy={busy}
-        battleOpen={battleOpen}
+        battleOpen={battleOpen || store.decisiveOpen}
         departing={departure !== null}
         error={error}
         onEnterRegion={store.focusRegion}

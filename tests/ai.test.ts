@@ -36,7 +36,7 @@ describe('Computer player', () => {
     };
     field('p1-raiders-1-k1', 3);
     field('p1-raiders-1-k2', 4);
-    s = { ...s, turn: { ...s.turn!, step: 'placement', captainId: 'p1-raiders-1' } };
+    s = { ...s, turn: { ...s.turn!, step: 'orders', captainId: 'p1-raiders-1' } };
     const action = choosePlacement(s, seeded(1));
     expect(action).toMatchObject({ type: 'placeKnight', square: 5 });
   });
@@ -70,7 +70,7 @@ describe('Reinforcements', () => {
     s = act(s, { type: 'endTurn', player: 'p1' });
     s = act(s, { type: 'deployCaptain', player: 'p2', captainId: 'p2-garrison-1', region: 4 });
     s = act(s, { type: 'placeKnight', player: 'p2', knightId: 'p2-garrison-1-k1', square: 1 });
-    return act(s, { type: 'declareAttack', player: 'p2', targetKnightId: 'p1-raiders-1-k1' });
+    return act(s, { type: 'declareAttack', player: 'p2', attackerKnightId: 'p2-garrison-1-k1', targetKnightId: 'p1-raiders-1-k1' });
   }
 
   it('moves men from the Captain reserve into the defending Knight, above its normal max', () => {

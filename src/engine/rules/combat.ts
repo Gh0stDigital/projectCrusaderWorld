@@ -1,6 +1,6 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
-import { adjacentSquares, attackTargets, availableSergeants, duelKnight, duelRoleOf, knightAt } from '../queries';
+import { adjacentSquares, attackTargets, attackers, availableSergeants, duelKnight, duelRoleOf, knightAt, nextOrdersStep } from '../queries';
 import { AMBUSH_COUNT, SABOTAGE_DAMAGE, SECOND_PASS_SHARE } from '../state';
 import type {
   AftermathEffect,
@@ -26,22 +26,27 @@ export const BEATS: Record<Tactic, Tactic> = {
 
 const OTHER: Record<DuelRole, DuelRole> = { attacker: 'defender', defender: 'attacker' };
 
-/** The Knight placed this turn attacks an adjacent enemy Knight, starting a duel. */
+/** One of the acting Captain's Knights on the board attacks an enemy in reach, starting a duel. Once per turn. */
 export function declareAttack(
   state: MatchState,
   player: PlayerId,
+  attackerKnightId: string,
   targetKnightId: string,
 ): EngineResult<MatchState, MatchEvent> {
   const turn = state.turn;
   if (state.phase !== 'turns' || !turn) return reject('Attacks can only be made during a turn.');
   if (turn.player !== player) return reject('It is not your turn.');
-  if (turn.step !== 'attack' || !turn.placedKnightId) return reject('Only a Knight placed this turn can attack, once.');
+  if (turn.attacked) return reject('You have already attacked this turn.');
+  if (turn.step !== 'orders') return reject('You cannot attack right now.');
+  if (!attackers(state).some((k) => k.id === attackerKnightId)) {
+    return reject('That Knight cannot attack: it must be yours, on this board, with an enemy in reach.');
+  }
   const target = state.knights[targetKnightId];
-  if (!target || !attackTargets(state).some((k) => k.id === targetKnightId)) {
-    return reject('That Knight is not an adjacent enemy.');
+  if (!target || !attackTargets(state, attackerKnightId).some((k) => k.id === targetKnightId)) {
+    return reject('That Knight is not an enemy in reach.');
   }
 
-  const attacker = state.knights[turn.placedKnightId]!;
+  const attacker = state.knights[attackerKnightId]!;
   const duel: Duel = {
     region: attacker.position!.region,
     attacker: {
@@ -119,7 +124,7 @@ export function declareAttack(
     ...state,
     knights: { ...state.knights, [attacker.id]: attackerNow, [target.id]: targetNow },
     duel,
-    turn: { ...turn, step: 'battle' },
+    turn: { ...turn, step: 'battle', attacked: true },
   };
   const events: MatchEvent[] = [
     { type: 'duelStarted', attackerId: attacker.id, defenderId: target.id, region: duel.region },
@@ -369,13 +374,10 @@ function finishDuel(state: MatchState): { state: MatchState; events: MatchEvent[
   knights[attacker.id] = current.attacker;
   knights[defender.id] = current.defender;
 
+  // Back to orders if a Knight can still be placed this turn; otherwise End.
+  const after: MatchState = { ...state, knights, duel: { ...duel, outcome, aftermath } };
   return {
-    state: {
-      ...state,
-      knights,
-      duel: { ...duel, outcome, aftermath },
-      turn: state.turn ? { ...state.turn, step: 'end' } : null,
-    },
+    state: { ...after, turn: after.turn ? { ...after.turn, step: nextOrdersStep(after) } : null },
     events: [{ type: 'duelEnded', outcome, attackerId: attacker.id, defenderId: defender.id }],
   };
 }
@@ -392,13 +394,16 @@ export function chooseRetreat(state: MatchState, player: PlayerId, retreat: bool
   const loserRole: DuelRole = OTHER[duel.outcome.winner];
   if (duel[loserRole].player !== player) return reject('Only the losing Knight’s side decides whether it retreats.');
   const knight = state.knights[duel[loserRole].knightId]!;
+  const after: MatchState = {
+    ...state,
+    knights: retreat ? { ...state.knights, [knight.id]: { ...knight, status: 'ready', position: null } } : state.knights,
+    duel: { ...duel, outcome: { ...duel.outcome, loserFate: retreat ? 'retreated' : 'held' } },
+  };
+  // A retreating Knight of the side whose turn it is can be placed again this turn.
+  const turn = after.turn;
   return {
     ok: true,
-    state: {
-      ...state,
-      knights: retreat ? { ...state.knights, [knight.id]: { ...knight, status: 'ready', position: null } } : state.knights,
-      duel: { ...duel, outcome: { ...duel.outcome, loserFate: retreat ? 'retreated' : 'held' } },
-    },
+    state: turn && (turn.step === 'orders' || turn.step === 'end') ? { ...after, turn: { ...turn, step: nextOrdersStep(after) } } : after,
     events: [{ type: 'loserChose', player, knightId: knight.id, retreat }],
   };
 }

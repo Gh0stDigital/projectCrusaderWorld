@@ -1,7 +1,7 @@
-import { actingCaptain, actionableCaptains, attackTargets, canEndTurn, commandOptions, moveType, retreatDecider } from '../../engine/queries';
+import { actingCaptain, actionableCaptains, canEndTurn, attackers, canPlaceNow, commandOptions, decisiveRoller, moveType, retreatDecider } from '../../engine/queries';
 import { MOVE_TYPE_NAMES, commandSummary } from './commandText';
 import type { MatchState, RegionIndex } from '../../engine/state';
-import { LORD_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
+import { LORD_NAMES, REGION_NAMES, captainName } from '../../data/names';
 import './phaseWindow.css';
 
 const PHASES = [
@@ -42,7 +42,16 @@ export function PhaseWindow({
     turn && turn.step !== 'command' && !battleOpen && captain?.region != null && focusedRegion !== captain.region
       ? captain.region
       : null;
-  const current = battleOpen || turn?.step === 'battle' ? 'battle' : turn?.step;
+  // During orders, light up whichever of Placement and Attack is still available.
+  const lit = new Set<string>(
+    battleOpen || turn?.step === 'battle' || turn?.step === 'decisive'
+      ? ['battle']
+      : turn?.step === 'orders'
+        ? [...(canPlaceNow(match) ? ['placement'] : []), ...(attackers(match).length > 0 ? ['attack'] : [])]
+        : turn
+          ? [turn.step]
+          : [],
+  );
 
   return (
     <footer className="phase-window">
@@ -50,7 +59,7 @@ export function PhaseWindow({
         {PHASES.map((phase) => (
           <li
             key={phase.id}
-            className={`phase-list__item phase-list__item--${phase.id}${current === phase.id ? ' phase-list__item--current' : ''}`}
+            className={`phase-list__item phase-list__item--${phase.id}${lit.has(phase.id) ? ' phase-list__item--current' : ''}`}
           >
             {phase.id === 'end' && turn && turn.player === 'p1' && !busy && !battleOpen && !departing ? (
               <button className="phase-list__end" onClick={onEndTurn} title="End turn">
@@ -70,6 +79,12 @@ export function PhaseWindow({
         <p className="phase-window__instruction">
           {busy
             ? 'Orders complete.'
+            : match.decisive
+              ? decisiveRoller(match) === 'p1'
+                ? 'Decisive battle: roll the die.'
+                : match.decisive.outcome
+                  ? 'The decisive battle is over.'
+                  : 'Decisive battle!'
             : turn && turn.player !== 'p1' && !battleOpen
               ? 'The enemy is taking their turn…'
             : battleOpen
@@ -87,10 +102,10 @@ export function PhaseWindow({
         <div className="phase-window__buttons">
           {enterTarget !== null && (
             <button
-              className={`btn${turn.step === 'placement' ? ' btn--primary' : ''}`}
+              className={`btn${turn.step === 'orders' && !canEndTurn(match) ? ' btn--primary' : ''}`}
               onClick={() => onEnterRegion(enterTarget)}
             >
-              {turn.step === 'placement' ? `Enter ${REGION_NAMES[enterTarget]}` : `Return to ${REGION_NAMES[enterTarget]}`}
+              {turn.step === 'orders' && !canEndTurn(match) ? `Enter ${REGION_NAMES[enterTarget]}` : `Return to ${REGION_NAMES[enterTarget]}`}
             </button>
           )}
           <button className={`btn phase-window__end-turn${canEndTurn(match) ? ' btn--primary' : ''}`} onClick={onEndTurn}>
@@ -123,17 +138,17 @@ function instructionFor(match: MatchState, selectedCaptainId: string | null, foc
 
   const captain = actingCaptain(match);
   const where = captain?.region != null ? REGION_NAMES[captain.region] : 'the Region';
-  if (turn.step === 'placement') {
-    return focusedRegion === captain?.region
-      ? 'Choose a Knight, then an empty square.'
-      : `Enter ${where} to place a Knight.`;
-  }
-  if (turn.step === 'attack') {
-    const placed = turn.placedKnightId ? match.knights[turn.placedKnightId] : undefined;
-    const n = attackTargets(match).length;
-    return focusedRegion === captain?.region
-      ? `${placed ? knightName(placed) : 'Your Knight'} can attack ${n === 1 ? 'the adjacent enemy' : 'an adjacent enemy'}, or End turn.`
-      : `Enter ${where} to attack, or End turn.`;
+  if (turn.step === 'decisive') return `Stalemate in ${where}: decisive battle!`;
+  if (turn.step === 'orders') {
+    const place = canPlaceNow(match);
+    const attack = attackers(match).length > 0;
+    const done = canEndTurn(match) ? ', or End turn' : '';
+    if (focusedRegion !== captain?.region) {
+      return `Enter ${where} to ${place && attack ? 'place a Knight and/or attack' : place ? 'place a Knight' : 'attack'}${done}.`;
+    }
+    if (place && attack) return `Place a Knight and/or attack, in any order${done}.`;
+    if (place) return `Choose a Knight, then an empty square${done}.`;
+    return `Pick one of your Knights, then an enemy to attack${done}.`;
   }
   if (match.duel?.outcome) return 'Battle fought. Press End turn when ready.';
   if (captain?.region != null && match.secured[captain.region]?.captainId === captain.id) {

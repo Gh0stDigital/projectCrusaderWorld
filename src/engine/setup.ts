@@ -113,5 +113,7 @@ export function createMatch(): MatchState {
     duel: null,
     route: null,
     secured: {},
+    closed: [],
+    decisive: null,
   };
 }

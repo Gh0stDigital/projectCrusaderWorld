@@ -30,7 +30,7 @@ function duel(
     t.map((tactic, i) => ({ id: `${id}-s${i + 1}`, tactic, militia: men?.[i] ?? 10 }));
   s.knights[ATTACKER] = { ...s.knights[ATTACKER]!, subclass: attacker.subclass, hp: attacker.hp ?? 50, sergeants: sg(ATTACKER, attacker.tactics, attacker.men) };
   s.knights[DEFENDER] = { ...s.knights[DEFENDER]!, subclass: defender.subclass, hp: defender.hp ?? 50, sergeants: sg(DEFENDER, defender.tactics, defender.men) };
-  return act(s, { type: 'declareAttack', player: 'p1', targetKnightId: DEFENDER });
+  return act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
 }
 
 function clash(s: MatchState, a: number, d: number): MatchState {

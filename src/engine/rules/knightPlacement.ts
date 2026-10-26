@@ -1,12 +1,12 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
-import { actingCaptain, attackTargets, knightAt, winningLine } from '../queries';
+import { actingCaptain, knightAt, nextOrdersStep, winningLine } from '../queries';
 import { SQUARES, type MatchState, type PlayerId, type SquareIndex } from '../state';
 
 /**
  * The acting Captain places one of their waiting Knights on an empty square
- * of their Region. One placement per turn. Knights never move afterwards.
- * If an enemy Knight stands next to the new Knight, the turn moves to the Attack step.
+ * of their Region. One placement per turn, before or after the turn's attack.
+ * Knights never move afterwards.
  */
 export function placeKnight(
   state: MatchState,
@@ -18,7 +18,8 @@ export function placeKnight(
   if (state.phase !== 'turns' || !turn) return reject('Knights can only be placed during a turn.');
   if (turn.player !== player) return reject('It is not your turn.');
   if (turn.step === 'command') return reject('Choose a Captain first.');
-  if (turn.step !== 'placement') return reject('You have already placed a Knight this turn.');
+  if (turn.placedKnightId) return reject('You have already placed a Knight this turn.');
+  if (turn.step !== 'orders') return reject('You cannot place a Knight right now.');
 
   const captain = actingCaptain(state);
   if (!captain || captain.region === null) return reject('Your Captain is not stationed in a Region.');
@@ -35,7 +36,7 @@ export function placeKnight(
     knights: { ...state.knights, [knightId]: { ...knight, status: 'fielded', position: { region, square } } },
     // The square sends the opponent to the Region in the same position.
     route: square,
-    turn: { ...turn, step: 'attack', placedKnightId: knightId },
+    turn: { ...turn, placedKnightId: knightId },
   };
   const events: MatchEvent[] = [{ type: 'knightPlaced', player, knightId, region, square }];
 
@@ -89,8 +90,6 @@ export function placeKnight(
     };
   }
 
-  // With no enemy next to the new Knight there is nothing to attack: go straight to End.
-  const next: MatchState =
-    attackTargets(placed).length > 0 ? placed : { ...placed, turn: { ...placed.turn!, step: 'end' } };
-  return { ok: true, state: next, events };
+  // More orders if the turn's attack is still unused and possible; otherwise End.
+  return { ok: true, state: { ...placed, turn: { ...placed.turn!, step: nextOrdersStep(placed) } }, events };
 }

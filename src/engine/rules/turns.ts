@@ -1,6 +1,7 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
-import { actionableCaptains, canEndTurn, nextLordFor, retreatDecider } from '../queries';
+import { actingCaptain, actionableCaptains, canEndTurn, isStalemate, nextLordFor, retreatDecider } from '../queries';
+import { startDecisive } from './decisive';
 import { otherPlayer, type MatchState, type PlayerId } from '../state';
 
 /** Begin a player's turn with their next Lord. The Lord is fixed here, not when the previous turn ends. */
@@ -15,8 +16,9 @@ export function startTurn(
   const next: MatchState = {
     ...state,
     turnNumber,
-    turn: { player, lord, step: 'command', captainId: null, placedKnightId: null },
+    turn: { player, lord, step: 'command', captainId: null, placedKnightId: null, attacked: false },
     duel: null,
+    decisive: null,
   };
   const canAct = actionableCaptains(next).length > 0;
   return {
@@ -34,20 +36,33 @@ export function endTurn(state: MatchState, player: PlayerId): EngineResult<Match
   if (!canEndTurn(state)) {
     const reasons: Record<string, string> = {
       command: 'Choose a Captain before ending your turn.',
-      placement: 'Place a Knight before ending your turn.',
+      orders: 'Place a Knight or attack before ending your turn.',
+      decisive: 'Finish the decisive battle first.',
       battle: 'Finish the battle before ending your turn.',
     };
     return reject(reasons[turn.step] ?? 'You cannot end your turn yet.');
   }
 
+  // Only a placement routes the opponent; a turn without one leaves them a free choice.
+  const routed: MatchState = turn.placedKnightId ? state : { ...state, route: null };
+
+  // The Region played in stalemated: its Captains fight a decisive battle before the turn passes.
+  const region = actingCaptain(routed)?.region ?? null;
+  if (region !== null && isStalemate(routed, region)) {
+    const fight = startDecisive(routed, region, player);
+    return { ok: true, state: fight.state, events: fight.events };
+  }
+
+  const passed = passTurn(routed, player);
+  return { ok: true, state: passed.state, events: passed.events };
+}
+
+/** Hands the turn to the other player. */
+export function passTurn(state: MatchState, player: PlayerId): { state: MatchState; events: MatchEvent[] } {
   const players = {
     ...state.players,
     [player]: { ...state.players[player], turnsTaken: state.players[player].turnsTaken + 1 },
   };
   const started = startTurn({ ...state, players }, otherPlayer(player));
-  return {
-    ok: true,
-    state: started.state,
-    events: [{ type: 'turnEnded', player }, ...started.events],
-  };
+  return { state: started.state, events: [{ type: 'turnEnded', player }, ...started.events] };
 }

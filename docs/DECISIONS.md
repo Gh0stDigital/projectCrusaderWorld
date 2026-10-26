@@ -33,8 +33,11 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - Each Lord has 2 Captains; each Captain has 6 Knights.
 - A turn: the current Lord chooses one of their Captains. A Ready Captain deploys to a Region; a Captain already stationed is given new orders (resumed). Then that Captain places one of their Knights on an empty square of their Region's 3×3 board. Then the player presses End Turn.
 - A player may have only one Captain per Region; the opponent may share it. A Region whose board is full takes no new Captains.
-- One Captain choice and one Knight placement per turn. Knights never move once placed.
-- End Turn is manual and is refused until a Knight is placed, unless the current Lord has no Captain who can act (then it can be ended right away).
+- One Captain choice per turn. Then, in either order: one Knight placement and one attack. Knights never move once placed.
+- Any of the acting Captain's Knights already on that Region's board may attack (the one just placed included), but only if it has an enemy in reach. A battle can come before or after the placement.
+- A stationed Captain with no Knight left to place can still be chosen if one of their Knights on the board has a target.
+- End Turn is manual and is refused until a Knight is placed or an attack made, unless the current Lord has no Captain who can act (then it can be ended right away).
+- Only a placement routes the opponent. A turn without one (attack only, or no orders) leaves the opponent a free choice.
 - Ultimate Tic-Tac-Toe routing (settled):
   - The square a Knight is placed on sends the opponent to the Region in the same position next turn. The first turn of the match is a free choice.
   - While the current Lord has a Ready Captain, they must play in the routed Region: deploy a Ready Captain there. They cannot revisit other Regions.
@@ -207,6 +210,17 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 - Reinforced men join the Knight's HP and may take it above the normal maximum of 50; the window says so, and battle HP shows the bonus in gold (e.g. 70 / 50 HP (+20)). The extra is permanent for the rest of the game (it can be lost in battle; nothing restores it).
 - Only the defender reinforces, only before the first clash. Attackers cannot reinforce (not requested).
 
+## Decisive battles — Settled
+
+- **Stalemate:** when a turn ends (after any battle that turn), if the Region it was played in can take no more placements (board full, or neither Captain there has a Knight left to place), nobody holds it, and both players have a Captain there, those Captains fight a decisive battle before the turn passes. Attacks still possible there do not prevent it.
+- **Men:** each side's HP is their Captain's total militia (reserve, waiting Knights, Knights on the board and their Sergeants).
+- **Dice:** each side rolls a six-sided die once per Knight of theirs on that board. The player whose turn just ended rolls first; then they alternate, and a side with rolls left keeps rolling once the other runs out. Each roll costs the other side (roller's current men × die) ÷ 10 men, rounded down.
+- **End:** when every roll is used, or a side reaches 0 men. Most men wins.
+- **Losses** are spread evenly over each Captain's men: reserve and every Knight in proportion to their men; within a Knight, across HP and Sergeants. A Knight only dies if all its men are gone.
+- **Winner** secures the Region (like three in a row). **Loser at 0 men:** the Captain dies with all their Knights. **Loser alive:** their Knights on that board are captured and the Captain returns to their Lord with the Knights they never deployed (or falls if no men are left off the board).
+- **Level:** nobody secures the Region; it closes (no more deployments or placements) and both Captains return to their Lords. Their Knights on the board stay there.
+- The human rolls with a button; the computer rolls on its own. The screen is a battlefield with each side's group avatar (lance rider, crossbowman and swordsman together), men bars, rolls left, and the die.
+
 ## Battles — Provisional (my choices, open to change)
 
 1. Rush beats Flank, Flank beats Counter, Counter beats Rush.
@@ -215,15 +229,15 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 4. Up to 5 clashes; each Sergeant fights once per duel. The duel ends early at 0 HP. If one side runs out of Sergeants, the other's remaining Sergeants strike unopposed.
 5. Equal HP at the end: the defender holds and both Knights stay.
 6. The losing Knight dies at 0 HP; otherwise its side chooses to retreat it to its Captain (with its remaining HP and Sergeants, to be placed again later) or hold its square.
-7. Only the Knight placed this turn may attack, once, and only an enemy directly up, down, left or right of it. Attacking is optional.
+7. One attack per turn, by any of the acting Captain's Knights on that board, against an enemy directly up, down, left or right of it (Archers: same row or column). Attacking is optional.
 8. HP, Sergeant losses and deaths carry over to every later battle. Nothing regenerates.
 9. The human always picks Player 1's (blue) Sergeants and the computer always picks Player 2's (red), whether attacking or defending. The computer picks at random, commits first, and never looks at the human's pick.
 
 ## Other rules — Proposed (not yet approved)
 
-1. A turn may instead be an attack by an already stationed Knight, with no placement. After such a turn, routing comes from the attacking Knight's square.
+1. (Settled, see Match start and turns.)
 2. When a territory is secured, the losing Captain's Knights there are captured and that Captain counts as killed.
-3. A full board with no line and no legal attack closes as neutral.
+3. (Replaced by Decisive battles.)
 4. A player with no legal action skips to the next Lord with one. If none has one, that player loses.
 5. Reserves and reinforcement (staffing unmanned Knights, topping up Sergeants) come later. Reserves are only displayed for now.
 

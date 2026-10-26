@@ -8,9 +8,11 @@ import {
   declareAttack,
   deployCaptain,
   endTurn,
+  finishDecisive,
   placeKnight,
   reinforceKnight,
   resumeCaptain,
+  rollDie,
   setLordOrder,
 } from './rules';
 
@@ -26,13 +28,17 @@ export function applyAction(state: MatchState, action: MatchAction): EngineResul
     case 'placeKnight':
       return placeKnight(state, action.player, action.knightId, action.square);
     case 'declareAttack':
-      return declareAttack(state, action.player, action.targetKnightId);
+      return declareAttack(state, action.player, action.attackerKnightId, action.targetKnightId);
     case 'reinforceKnight':
       return reinforceKnight(state, action.player, action.knightId, action.amount);
     case 'commitSergeant':
       return commitSergeant(state, action.player, action.sergeantId);
     case 'chooseRetreat':
       return chooseRetreat(state, action.player, action.retreat);
+    case 'rollDie':
+      return rollDie(state, action.player, action.value);
+    case 'finishDecisive':
+      return finishDecisive(state, action.player);
     case 'endTurn':
       return endTurn(state, action.player);
   }

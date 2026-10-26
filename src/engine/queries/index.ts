@@ -59,9 +59,9 @@ export function knightAt(state: MatchState, region: RegionIndex, square: SquareI
   );
 }
 
-/** Empty squares a Knight could still be placed on. A secured Region has none. */
+/** Empty squares a Knight could still be placed on. A secured or closed Region has none. */
 export function emptySquares(state: MatchState, region: RegionIndex): SquareIndex[] {
-  if (state.secured[region]) return [];
+  if (state.secured[region] || state.closed.includes(region)) return [];
   return SQUARES.filter((square) => knightAt(state, region, square) === null);
 }
 
@@ -97,9 +97,27 @@ export function regionsOpenTo(state: MatchState, player: PlayerId): RegionIndex[
  */
 export function captainCanAct(state: MatchState, captain: Captain): boolean {
   if (captain.fallen) return false;
-  if (reserveKnights(state, captain.id).length === 0) return false;
-  if (captain.region === null) return regionsOpenTo(state, captain.owner).length > 0;
-  return emptySquares(state, captain.region).length > 0;
+  if (captain.region === null) {
+    return reserveKnights(state, captain.id).length > 0 && regionsOpenTo(state, captain.owner).length > 0;
+  }
+  return captainCanPlace(state, captain) || captainAttackers(state, captain).length > 0;
+}
+
+/** A stationed Captain with a waiting Knight and an empty square in their Region. */
+export function captainCanPlace(state: MatchState, captain: Captain): boolean {
+  return (
+    captain.region !== null &&
+    reserveKnights(state, captain.id).length > 0 &&
+    emptySquares(state, captain.region).length > 0
+  );
+}
+
+/** A Captain's Knights on their Region's board that have an enemy to attack. */
+export function captainAttackers(state: MatchState, captain: Captain): Knight[] {
+  if (captain.region === null || state.secured[captain.region] || state.closed.includes(captain.region)) return [];
+  return knightsOf(state, captain.id).filter(
+    (k) => k.status === 'fielded' && k.position?.region === captain.region && targetsFrom(state, k).length > 0,
+  );
 }
 
 /**
@@ -225,8 +243,31 @@ export function actingCaptain(state: MatchState): Captain | null {
 export function legalSquares(state: MatchState): SquareIndex[] {
   const turn = state.turn;
   const captain = actingCaptain(state);
-  if (!turn || turn.step !== 'placement' || !captain || captain.region === null) return [];
-  return emptySquares(state, captain.region);
+  if (!turn || turn.step !== 'orders' || turn.placedKnightId || !captain || !captainCanPlace(state, captain)) return [];
+  return emptySquares(state, captain.region!);
+}
+
+/** Whether the acting Captain can still place a Knight this turn. */
+export function canPlaceNow(state: MatchState): boolean {
+  return legalSquares(state).length > 0;
+}
+
+/** The acting Captain's Knights that can attack right now (this turn's attack unused). */
+export function attackers(state: MatchState): Knight[] {
+  const turn = state.turn;
+  const captain = actingCaptain(state);
+  if (!turn || turn.step !== 'orders' || turn.attacked || !captain) return [];
+  return captainAttackers(state, captain);
+}
+
+/** The step after an order: more orders while a placement or an attack is still possible, else end. */
+export function nextOrdersStep(state: MatchState): 'orders' | 'end' {
+  const turn = state.turn!;
+  const captain = actingCaptain(state);
+  if (!captain) return 'end';
+  const canPlace = !turn.placedKnightId && captainCanPlace(state, captain);
+  const canAttack = !turn.attacked && captainAttackers(state, captain).length > 0;
+  return canPlace || canAttack ? 'orders' : 'end';
 }
 
 // --- Adjacency and attacks ---
@@ -244,11 +285,15 @@ export function adjacentSquares(square: SquareIndex): SquareIndex[] {
 }
 
 /** Enemy Knights the Knight placed this turn may attack. */
-export function attackTargets(state: MatchState): Knight[] {
-  const turn = state.turn;
-  if (!turn || turn.step !== 'attack' || !turn.placedKnightId) return [];
-  const attacker = state.knights[turn.placedKnightId];
-  if (!attacker?.position) return [];
+/** Enemies a Knight on the board this turn could attack (empty unless it is one of the current attackers). */
+export function attackTargets(state: MatchState, attackerId: string | null): Knight[] {
+  if (!attackerId || !attackers(state).some((k) => k.id === attackerId)) return [];
+  return targetsFrom(state, state.knights[attackerId]!);
+}
+
+/** Enemies within reach of a Knight on the board, whatever the turn. */
+export function targetsFrom(state: MatchState, attacker: Knight): Knight[] {
+  if (attacker.status !== 'fielded' || !attacker.position) return [];
   const { region, square } = attacker.position;
   // Archers shoot along their row or column at any distance; others strike adjacent squares.
   const squares = attacker.subclass === 'archers' ? lineSquares(square) : adjacentSquares(square);
@@ -268,7 +313,8 @@ export function canEndTurn(state: MatchState): boolean {
   const turn = state.turn;
   if (!turn) return false;
   if (retreatDecider(state)) return false;
-  if (turn.step === 'end' || turn.step === 'attack') return true;
+  if (turn.step === 'end') return true;
+  if (turn.step === 'orders') return turn.placedKnightId !== null || turn.attacked;
   return turn.step === 'command' && actionableCaptains(state).length === 0;
 }
 
@@ -339,4 +385,40 @@ export function playerMilitia(state: MatchState, player: PlayerId): number {
 /** A Knight's normal maximum HP: their type's base HP, plus Brace once a Gatekeeper has used it. */
 export function normalMaxHp(knight: Pick<Knight, 'subclass' | 'braced'>): number {
   return ((knight.subclass && SUBCLASS_HP[knight.subclass]) ?? KNIGHT_HP) + (knight.braced ? BRACE_BONUS : 0);
+}
+
+// --- Decisive battles ---
+
+/**
+ * A Region stalemates when nobody holds it, both players have a Captain there,
+ * and no more Knights can be placed (board full, or neither Captain has one left).
+ */
+export function isStalemate(state: MatchState, region: RegionIndex): boolean {
+  if (state.secured[region] || state.closed.includes(region)) return false;
+  const a = captainInRegion(state, region, 'p1');
+  const b = captainInRegion(state, region, 'p2');
+  if (!a || !b || a.fallen || b.fallen) return false;
+  if (emptySquares(state, region).length === 0) return true;
+  return reserveKnights(state, a.id).length === 0 && reserveKnights(state, b.id).length === 0;
+}
+
+/** A player's Knights standing on a Region's board. */
+export function knightsOnBoard(state: MatchState, region: RegionIndex, player: PlayerId): Knight[] {
+  return Object.values(state.knights).filter(
+    (k) => k.status === 'fielded' && k.owner === player && k.position?.region === region,
+  );
+}
+
+/** Whose roll it is in the decisive battle: alternating from `first`, until each side's chances run out. */
+export function decisiveRoller(state: MatchState): PlayerId | null {
+  const d = state.decisive;
+  if (!d || d.outcome) return null;
+  const used = (p: PlayerId) => d.rolls.filter((r) => r.player === p).length;
+  const left = (p: PlayerId) => d.chances[p] - used(p);
+  const second: PlayerId = d.first === 'p1' ? 'p2' : 'p1';
+  const last = d.rolls[d.rolls.length - 1]?.player;
+  const preferred = last === undefined ? d.first : last === d.first ? second : d.first;
+  if (left(preferred) > 0) return preferred;
+  const other: PlayerId = preferred === 'p1' ? 'p2' : 'p1';
+  return left(other) > 0 ? other : null;
 }

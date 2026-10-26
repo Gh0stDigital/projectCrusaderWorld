@@ -99,10 +99,10 @@ describe('Adjacency', () => {
 });
 
 describe('Declaring an attack', () => {
-  it('moves to the Attack step when an enemy is next to the placed Knight', () => {
+  it('stays in orders when an enemy is in reach of one of your Knights', () => {
     const s = readyToAttack();
-    expect(s.turn!.step).toBe('attack');
-    expect(attackTargets(s).map((k) => k.id)).toEqual([DEFENDER]);
+    expect(s.turn!.step).toBe('orders');
+    expect(attackTargets(s, ATTACKER).map((k) => k.id)).toEqual([DEFENDER]);
   });
 
   it('allows ending the turn instead of attacking', () => {
@@ -110,15 +110,15 @@ describe('Declaring an attack', () => {
   });
 
   it('starts a duel and blocks End Turn until it is over', () => {
-    const s = act(readyToAttack(), { type: 'declareAttack', player: 'p1', targetKnightId: DEFENDER });
+    const s = act(readyToAttack(), { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
     expect(s.turn!.step).toBe('battle');
     expect(s.duel).toMatchObject({ attacker: { knightId: ATTACKER }, defender: { knightId: DEFENDER }, clashes: [] });
     expect(rejected(s, { type: 'endTurn', player: 'p1' })).toMatch(/Finish the battle/);
   });
 
   it('refuses a Knight that is not an adjacent enemy', () => {
-    expect(rejected(readyToAttack(), { type: 'declareAttack', player: 'p1', targetKnightId: 'p1-raiders-1-k1' })).toMatch(
-      /adjacent enemy/,
+    expect(rejected(readyToAttack(), { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: 'p1-raiders-1-k1' })).toMatch(
+      /enemy in reach/,
     );
   });
 });
@@ -128,7 +128,7 @@ describe('Clashes', () => {
     let s = readyToAttack();
     s = setSergeants(s, ATTACKER, attacker);
     s = setSergeants(s, DEFENDER, defender);
-    return act(s, { type: 'declareAttack', player: 'p1', targetKnightId: DEFENDER });
+    return act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
   }
 
   it('waits until both sides have committed', () => {
@@ -156,7 +156,7 @@ describe('Clashes', () => {
     let s = readyToAttack();
     s = setSergeants(s, ATTACKER, ['rush', 'flank'], 7);
     s = setSergeants(s, DEFENDER, ['rush', 'flank'], 10);
-    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: DEFENDER });
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
     s = clash(s, 1, 1);
     expect(s.duel!.clashes[0]).toMatchObject({ winner: 'tie', damage: 0 });
     expect(s.knights[ATTACKER]!.sergeants[0]!.militia).toBe(3);
@@ -186,7 +186,7 @@ describe('Ending a duel', () => {
     let s = readyToAttack();
     s = setSergeants(s, ATTACKER, ['rush', 'rush']);
     s = setSergeants(s, DEFENDER, ['flank', 'flank']);
-    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: DEFENDER });
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
     s = clash(s, 1, 1);
     return clash(s, 2, 2);
   }
@@ -223,7 +223,7 @@ describe('Ending a duel', () => {
     s = { ...s, knights: { ...s.knights, [ATTACKER]: { ...s.knights[ATTACKER]!, hp: 5 } } };
     s = setSergeants(s, ATTACKER, ['rush']);
     s = setSergeants(s, DEFENDER, ['flank']);
-    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: DEFENDER });
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
     s = clash(s, 1, 1);
     expect(s.knights[DEFENDER]!.hp).toBe(40);
     expect(s.duel!.outcome!.winner).toBe('defender');
@@ -235,7 +235,7 @@ describe('Ending a duel', () => {
     s = { ...s, knights: { ...s.knights, [DEFENDER]: { ...s.knights[DEFENDER]!, hp: 10 } } };
     s = setSergeants(s, ATTACKER, ['rush', 'rush']);
     s = setSergeants(s, DEFENDER, ['flank', 'flank']);
-    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: DEFENDER });
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
     s = clash(s, 1, 1);
     expect(s.duel!.clashes).toHaveLength(1);
     expect(s.duel!.outcome).toEqual({ winner: 'attacker', loserFate: 'killed' });
@@ -247,7 +247,7 @@ describe('Ending a duel', () => {
     let s = readyToAttack();
     s = setSergeants(s, ATTACKER, ['rush']);
     s = setSergeants(s, DEFENDER, ['rush']);
-    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: DEFENDER });
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
     s = clash(s, 1, 1);
     expect(s.duel!.outcome).toEqual({ winner: null, loserFate: null });
     expect(s.knights[DEFENDER]!.status).toBe('fielded');
@@ -259,7 +259,7 @@ describe('Ending a duel', () => {
     s = setSergeants(s, ATTACKER, ['rush']);
     s = setSergeants(s, DEFENDER, ['flank', 'counter']);
     const before = captainMilitia(s, 'p2-garrison-1');
-    s = act(s, { type: 'declareAttack', player: 'p1', targetKnightId: DEFENDER });
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
     s = clash(s, 1, 1);
     // The attacker is out of Sergeants; the defender's last one strikes unopposed.
     s = act(s, { type: 'commitSergeant', player: 'p2', sergeantId: `${DEFENDER}-s2` });
@@ -276,7 +276,7 @@ describe('Ending a duel', () => {
 
 describe('Computer Sergeant choice', () => {
   it('commits one of its own available Sergeants without needing the other side’s pick', () => {
-    const s = act(readyToAttack(), { type: 'declareAttack', player: 'p1', targetKnightId: DEFENDER });
+    const s = act(readyToAttack(), { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
     const action = chooseSergeant(s, 'p2', () => 0);
     expect(action).toEqual({ type: 'commitSergeant', player: 'p2', sergeantId: `${DEFENDER}-s1` });
   });

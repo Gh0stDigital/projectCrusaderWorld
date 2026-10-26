@@ -1,4 +1,4 @@
-import { captainInRegion, captainMilitia, knightsOf } from '../../engine/queries';
+import { captainInRegion, canPlaceNow, captainMilitia, knightsOf } from '../../engine/queries';
 import type { Knight, MatchState, PlayerId, RegionIndex } from '../../engine/state';
 import {
   REGION_NAMES,
@@ -53,7 +53,7 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
   }
 
   const acting = turn?.captainId === captain.id;
-  const picking = acting && turn?.step === 'placement';
+  const picking = acting && canPlaceNow(match);
 
   return (
     <div className="company">

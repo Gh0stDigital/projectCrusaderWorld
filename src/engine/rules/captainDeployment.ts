@@ -42,7 +42,7 @@ export function deployCaptain(
     state: {
       ...state,
       captains: { ...state.captains, [captainId]: { ...captain, region } },
-      turn: { ...state.turn!, step: 'placement', captainId },
+      turn: { ...state.turn!, step: 'orders', captainId },
     },
     events: [{ type: 'captainDeployed', player, captainId, lord: captain.lord, region }],
   };
@@ -66,7 +66,7 @@ export function resumeCaptain(
 
   return {
     ok: true,
-    state: { ...state, turn: { ...state.turn!, step: 'placement', captainId } },
+    state: { ...state, turn: { ...state.turn!, step: 'orders', captainId } },
     events: [{ type: 'captainResumed', player, captainId, region: captain.region }],
   };
 }

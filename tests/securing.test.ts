@@ -27,7 +27,7 @@ function aboutToSecure(): MatchState {
   field('p1-raiders-1-k1', 0);
   field('p1-raiders-1-k2', 1);
   field('p2-garrison-1-k1', 4);
-  s = { ...s, turn: { ...s.turn!, step: 'placement', captainId: 'p1-raiders-1' } };
+  s = { ...s, turn: { ...s.turn!, step: 'orders', captainId: 'p1-raiders-1' } };
   return s;
 }
 

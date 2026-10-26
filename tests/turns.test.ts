@@ -128,7 +128,7 @@ describe('Captain deployment', () => {
   it('stations the Captain and moves on to Knight placement', () => {
     const s = act(startedMatch(), { type: 'deployCaptain', player: 'p1', captainId: 'p1-raiders-1', region: 4 });
     expect(s.captains['p1-raiders-1']!.region).toBe(4);
-    expect(s.turn).toMatchObject({ step: 'placement', captainId: 'p1-raiders-1' });
+    expect(s.turn).toMatchObject({ step: 'orders', captainId: 'p1-raiders-1' });
   });
 
   it('refuses a Captain belonging to a different Lord', () => {
