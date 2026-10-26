@@ -15,6 +15,7 @@ import { OrdersNotice } from '../overlays/OrdersNotice';
 import { AttackPreview } from '../battle/AttackPreview';
 import { BattleView } from '../battle/BattleView';
 import { DecisiveView } from '../battle/DecisiveView';
+import { DecisivePreview, assaultSetup, setupFromBattle } from '../battle/DecisivePreview';
 import { MatchOver, ReportWindow, StationOrders, StationPrompt } from '../campaign/StationOrders';
 import regionBoardSkin from '../../assets/ui/region-board-skin.webp';
 import regionViewSkin from '../../assets/ui/region-view-skin.webp';
@@ -260,7 +261,18 @@ export function MatchScreen() {
                 onChooseRetreat={store.chooseRetreat}
               />
             )}
-            {store.decisiveOpen && match.decisive && (
+            {store.decisiveOpen && match.decisive && !store.decisiveBegun && (
+              <DecisivePreview match={match} setup={setupFromBattle(match.decisive)} onBegin={store.beginDecisive} />
+            )}
+            {store.assaultPreview !== null && acting && (
+              <DecisivePreview
+                match={match}
+                setup={assaultSetup(match, acting.id, store.assaultPreview)}
+                onBegin={store.launchAssault}
+                onCancel={() => store.previewAssault(null)}
+              />
+            )}
+            {store.decisiveOpen && match.decisive && store.decisiveBegun && (
               <DecisiveView
                 match={match}
                 decisive={match.decisive}
@@ -268,13 +280,13 @@ export function MatchScreen() {
                 onReturn={store.closeDecisive}
               />
             )}
-            {turn && !locked && !battleOpen && !store.decisiveOpen && stationedOrdersOpen(match) && (
+            {turn && !locked && !battleOpen && !store.decisiveOpen && store.assaultPreview === null && stationedOrdersOpen(match) && (
               <StationOrders
                 match={match}
                 captain={stationedOrdersOpen(match)!}
                 onSendReserve={(toCaptainId, amount) => store.dispatch({ type: 'sendReserve', player: 'p1', toCaptainId, amount })}
                 onSendKnight={(knightId, toCaptainId) => store.dispatch({ type: 'sendKnight', player: 'p1', knightId, toCaptainId })}
-                onAssault={(region) => store.dispatch({ type: 'assault', player: 'p1', region: region as RegionIndex })}
+                onAssault={(region) => store.previewAssault(region as RegionIndex)}
                 onCancel={() => store.dispatch({ type: 'cancelStationOrders', player: 'p1' })}
               />
             )}

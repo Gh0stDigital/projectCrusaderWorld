@@ -222,6 +222,7 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 - **Losses** are spread evenly over each Captain's men: reserve and every Knight in proportion to their men; within a Knight, across HP and Sergeants. A Knight only dies if all its men are gone.
 - **Winner** secures the Region (like three in a row). **Loser at 0 men:** the Captain dies with all their Knights. **Loser alive:** their Knights on that board are captured and the Captain returns to their Lord with the Knights they never deployed (or falls if no men are left off the board).
 - **Level:** nobody secures the Region; it closes (no more deployments or placements) and both Captains return to their Lords. Their Knights on the board stay there.
+- Before every decisive battle or assault a pre-battle window shows both Captains' cards (yours on the left), their men, reserve and rolls, and the rules; in an assault an arrow points from attacker to defender. When you launch an assault yourself it comes up first with Cancel and Launch assault; otherwise it has Begin the battle. Nobody rolls until it is closed.
 - The human rolls with a button; the computer rolls on its own. The screen is a battlefield with each side's group avatar (lance rider, crossbowman and swordsman together), men bars, rolls left, and the die.
 
 ## Secured Regions: stationed Captains and winning — Settled

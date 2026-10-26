@@ -76,6 +76,10 @@ interface MatchStore {
   defensePromptOpen: boolean;
   /** The decisive battle screen is showing (from its start until the player returns). */
   decisiveOpen: boolean;
+  /** The pre-battle window for the decisive battle has been closed; rolling can start. */
+  decisiveBegun: boolean;
+  /** Player 1 is looking at an assault before launching it (the Region to assault). */
+  assaultPreview: RegionIndex | null;
   /** Pop-up reports waiting to be read (Regions lost or won, men sent). The computer waits for them. */
   reports: Report[];
   /** "Orders complete" confirmation shown at the end of a turn. */
@@ -97,6 +101,12 @@ interface MatchStore {
   rollDecisive: () => void;
   /** Leave the finished decisive battle: its results apply and the turn passes. */
   closeDecisive: () => void;
+  /** Close the decisive pre-battle window and start rolling. */
+  beginDecisive: () => void;
+  /** Open (region) or cancel (null) the preview of an assault Player 1 is considering. */
+  previewAssault: (region: RegionIndex | null) => void;
+  /** Launch the previewed assault; its pre-battle window has already been seen. */
+  launchAssault: () => void;
   /** Close the report on top. */
   dismissReport: () => void;
   /** The human, under attack, sends `amount` reserve militia (0 for none) and the battle begins. */
@@ -118,6 +128,8 @@ const freshScreenState = {
   battleSnapshot: null,
   defensePromptOpen: false,
   decisiveOpen: false,
+  decisiveBegun: false,
+  assaultPreview: null,
   reports: [],
   departure: null,
 };
@@ -165,16 +177,7 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
         if (reply) get().dispatch(reply);
       }
     }
-    // The computer rolls its own dice in a decisive battle, one roll at a time.
-    if (decisiveRoller(result.state) === COMPUTER && decisiveTimer === null) {
-      decisiveTimer = window.setTimeout(() => {
-        decisiveTimer = null;
-        const now = get().match;
-        if (decisiveRoller(now) === COMPUTER) {
-          get().dispatch({ type: 'rollDie', player: COMPUTER, value: 1 + Math.floor(Math.random() * 6) });
-        }
-      }, DECISIVE_ROLL_MS);
-    }
+    scheduleComputerRoll();
     // The computer decides at once whether its surviving loser retreats or holds.
     if (retreatDecider(result.state) === COMPUTER) {
       const choice = chooseComputerRetreat(result.state, COMPUTER);
@@ -231,6 +234,21 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
     if (get().dispatch(action)) {
       set({ battleOpen: true, battleSnapshot: before });
     }
+  },
+
+  beginDecisive: () => {
+    set({ decisiveBegun: true });
+    scheduleComputerRoll();
+  },
+
+  previewAssault: (region) => set({ assaultPreview: region, error: null }),
+
+  launchAssault: () => {
+    const region = get().assaultPreview;
+    set({ assaultPreview: null });
+    if (region === null) return;
+    if (get().dispatch({ type: 'assault', player: 'p1', region })) set({ decisiveBegun: true });
+    scheduleComputerRoll();
   },
 
   dismissReport: () => {
@@ -314,6 +332,20 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
     set({ match: createMatch(), ...freshScreenState });
   },
 }));
+
+/** The computer rolls its own dice, one roll at a time, once the pre-battle window is closed. */
+function scheduleComputerRoll() {
+  if (decisiveTimer !== null) return;
+  const { match, decisiveBegun } = useMatchStore.getState();
+  if (!decisiveBegun || decisiveRoller(match) !== COMPUTER) return;
+  decisiveTimer = window.setTimeout(() => {
+    decisiveTimer = null;
+    const store = useMatchStore.getState();
+    if (store.decisiveBegun && decisiveRoller(store.match) === COMPUTER) {
+      store.dispatch({ type: 'rollDie', player: COMPUTER, value: 1 + Math.floor(Math.random() * 6) });
+    }
+  }, DECISIVE_ROLL_MS);
+}
 
 /** Queue the computer's next step, if it isn't already queued. */
 function scheduleComputer() {
@@ -435,6 +467,7 @@ function screenUpdatesFor(state: MatchState, events: MatchEvent[]): Partial<Matc
         break;
       case 'decisiveStarted':
         updates.decisiveOpen = true;
+        updates.decisiveBegun = false;
         updates.focusedRegion = null;
         break;
     }
