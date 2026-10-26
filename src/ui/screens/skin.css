@@ -597,9 +597,17 @@
 }
 
 /* During a turn every Lord except the acting one steps back, so it is clear whose turn it is. */
-.lord-row--resting > *:not(.lord-row__badge) {
+/* Lords not taking this turn are greyed out, except their Captains' status text. */
+.lord-row--resting > *:not(.lord-row__badge):not(.lord-row__info),
+.lord-row--resting .lord-row__info > *:not(.lord-row__captains):not(.lord-row__badge),
+.lord-row--resting .captain-icon > *:not(.captain-icon__status) {
   filter: grayscale(0.9) brightness(0.45);
   transition: filter 250ms;
+}
+
+.lord-row--resting .captain-icon {
+  border-color: rgba(120, 95, 60, 0.45);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .lord-row--active {
