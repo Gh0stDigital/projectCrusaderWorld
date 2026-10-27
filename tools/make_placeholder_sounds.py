@@ -1,5 +1,6 @@
 """Writes simple 8-bit style placeholder sound effects to src/assets/sounds.
 Replace any file with a real sound of the same name; the game picks it up as is.
+Existing files are never overwritten.
 Run: python tools/make_placeholder_sounds.py
 """
 import math, random, struct, wave, os
@@ -48,6 +49,9 @@ def silence(d):
 
 def write(name, samples):
     path = os.path.join(OUT, name + '.wav')
+    if os.path.exists(path):
+        print(name, 'exists, kept')  # never overwrite a real sound
+        return
     with wave.open(path, 'w') as w:
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(RATE)
         w.writeframes(b''.join(struct.pack('<h', int(max(-1, min(1, s)) * 32000)) for s in samples))
@@ -68,5 +72,4 @@ write('secure', tone([(523, 0.12), (659, 0.12), (784, 0.12), (1046, 0.3)], 0, vo
 write('victory', tone([(523, 0.15), (523, 0.15), (523, 0.15), (659, 0.3), (784, 0.15), (1046, 0.5)], 0, vol=0.28))
 write('defeat', tone([(392, 0.25), (370, 0.25), (349, 0.25), (262, 0.6)], 0, vol=0.28))
 write('retreat', tone([(700, 0.35)], 0, sine, vol=0.3, slide=-0.6))
-write('report', tone([(523, 0.1), (392, 0.18)], 0, sine, vol=0.3))
 write('kill', mix(tone([(200, 0.4)], 0, vol=0.3, slide=-0.7), noise(0.3, 0.3, 0.4)))

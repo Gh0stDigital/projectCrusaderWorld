@@ -84,7 +84,8 @@ export function BattleView({ match, duel, onCommit, onClose, onChooseRetreat }: 
     if (phase !== 'prelude') return;
     const effect = duel.prelude[preludeIndex];
     if (!effect) return;
-    if (effect.type === 'brace' || effect.type === 'ambush') play('turn');
+    if (effect.type === 'brace') play('heal');
+    else if (effect.type === 'ambush') play('turn');
     else {
       play('slash');
       window.setTimeout(() => play(effect.killed ? 'kill' : 'hit'), 140);
@@ -94,7 +95,7 @@ export function BattleView({ match, duel, onCommit, onClose, onChooseRetreat }: 
     if (phase !== 'aftermath') return;
     const effect = duel.aftermath[effectIndex];
     if (!effect) return;
-    if (effect.type === 'regroup') play('turn');
+    if (effect.type === 'regroup') play('heal');
     else {
       play('slash');
       window.setTimeout(() => play(effect.killed ? 'kill' : 'hit'), 140);

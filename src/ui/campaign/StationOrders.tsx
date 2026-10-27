@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { play } from '../../audio/sound';
+import { useState } from 'react';
 import {
   assaultTargets,
   captainMilitia,
@@ -183,7 +182,6 @@ export function StationOrders({
 
 /** A pop-up report: a Region lost or won, Knights freed, or men the enemy sent. */
 export function ReportWindow({ report, onClose }: { report: Report; onClose: () => void }) {
-  useEffect(() => play('report'), [report]);
   return (
     <div className="attack-preview" role="dialog" aria-modal="true" aria-labelledby="report-title">
       <div className={`attack-preview__window battle-results__window battle-results__window--${report.tone} station`}>

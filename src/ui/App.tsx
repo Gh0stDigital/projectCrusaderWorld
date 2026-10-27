@@ -21,6 +21,24 @@ export function App() {
     return () => window.removeEventListener('pointerdown', onPress);
   }, []);
 
+  // A blip whenever any pop-up window (role="dialog") opens.
+  useEffect(() => {
+    let last = 0;
+    const observer = new MutationObserver((records) => {
+      const opened = records.some((r) =>
+        [...r.addedNodes].some(
+          (n) => n instanceof HTMLElement && (n.matches('[role="dialog"]') || n.querySelector('[role="dialog"]')),
+        ),
+      );
+      if (opened && performance.now() - last > 150) {
+        last = performance.now();
+        play('modal');
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <Stage>
       {screen === 'loading' && <LoadingScreen />}

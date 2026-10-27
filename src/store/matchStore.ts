@@ -353,6 +353,9 @@ function playEventSounds(events: MatchEvent[]) {
       case 'duelStarted':
         play('clash');
         break;
+      case 'knightReinforced':
+        play('heal');
+        break;
       case 'turnStarted':
         if (e.player === 'p1') play('turn');
         break;

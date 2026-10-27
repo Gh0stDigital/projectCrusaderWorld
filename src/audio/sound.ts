@@ -34,7 +34,8 @@ export type SoundName =
   | 'victory'
   | 'defeat'
   | 'retreat'
-  | 'report';
+  | 'modal'
+  | 'heal';
 
 export interface SoundSettings {
   muted: boolean;
