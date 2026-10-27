@@ -12,11 +12,14 @@ export function App() {
   const screen = useAppStore((s) => s.screen);
   const fade = useAppStore((s) => s.fade);
 
-  // A quiet click on every enabled button press.
+  // A quiet click on every enabled button press; the confirmation sound on main buttons.
   useEffect(() => {
     const onPress = (e: PointerEvent) => {
       const button = (e.target as HTMLElement).closest('button');
-      if (button && !button.disabled && button.getAttribute('aria-disabled') !== 'true') play('ui-click', { volume: 0.5 });
+      if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true') return;
+      // Main (gold) buttons confirm something; the die roll has its own sounds.
+      if (button.classList.contains('btn--primary') && !button.classList.contains('decisive__roll')) play('confirm');
+      else play('ui-click', { volume: 0.5 });
     };
     window.addEventListener('pointerdown', onPress);
     return () => window.removeEventListener('pointerdown', onPress);

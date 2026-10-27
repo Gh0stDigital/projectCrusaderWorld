@@ -341,6 +341,12 @@ function playEventSounds(events: MatchEvent[]) {
   for (const e of events) {
     switch (e.type) {
       case 'captainDeployed':
+        play('captain');
+        break;
+      case 'regionTaken':
+        play(e.player === 'p1' ? 'secure' : 'retreat');
+        if (e.captainId) window.setTimeout(() => play('captain'), 500);
+        break;
       case 'captainResumed':
       case 'reserveSent':
       case 'knightSent':
@@ -360,7 +366,6 @@ function playEventSounds(events: MatchEvent[]) {
         if (e.player === 'p1') play('turn');
         break;
       case 'regionSecured':
-      case 'regionTaken':
         play(e.player === 'p1' ? 'secure' : 'retreat');
         break;
       case 'matchWon':

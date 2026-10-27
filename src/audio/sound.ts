@@ -55,7 +55,9 @@ export type SoundName =
   | 'sabotage'
   | 'zoom'
   | 'archer'
-  | 'second-pass';
+  | 'second-pass'
+  | 'confirm'
+  | 'captain';
 
 export interface SoundSettings {
   muted: boolean;
