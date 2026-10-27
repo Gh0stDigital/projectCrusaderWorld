@@ -1,3 +1,4 @@
+import { ResourceBars } from './ResourceBars';
 import { actingCaptain, actionableCaptains, canEndTurn, attackers, canPlaceNow, canUndoCommand, canUndoKnight, commandOptions, movers, decisiveRoller, isStationed, moveType, retreatDecider } from '../../engine/queries';
 import { MOVE_TYPE_NAMES, commandSummary } from './commandText';
 import type { MatchState, RegionIndex } from '../../engine/state';
@@ -63,6 +64,7 @@ export function PhaseWindow({
 
   return (
     <footer className="phase-window">
+      <ResourceBars match={match} />
       <ol className="phase-list">
         {PHASES.map((phase) => (
           <li

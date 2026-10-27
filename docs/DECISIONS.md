@@ -280,7 +280,7 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
   - End of each turn: the Lord who played pays for their troops (their Captains' Knights, waiting or on the board; not reserves).
 - An action the pool can't fully cover still happens; the pool goes to 0.
 - **Out of Resources:** each action costs 1 man instead (from the acting Captain's reserve, or the acting Knight; a Knight is never starved of its last man by its own action: its Captain's reserve or another of its Knights pays instead), and at the end of each of a Lord's turns their troops (not reserves) lose 10% of their men (rounded up per Knight; a Knight left with no men falls).
-- Shown in each player's header (gold; red at 0), on deploy labels, the attack and assault windows, and the send-men confirmations. A report window opens when a player runs out, and each time your troops lose men to it.
+- Shown as health bars across the top of the bottom bar: yours on the left, the enemy's mirrored on the right, with the number on the bar. Green above half, yellow below half, red and throbbing below a quarter; at 0 the empty bar flashes "OUT OF RESOURCES". Spending leaves a pale stretch that drains away a moment later, with the amount shown in the bar; refunds show in green. The bar of whoever's turn it is glows. Costs also show on deploy labels, the attack and assault windows, and the send-men confirmations. A report window opens when a player runs out, and each time your troops lose men to it.
 - The computer spends a little more carefully once its Resources run low.
 - Undoing a placement or move refunds what it cost.
 

@@ -49,14 +49,6 @@ export function PlayerPanel({
           <h2 className="player-panel__name">{PLAYER_NAMES[player]}</h2>
           <p className="player-panel__militia">
             {formatMilitia(playerMilitia(match, player))} militia
-            {match.resources && (
-              <span
-                className={`player-panel__resources${match.resources[player] === 0 ? ' player-panel__resources--out' : ''}`}
-                title={match.resources[player] === 0 ? 'Out of Resources: each action costs 1 man, and troops lose 10% each turn' : 'Resources'}
-              >
-                {` · ${formatMilitia(match.resources[player])} res`}
-              </span>
-            )}
           </p>
         </div>
         <p className="player-panel__status">{statusFor(match, player)}</p>

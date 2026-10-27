@@ -1,0 +1,178 @@
+/* Resources as health bars across the top of the bottom bar. */
+.resource-bars {
+  position: absolute;
+  top: 8px;
+  left: 48px;
+  right: 48px;
+  height: 26px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 18px;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.resource-bars__label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 #000;
+}
+
+.resource-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* The enemy's bar mirrors yours: name on the outside, draining towards the middle. */
+.resource-bar--p2 {
+  flex-direction: row-reverse;
+}
+
+.resource-bar__name {
+  flex: none;
+  width: 52px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--parchment-dim);
+  text-shadow: 0 2px 0 #000;
+}
+
+.resource-bar--p1 .resource-bar__name { color: #8fb4ff; }
+.resource-bar--p2 .resource-bar__name { color: #ff9b8f; text-align: right; }
+
+.resource-bar__track {
+  --bar: #4fc25b;
+  --bar-dark: #2c7a35;
+  position: relative;
+  flex: 1;
+  height: 22px;
+  border: 2px solid #000;
+  outline: 2px solid var(--gold-dim);
+  border-radius: 3px;
+  background: #1a130d;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
+  transition: outline-color 200ms, box-shadow 200ms;
+}
+
+.resource-bar--p2 .resource-bar__track {
+  transform: scaleX(-1);
+}
+
+.resource-bar--mid .resource-bar__track { --bar: #e3c33c; --bar-dark: #9a7f17; }
+.resource-bar--low .resource-bar__track { --bar: #e2604f; --bar-dark: #8f2b20; }
+
+.resource-bar__fill,
+.resource-bar__trail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+}
+
+/* Pixel-style fill: a bright top band over the darker body. */
+.resource-bar__fill {
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--bar) 70%, #fff) 0 22%, var(--bar) 22% 62%, var(--bar-dark) 62% 100%);
+  transition: width 300ms steps(12, end), background 300ms;
+}
+
+/* What was just spent: pale, then it drains away to catch up. */
+.resource-bar__trail {
+  background: #f3e6c4;
+  transition: width 500ms ease-in;
+}
+
+.resource-bar__notches {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to right, transparent 0 calc(10% - 2px), rgba(0, 0, 0, 0.45) calc(10% - 2px) 10%);
+  pointer-events: none;
+}
+
+.resource-bar__value {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: #fff;
+  text-shadow: 0 2px 0 #000, 0 0 4px #000;
+}
+
+/* The text stays readable inside the mirrored enemy track. */
+.resource-bar--p2 .resource-bar__value {
+  transform: scaleX(-1);
+}
+
+/* Whose turn it is: their bar glows. */
+.resource-bar--active .resource-bar__track {
+  outline-color: var(--gold);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7), 0 0 12px rgba(217, 169, 58, 0.55);
+}
+
+/* Running low: the bar throbs. Out: the empty track flashes red. */
+.resource-bar--low .resource-bar__fill {
+  animation: resource-low 900ms ease-in-out infinite;
+}
+
+.resource-bar--out .resource-bar__track {
+  outline-color: #e2604f;
+  animation: resource-out 1s steps(2, end) infinite;
+}
+
+.resource-bar--out .resource-bar__value {
+  color: #ff9b8f;
+  font-size: 10px;
+}
+
+@keyframes resource-low {
+  50% { filter: brightness(1.5); }
+}
+
+@keyframes resource-out {
+  50% { background: #4a1510; }
+}
+
+/* The amount just spent (or refunded) floats up off the bar. */
+.resource-bar__delta {
+  position: absolute;
+  top: 5px;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: #ff8a78;
+  text-shadow: 0 2px 0 #000;
+  pointer-events: none;
+  animation: resource-delta 1400ms ease-out forwards;
+}
+
+/* Inside the bar, at the end nearest the middle. */
+.resource-bar--p1 .resource-bar__delta { right: 10px; }
+.resource-bar--p2 .resource-bar__delta { left: 10px; }
+
+.resource-bar__delta--refund {
+  color: #7fe08a;
+}
+
+@keyframes resource-delta {
+  0% { transform: scale(1.6); opacity: 0; }
+  12% { transform: scale(1); opacity: 1; }
+  75% { opacity: 1; }
+  100% { transform: translateY(-6px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resource-bar__fill,
+  .resource-bar__trail { transition: none; }
+  .resource-bar--low .resource-bar__fill,
+  .resource-bar--out .resource-bar__track,
+  .resource-bar__delta { animation: none; }
+}
