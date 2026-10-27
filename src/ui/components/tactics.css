@@ -1,8 +1,8 @@
-/* Tactic colors are kept apart from the player colors (blue / red). */
+/* Tactic colors: rock (Rush) red, paper (Counter) blue, scissors (Flank) green. */
 :root {
-  --rush: #e2913a;
-  --flank: #7dbb5f;
-  --counter: #a58ae0;
+  --rush: #e2524a;
+  --flank: #5fcf6a;
+  --counter: #4f9bff;
 }
 
 .tactic-icon {

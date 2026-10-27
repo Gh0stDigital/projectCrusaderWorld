@@ -485,6 +485,12 @@
   font-size: 10px;
 }
 
+/* Avatar and men on the left; tactic name and its rock/paper/scissors icon on the right. */
+.battle-hud .combatant__sergeants .sergeant-box__avatar { order: 0; }
+.battle-hud .combatant__sergeants .sergeant-box__militia { order: 1; }
+.battle-hud .combatant__sergeants .sergeant-box__tactic { order: 2; }
+.battle-hud .combatant__sergeants .tactic-icon { order: 3; }
+
 .battle-hud .combatant__sergeants .sergeant-box--pickable:hover,
 .battle-hud .combatant__sergeants .sergeant-box--pickable:focus-visible {
   transform: skewX(-14deg) translateX(8px);
