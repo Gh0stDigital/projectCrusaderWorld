@@ -7,6 +7,8 @@ export interface Report {
   title: string;
   tone: 'win' | 'loss' | 'even';
   lines: string[];
+  /** A Captain to show (their card) beside the text. */
+  captainId?: string;
 }
 
 const HUMAN: PlayerId = 'p1';
@@ -95,6 +97,7 @@ export function reportsFor(state: MatchState, events: MatchEvent[]): Report[] {
       const knightsLeft = Object.values(state.knights).filter((k) => k.captainId === id && k.status === 'ready').length;
       reports.push({
         title: `${captainName(c)} needs redeployment`,
+        captainId: id,
         tone: 'even',
         lines: [
           `${captainName(c)} has retreated to ${lordPersona(c.owner, c.lord).name} and is on Standby.`,

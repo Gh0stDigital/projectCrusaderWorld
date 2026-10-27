@@ -70,3 +70,15 @@
 .station--confirm {
   width: 760px;
 }
+
+/* Report text, with a Captain's card beside it when one is named. */
+.report__body--with-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  text-align: left;
+}
+
+.report__body--with-card .battle-results__verdict {
+  text-align: left;
+}

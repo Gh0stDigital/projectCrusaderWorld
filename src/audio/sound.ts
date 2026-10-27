@@ -58,7 +58,9 @@ export type SoundName =
   | 'second-pass'
   | 'confirm'
   | 'captain'
-  | 'turn-change';
+  | 'turn-change'
+  | 'card-flip'
+  | 'heist';
 
 export interface SoundSettings {
   muted: boolean;

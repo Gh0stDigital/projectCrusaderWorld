@@ -309,7 +309,7 @@ export function MatchScreen() {
               <MatchOver winner={match.winner} onMenu={leave} />
             )}
             {store.reports.length > 0 && !battleOpen && !store.decisiveOpen && !defensePromptOpen && (
-              <ReportWindow report={store.reports[0]!} onClose={store.dismissReport} />
+              <ReportWindow match={match} report={store.reports[0]!} onClose={store.dismissReport} />
             )}
             {notice && <OrdersNotice player={notice.player} detail={noticeDetail} />}
             {announcement && <TurnAnnouncement announcement={announcement} onDone={store.dismissAnnouncement} />}

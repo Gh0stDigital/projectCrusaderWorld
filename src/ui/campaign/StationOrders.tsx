@@ -9,7 +9,8 @@ import {
   stationCandidates,
 } from '../../engine/queries';
 import type { Captain, MatchState, PlayerId } from '../../engine/state';
-import { PLAYER_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
+import { PLAYER_NAMES, REGION_NAMES, captainArt, captainName, knightName } from '../../data/names';
+import { Card } from '../components/Card';
 import type { Report } from './reports';
 import '../battle/attackPreview.css';
 import './stationOrders.css';
@@ -181,18 +182,29 @@ export function StationOrders({
 }
 
 /** A pop-up report: a Region lost or won, Knights freed, or men the enemy sent. */
-export function ReportWindow({ report, onClose }: { report: Report; onClose: () => void }) {
+export function ReportWindow({ match, report, onClose }: { match: MatchState; report: Report; onClose: () => void }) {
   return (
     <div className="attack-preview" role="dialog" aria-modal="true" aria-labelledby="report-title">
       <div className={`attack-preview__window battle-results__window battle-results__window--${report.tone} station`}>
         <h2 id="report-title" className="attack-preview__title battle-results__title">
           {report.title}
         </h2>
-        {report.lines.map((line) => (
-          <p key={line} className="battle-results__verdict">
-            {line}
-          </p>
-        ))}
+        <div className={report.captainId ? 'report__body report__body--with-card' : 'report__body'}>
+          {report.captainId && (
+            <Card
+              art={captainArt(match.captains[report.captainId]!.owner, match.captains[report.captainId]!.lord)}
+              size="roster"
+              owner={match.captains[report.captainId]!.owner}
+            />
+          )}
+          <div>
+            {report.lines.map((line) => (
+              <p key={line} className="battle-results__verdict">
+                {line}
+              </p>
+            ))}
+          </div>
+        </div>
         <div className="attack-preview__actions">
           <button className="btn btn--primary" onClick={onClose} autoFocus>
             Continue

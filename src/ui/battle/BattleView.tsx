@@ -71,7 +71,11 @@ export function BattleView({ match, duel, onCommit, onClose, onChooseRetreat }: 
 
   // Sounds follow what the screen shows, not the rules (which resolve instantly).
   useEffect(() => {
+    // Both sides' Sergeant picks flip open.
+    if (phase === 'reveal' && pendingClash) play('card-flip');
     if (phase === 'result' && pendingClash) {
+      // Skirmisher: Heist wins the clash outright.
+      if (pendingClash.heist) play('heist');
       if (pendingClash.winner === 'tie') {
         play('clash');
       } else {
