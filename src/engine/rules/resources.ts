@@ -47,8 +47,16 @@ function loseMen(state: MatchState, payer: Payer, men: number): MatchState {
     const knight = knightsOf(state, captain.id).find((k) => knightMilitia(k) > 0);
     return knight ? loseMen(state, { knightId: knight.id }, men) : state;
   }
+  // A Knight's action: the Knight pays, unless that would cost its last man;
+  // then its Captain's reserve, then another of that Captain's Knights.
   const knight = state.knights[payer.knightId]!;
-  return { ...state, knights: { ...state.knights, [knight.id]: takeLosses(knight, men) } };
+  const captain = state.captains[knight.captainId]!;
+  if (knightMilitia(knight) <= men && captain.reserve >= men) {
+    return { ...state, captains: { ...state.captains, [captain.id]: { ...captain, reserve: captain.reserve - men } } };
+  }
+  const other = knightsOf(state, captain.id).find((k) => k.id !== knight.id && knightMilitia(k) > men);
+  const from = knightMilitia(knight) > men ? knight : other;
+  return from ? { ...state, knights: { ...state.knights, [from.id]: takeLosses(from, men) } } : state;
 }
 
 /** A Lord's troops for upkeep: their Captains' Knights (waiting or on the board), not reserves. */

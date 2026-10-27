@@ -343,6 +343,7 @@ export function MatchScreen() {
         onEnterRegion={store.focusRegion}
         onEndTurn={store.requestEndTurn}
         onUndo={() => turn && !locked && store.dispatch({ type: 'undoKnight', player: turn.player })}
+        onUndoCommand={() => turn && !locked && store.dispatch({ type: 'undoCommand', player: turn.player })}
       />
     </div>
   );

@@ -141,6 +141,20 @@ export function canUndoKnight(state: MatchState): boolean {
   return Boolean(turn?.undo) && (turn!.step === 'orders' || turn!.step === 'end');
 }
 
+/** Whether this turn's Captain choice can still be taken back: chosen, but nothing done yet. */
+export function canUndoCommand(state: MatchState): boolean {
+  const turn = state.turn;
+  return (
+    state.phase === 'turns' &&
+    turn?.step === 'orders' &&
+    turn.captainId !== null &&
+    !turn.placedKnightId &&
+    !turn.movedKnightId &&
+    !turn.attacked &&
+    !turn.stationOrder
+  );
+}
+
 /** A stationed Captain with a waiting Knight and an empty square in their Region. */
 export function captainCanPlace(state: MatchState, captain: Captain): boolean {
   return (

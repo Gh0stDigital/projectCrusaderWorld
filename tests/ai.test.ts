@@ -136,3 +136,39 @@ describe('Computer: retreat or hold', () => {
     expect(chooseRetreat(lost(19, 20), 'p1')).toBeNull();
   });
 });
+
+describe('Computer player: tactics', () => {
+  function startedMatch() {
+    let s = createMatch();
+    s = act(s, { type: 'setLordOrder', player: 'p1', order: ['raiders', 'army', 'garrison'] });
+    return act(s, { type: 'setLordOrder', player: 'p2', order: ['garrison', 'raiders', 'army'] });
+  }
+
+  it('reinforces a defending Knight at most once', () => {
+    let s = startedMatch();
+    s = act(s, { type: 'deployCaptain', player: 'p1', captainId: 'p1-raiders-1', region: 4 });
+    s = structuredClone(s);
+    s.captains['p2-garrison-1'] = { ...s.captains['p2-garrison-1']!, region: 4 };
+    s.knights['p1-raiders-1-k1'] = { ...s.knights['p1-raiders-1-k1']!, status: 'fielded', position: { region: 4, square: 3 } };
+    s.knights['p2-garrison-1-k1'] = { ...s.knights['p2-garrison-1-k1']!, status: 'fielded', position: { region: 4, square: 4 }, hp: 10 };
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: 'p1-raiders-1-k1', targetKnightId: 'p2-garrison-1-k1' });
+    expect(s.duel?.outcome).toBeNull();
+    const first = nextComputerAction(s, 'p2', seeded(1));
+    expect(first?.type).toBe('reinforceKnight');
+    s = act(s, first!);
+    expect(nextComputerAction(s, 'p2', seeded(1))?.type).toBe('commitSergeant');
+  });
+
+  it('plays a computer-vs-computer game through to a winner', () => {
+    const random = seeded(9);
+    let s = createMatch();
+    let steps = 0;
+    while (steps < 4000 && s.phase !== 'over') {
+      const action = nextComputerAction(s, 'p1', random) ?? nextComputerAction(s, 'p2', random);
+      expect(action).not.toBeNull();
+      s = act(s, action!);
+      steps++;
+    }
+    expect(s.phase).toBe('over');
+  });
+});

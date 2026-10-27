@@ -1,6 +1,6 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
-import { actingCaptain, actionableCaptains, canEndTurn, isStalemate, matchWinner, nextLordFor, retreatDecider } from '../queries';
+import { actingCaptain, actionableCaptains, canEndTurn, isStalemate, matchWinner, nextLordFor, retreatDecider, stationedOrdersOpen } from '../queries';
 import { startDecisive } from './decisive';
 import { upkeep } from './resources';
 import { otherPlayer, type MatchState, type PlayerId } from '../state';
@@ -17,7 +17,7 @@ export function startTurn(
   const next: MatchState = {
     ...state,
     turnNumber,
-    turn: { player, lord, step: 'command', captainId: null, placedKnightId: null, attacked: false, movedKnightId: null, stationOrder: false, undo: null },
+    turn: { player, lord, step: 'command', captainId: null, placedKnightId: null, attacked: false, movedKnightId: null, stationOrder: false, undo: null, commandUndo: null },
     duel: null,
     decisive: null,
   };
@@ -37,7 +37,9 @@ export function endTurn(state: MatchState, player: PlayerId): EngineResult<Match
   if (!canEndTurn(state)) {
     const reasons: Record<string, string> = {
       command: 'Choose a Captain before ending your turn.',
-      orders: 'Place a Knight or attack before ending your turn.',
+      orders: stationedOrdersOpen(state)
+        ? 'Give your stationed Captain an order before ending your turn.'
+        : 'Place a Knight or attack before ending your turn.',
       decisive: 'Finish the decisive battle first.',
       station: 'Choose a Captain to station in the Region you took.',
       battle: 'Finish the battle before ending your turn.',

@@ -22,6 +22,7 @@ import {
 } from '../state';
 import { settle } from './decisive';
 import { passTurn } from './turns';
+import { undoCommand } from './captainDeployment';
 import { charge } from './resources';
 
 /**
@@ -296,9 +297,5 @@ export function joinCaptain(knights: Record<string, Knight>, knightId: string, t
 export function cancelStationOrders(state: MatchState, player: PlayerId): EngineResult<MatchState, MatchEvent> {
   const from = checkStationed(state, player);
   if (typeof from === 'string') return reject(from);
-  return {
-    ok: true,
-    state: { ...state, turn: { ...state.turn!, step: 'command', captainId: null } },
-    events: [{ type: 'commandCancelled', player, captainId: from.id }],
-  };
+  return undoCommand(state, player);
 }

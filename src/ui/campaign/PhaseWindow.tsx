@@ -1,4 +1,4 @@
-import { actingCaptain, actionableCaptains, canEndTurn, attackers, canPlaceNow, canUndoKnight, commandOptions, movers, decisiveRoller, isStationed, moveType, retreatDecider } from '../../engine/queries';
+import { actingCaptain, actionableCaptains, canEndTurn, attackers, canPlaceNow, canUndoCommand, canUndoKnight, commandOptions, movers, decisiveRoller, isStationed, moveType, retreatDecider } from '../../engine/queries';
 import { MOVE_TYPE_NAMES, commandSummary } from './commandText';
 import type { MatchState, RegionIndex } from '../../engine/state';
 import { LORD_NAMES, REGION_NAMES, captainName } from '../../data/names';
@@ -25,6 +25,8 @@ interface PhaseWindowProps {
   onEndTurn: () => void;
   /** Take back this turn's placement or move. */
   onUndo: () => void;
+  /** Take back this turn's Captain deployment (or Captain choice). */
+  onUndoCommand: () => void;
 }
 
 export function PhaseWindow({
@@ -38,9 +40,12 @@ export function PhaseWindow({
   onEnterRegion,
   onEndTurn,
   onUndo,
+  onUndoCommand,
 }: PhaseWindowProps) {
   const turn = match.turn;
   const captain = actingCaptain(match);
+  // A stationed Captain's orders window has its own cancel button.
+  const isStationedTurn = captain !== null && isStationed(match, captain);
   const enterTarget =
     turn && turn.step !== 'command' && !battleOpen && captain?.region != null && focusedRegion !== captain.region
       ? captain.region
@@ -106,6 +111,11 @@ export function PhaseWindow({
           {canUndoKnight(match) && (
             <button className="btn" onClick={onUndo}>
               {turn.movedKnightId ? 'Undo move' : 'Undo placement'}
+            </button>
+          )}
+          {canUndoCommand(match) && !isStationedTurn && (
+            <button className="btn" onClick={onUndoCommand}>
+              {turn.commandUndo ? 'Undo deployment' : 'Choose another Captain'}
             </button>
           )}
           {enterTarget !== null && (

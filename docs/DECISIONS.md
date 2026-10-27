@@ -205,14 +205,23 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 
 - The computer sets its own Lord order and plays its whole turn by itself at a watchable pace (about a second per step), zooming into the Region it plays in, and ends its own turns.
 - It waits for the human when needed: the reinforcement prompt when it attacks, Sergeant picks, and Return after a battle. The human's controls are locked during its turn.
-- Choices: complete three in a row if possible, block the human's two-in-a-row, avoid routing the human into a Region they can win, prefer center then corners, place its strongest ready Knight, attack the weakest adjacent enemy only when its Knight is at least about 90% as strong. Sergeants are picked at random, committed first, never looking at the human's pick.
-- Not yet: the computer does not reinforce when defending.
+- It sees only what a human sees (boards, rosters, Regions held), never the human's hidden Sergeant pick, and commits its Sergeant first.
+- **Smarter computer (Oct 2026).** Beat the previous computer 187–8 (5 drawn) over 200 simulated games. It:
+  - Reads the big board: values Regions by the lines of three Regions they build or block (a Region that would win the match, or the only block of the human's, counts most).
+  - Places to secure a Region, block the human's line, make two threats at once, and avoid routing the human into a Region they can win (weighted by what that Region is worth to them).
+  - Judges an attack by playing it out several times in its head with the real battle rules, weighing the chance of clearing the square (and what that square means: a blocker of its own line, a piece of the human's) against the chance of losing its own Knight and the men traded. It attacks first when that clears the way to three in a row.
+  - Moves a Knight when the step secures a Region, or when it has nothing better.
+  - Picks Sergeants by expected trade against the human's remaining Sergeants (weighted, never certain, so it can't be read).
+  - Reinforces a defending Knight from its Captain's reserve when the Knight is outmatched or holds an important square, keeping half the reserve back. A banner on the battle screen says how many men were sent.
+  - Stationed Captains assault when their men × rolls clearly beat the defender's (or the Region would win the match), otherwise send men or a Knight to the neighbouring Captain with the most at stake, keeping men back when an enemy next door could assault them.
+  - Chooses between deploying and giving orders by how promising each Region looks, not just the first option.
+  - Spends a little more carefully once its Resources run low.
 
 ## Reinforcements — Settled
 
 - When the human is attacked, the pre-battle window says "<Player> is attacking you! Deploy reinforcements?" and offers militia from the defending Knight's Captain reserve, in steps of 10 up to the whole reserve, or none.
 - Reinforced men join the Knight's HP and may take it above the normal maximum of 50; the window says so, and battle HP shows the bonus in gold (e.g. 70 / 50 HP (+20)). The extra is permanent for the rest of the game (it can be lost in battle; nothing restores it).
-- Only the defender reinforces, only before the first clash. Attackers cannot reinforce (not requested).
+- Only the defender reinforces, only before the first clash, and once per battle (the window only ever offered it once; the rules now enforce it). Attackers cannot reinforce (not requested).
 
 ## Decisive battles — Settled
 
@@ -270,10 +279,15 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
   - Reinforcing a defender: the men sent. Sending reserve or a Knight from a secured Region: the men sent. Assaulting: the assaulting Captain's whole company.
   - End of each turn: the Lord who played pays for their troops (their Captains' Knights, waiting or on the board; not reserves).
 - An action the pool can't fully cover still happens; the pool goes to 0.
-- **Out of Resources:** each action costs 1 man instead (from the acting Captain's reserve, or the acting Knight), and at the end of each of a Lord's turns their troops (not reserves) lose 10% of their men (rounded up per Knight; a Knight left with no men falls).
+- **Out of Resources:** each action costs 1 man instead (from the acting Captain's reserve, or the acting Knight; a Knight is never starved of its last man by its own action: its Captain's reserve or another of its Knights pays instead), and at the end of each of a Lord's turns their troops (not reserves) lose 10% of their men (rounded up per Knight; a Knight left with no men falls).
 - Shown in each player's header (gold; red at 0), on deploy labels, the attack and assault windows, and the send-men confirmations. A report window opens when a player runs out, and each time your troops lose men to it.
-- The computer ignores costs when choosing moves (experimental).
+- The computer spends a little more carefully once its Resources run low.
 - Undoing a placement or move refunds what it cost.
+
+## Undoing a Captain choice — Settled
+
+- Until the turn is confirmed, a Captain's deployment can be undone ("Undo deployment"): the Captain goes back to Standby, its Resources are refunded, and the Lord chooses again (another Region, or another Captain). Giving orders to a deployed Captain can be taken back the same way ("Choose another Captain"); a stationed Captain's orders window already had Cancel.
+- A placement or move must be undone first. Once that Captain attacks, or a stationed Captain gives its order, the choice is final.
 
 ## Battles — Provisional (my choices, open to change)
 
@@ -285,7 +299,7 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 6. The losing Knight dies at 0 HP; otherwise its side chooses to retreat it to its Captain (with its remaining HP and Sergeants, to be placed again later) or hold its square.
 7. One attack per turn, by any of the acting Captain's Knights on that board, against an enemy directly up, down, left or right of it (Archers: same row or column). Attacking is optional.
 8. HP, Sergeant losses and deaths carry over to every later battle. Nothing regenerates.
-9. The human always picks Player 1's (blue) Sergeants and the computer always picks Player 2's (red), whether attacking or defending. The computer picks at random, commits first, and never looks at the human's pick.
+9. The human always picks Player 1's (blue) Sergeants and the computer always picks Player 2's (red), whether attacking or defending. The computer commits first and never looks at the human's pick (see Computer opponent for how it chooses).
 
 ## Other rules — Proposed (not yet approved)
 

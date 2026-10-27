@@ -173,6 +173,11 @@ export function BattleView({ match, duel, onCommit, onClose, onChooseRetreat }: 
     <div className={`battle${closing ? ' battle--closing' : ''}`}>
       <header className="battle__header">
         <span className="battle__where">Battle in {REGION_NAMES[duel.region]}</span>
+        {duel.reinforced ? (
+          <span className="battle__reinforced">
+            {enemyRole === 'defender' ? 'Enemy' : 'You'} reinforced +{duel.reinforced} men
+          </span>
+        ) : null}
         <span className="battle__clash">
           {phase === 'over' || phase === 'aftermath' ? 'Battle over' : `Clash ${Math.min(shown + 1, 5)}`}
         </span>

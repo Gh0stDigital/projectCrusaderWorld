@@ -1,6 +1,6 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
-import { captainMilitia, commandOptions, reserveKnights } from '../queries';
+import { canUndoCommand, captainMilitia, commandOptions, reserveKnights } from '../queries';
 import { charge } from './resources';
 import { REGIONS, type Captain, type MatchState, type PlayerId, type RegionIndex } from '../state';
 
@@ -44,9 +44,36 @@ export function deployCaptain(
     state: {
       ...paid.state,
       captains: { ...paid.state.captains, [captainId]: { ...paid.state.captains[captainId]!, region } },
-      turn: { ...state.turn!, step: 'orders', captainId },
+      turn: {
+        ...state.turn!,
+        step: 'orders',
+        captainId,
+        commandUndo: { resources: state.resources, knights: state.knights, captains: state.captains },
+      },
     },
     events: [{ type: 'captainDeployed', player, captainId, lord: captain.lord, region }, ...paid.events],
+  };
+}
+
+/**
+ * Take back this turn's Captain choice (a deployment or giving orders to a
+ * deployed Captain) while that Captain has done nothing yet. A placement or
+ * move must be undone first; an attack or a stationed order makes it final.
+ */
+export function undoCommand(state: MatchState, player: PlayerId): EngineResult<MatchState, MatchEvent> {
+  const turn = state.turn;
+  if (state.phase !== 'turns' || !turn) return reject('There is no turn in progress.');
+  if (turn.player !== player) return reject('It is not your turn.');
+  if (!canUndoCommand(state)) {
+    if (turn.placedKnightId || turn.movedKnightId) return reject('Undo the Knight first.');
+    return reject('That Captain has already acted this turn.');
+  }
+  const captainId = turn.captainId!;
+  const restored = turn.commandUndo ?? {};
+  return {
+    ok: true,
+    state: { ...state, ...restored, turn: { ...turn, step: 'command', captainId: null, commandUndo: null } },
+    events: [{ type: 'commandCancelled', player, captainId }],
   };
 }
 

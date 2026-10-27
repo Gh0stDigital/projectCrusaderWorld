@@ -18,6 +18,7 @@ export function reinforceKnight(
   const duel = state.duel;
   if (!duel || duel.outcome) return reject('There is no battle to reinforce.');
   if (duel.clashes.length > 0) return reject('Reinforcements must arrive before the first clash.');
+  if (duel.reinforced) return reject('This Knight has already been reinforced.');
   if (duel.defender.player !== player || duel.defender.knightId !== knightId) {
     return reject('Only the defending Knight can be reinforced.');
   }
@@ -39,6 +40,7 @@ export function reinforceKnight(
       knights: { ...paid.state.knights, [knightId]: { ...knight, hp: knight.hp + sent * (knight.braced ? 2 : 1) } },
       duel: {
         ...duel,
+        reinforced: sent,
         defender: { ...duel.defender, startHp: duel.defender.startHp + sent * (knight.braced ? 2 : 1) },
       },
     },

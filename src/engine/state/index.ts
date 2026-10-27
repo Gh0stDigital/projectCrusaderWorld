@@ -170,6 +170,12 @@ export interface TurnState {
   movedKnightId: string | null;
   /** A stationed Captain gave its one order this turn (sent men or launched an assault). */
   stationOrder: boolean;
+  /** Captains and Resources before this turn's Captain deployed, so the deployment can be taken back. */
+  commandUndo: {
+    resources: Record<PlayerId, number> | null;
+    knights: Record<string, Knight>;
+    captains: Record<string, Captain>;
+  } | null;
   /** What the board looked like before this turn's placement or move, while it can still be undone. */
   undo: {
     resources: Record<PlayerId, number> | null;
@@ -237,6 +243,8 @@ export interface Duel {
   blocked: Record<DuelRole, string[]>;
   /** Abilities that took effect after the duel, in order. */
   aftermath: AftermathEffect[];
+  /** Men sent to reinforce the defender (once per battle), if any. */
+  reinforced?: number;
 }
 
 /** Effects before the first clash: Brace, Garrison strikes on the attacker, and Raider ambushes. */

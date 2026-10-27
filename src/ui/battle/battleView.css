@@ -519,3 +519,10 @@
   0%, 100% { filter: drop-shadow(0 10px 6px rgba(0, 0, 0, 0.55)); }
   40% { filter: drop-shadow(0 0 18px rgba(255, 215, 120, 0.95)) brightness(1.25); }
 }
+
+/* The defender's reserve sent into the battle. */
+.battle__reinforced {
+  color: var(--gold);
+  font-size: 10px;
+  white-space: nowrap;
+}

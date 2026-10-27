@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { MatchAction } from '../engine/actions';
 import type { MatchEvent } from '../engine/events';
 import { applyAction } from '../engine/match';
-import { chooseAttack, chooseCommand, chooseLordOrder, choosePlacement, chooseSergeant, chooseRetreat as chooseComputerRetreat, chooseMove, chooseStation, chooseStationOrder } from '../ai';
+import { chooseCommand, chooseLordOrder, chooseOrders, chooseReinforcement, chooseSergeant, chooseRetreat as chooseComputerRetreat, chooseStation } from '../ai';
 import { commandSummary } from '../ui/campaign/commandText';
 import { reportsFor, type Report } from '../ui/campaign/reports';
 import { play } from '../audio/sound';
@@ -15,7 +15,6 @@ import {
   decisiveRoller,
   reserveKnights,
   retreatDecider,
-  stationedOrdersOpen,
 } from '../engine/queries';
 import { createMatch } from '../engine/setup';
 import type { LordClass, MatchState, PlayerId, RegionIndex, SquareIndex } from '../engine/state';
@@ -175,7 +174,10 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
     if (result.events.some((e) => e.type === 'duelStarted' || e.type === 'clashResolved')) {
       const duel = result.state.duel;
       if (duel && !duel.outcome) {
-        const reply = chooseSergeant(result.state, COMPUTER);
+        // Attacked: the computer may first send reserve men to its Knight.
+        const reinforce = chooseReinforcement(result.state, COMPUTER);
+        if (reinforce) get().dispatch(reinforce);
+        const reply = chooseSergeant(get().match, COMPUTER);
         if (reply) get().dispatch(reply);
       }
     }
@@ -439,19 +441,11 @@ function runComputerStep() {
         scheduleComputer();
         return;
       }
-      if (stationedOrdersOpen(match)) {
-        const order = chooseStationOrder(match);
-        if (order) store.dispatch(order);
-        else store.requestEndTurn();
+      const action = chooseOrders(match);
+      if (action?.type === 'endTurn') {
+        store.requestEndTurn();
         return;
       }
-      const placement = choosePlacement(match);
-      if (placement) {
-        store.dispatch(placement);
-        return;
-      }
-      // A Captain that can only attack must; otherwise attack only at fair odds.
-      const action = canEndTurn(match) ? chooseAttack(match) : (chooseAttack(match, true) ?? chooseMove(match));
       if (action && store.dispatch(action)) {
         if (action.type !== 'declareAttack') return;
         const state = useMatchStore.getState();
@@ -502,6 +496,12 @@ function screenUpdatesFor(state: MatchState, events: MatchEvent[]): Partial<Matc
         break;
       case 'knightMoved':
         updates.selectedKnightId = null;
+        break;
+      case 'commandCancelled':
+        // Back to choosing: out on the Region board with that Captain still picked.
+        updates.focusedRegion = null;
+        updates.selectedKnightId = null;
+        updates.selectedCaptainId = event.captainId;
         break;
       case 'knightOrderUndone': {
         // Ready to try again: the Knight itself if it is waiting again (an undone

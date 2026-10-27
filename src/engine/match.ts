@@ -17,6 +17,7 @@ import {
   moveKnight,
   placeKnight,
   undoKnight,
+  undoCommand,
   reinforceKnight,
   resumeCaptain,
   rollDie,
@@ -38,6 +39,8 @@ export function applyAction(state: MatchState, action: MatchAction): EngineResul
       return moveKnight(state, action.player, action.knightId, action.square);
     case 'undoKnight':
       return undoKnight(state, action.player);
+    case 'undoCommand':
+      return undoCommand(state, action.player);
     case 'declareAttack':
       return declareAttack(state, action.player, action.attackerKnightId, action.targetKnightId);
     case 'reinforceKnight':
