@@ -4,6 +4,7 @@ import { DECISIVE_DIVISOR, type DecisiveBattle, type MatchState, type PlayerId }
 import { PLAYER_NAMES, REGION_NAMES, captainName } from '../../data/names';
 import armyBattle from '../../assets/sprites/army-battle-anim.webp';
 import enemyArmyBattle from '../../assets/sprites/enemy-army-battle-anim.webp';
+import { play } from '../../audio/sound';
 import './decisiveView.css';
 
 const HUMAN: PlayerId = 'p1';
@@ -50,7 +51,13 @@ export function DecisiveView({ match, decisive, onRoll, onReturn }: DecisiveView
   useEffect(() => {
     if (!rolling) return;
     const spin = window.setInterval(() => setTumble(1 + Math.floor(Math.random() * 6)), 90);
-    const done = window.setTimeout(() => setShown((n) => n + 1), ROLL_MS);
+    play('die-roll');
+    const roll = decisive.rolls[shown]!;
+    const done = window.setTimeout(() => {
+      setShown((n) => n + 1);
+      play('die-land');
+      if (roll.damage > 0) window.setTimeout(() => play('hit', { volume: Math.min(1, 0.4 + roll.value / 10) }), 120);
+    }, ROLL_MS);
     return () => {
       window.clearInterval(spin);
       window.clearTimeout(done);

@@ -23,6 +23,7 @@ import {
 } from '../../data/names';
 import { Card } from '../components/Card';
 import { BattleResults } from './BattleResults';
+import { play } from '../../audio/sound';
 import { BATTLE_SPRITES, SPRITE_WIDTH, battleSprite } from '../components/battleSprites';
 const SWORD_HEIGHT = BATTLE_SPRITES.sword.height;
 import { SergeantBox, TacticLegend, type SergeantBoxState } from '../components/SergeantBox';
@@ -67,6 +68,38 @@ export function BattleView({ match, duel, onCommit, onClose, onChooseRetreat }: 
   const [preludeIndex, setPreludeIndex] = useState(0);
 
   const pendingClash = duel.clashes[shown];
+
+  // Sounds follow what the screen shows, not the rules (which resolve instantly).
+  useEffect(() => {
+    if (phase === 'result' && pendingClash) {
+      if (pendingClash.winner === 'tie') {
+        play('clash');
+      } else {
+        play('slash');
+        window.setTimeout(() => play(pendingClash.hpAfter[pendingClash.winner === 'attacker' ? 'defender' : 'attacker'] <= 0 ? 'kill' : 'hit'), 140);
+      }
+    }
+  }, [phase, pendingClash]);
+  useEffect(() => {
+    if (phase !== 'prelude') return;
+    const effect = duel.prelude[preludeIndex];
+    if (!effect) return;
+    if (effect.type === 'brace' || effect.type === 'ambush') play('turn');
+    else {
+      play('slash');
+      window.setTimeout(() => play(effect.killed ? 'kill' : 'hit'), 140);
+    }
+  }, [phase, preludeIndex, duel.prelude]);
+  useEffect(() => {
+    if (phase !== 'aftermath') return;
+    const effect = duel.aftermath[effectIndex];
+    if (!effect) return;
+    if (effect.type === 'regroup') play('turn');
+    else {
+      play('slash');
+      window.setTimeout(() => play(effect.killed ? 'kill' : 'hit'), 140);
+    }
+  }, [phase, effectIndex, duel.aftermath]);
 
   useEffect(() => {
     if (phase === 'intro') {

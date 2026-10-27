@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 /** Which full-canvas screen is showing. Screen state only, never game rules. */
-export type Screen = 'title' | 'mainMenu' | 'match';
+export type Screen = 'loading' | 'title' | 'mainMenu' | 'match';
 
 interface AppState {
   screen: Screen;
@@ -9,6 +9,6 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set) => ({
-  screen: 'title',
+  screen: 'loading',
   goTo: (screen) => set({ screen }),
 }));

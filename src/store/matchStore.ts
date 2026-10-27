@@ -5,6 +5,7 @@ import { applyAction } from '../engine/match';
 import { chooseAttack, chooseCommand, chooseLordOrder, choosePlacement, chooseSergeant, chooseRetreat as chooseComputerRetreat, chooseMove, chooseStation, chooseStationOrder } from '../ai';
 import { commandSummary } from '../ui/campaign/commandText';
 import { reportsFor, type Report } from '../ui/campaign/reports';
+import { play } from '../audio/sound';
 import {
   actingCaptain,
   actionableCaptains,
@@ -162,6 +163,7 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
       set({ error: result.reason });
       return false;
     }
+    playEventSounds(result.events);
     set({
       match: result.state,
       error: null,
@@ -297,6 +299,7 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
     const acting = actingCaptain(match);
     const nextKnight = acting && canPlaceNow(match) ? (reserveKnights(match, acting.id)[0]?.id ?? null) : null;
     set({ battleOpen: false, battleSnapshot: null, departure, selectedKnightId: nextKnight });
+    if (departure) window.setTimeout(() => play(departure!.fate === 'killed' ? 'kill' : 'retreat'), DEPART_MS / 2);
     if (departure) {
       if (departureTimer !== null) window.clearTimeout(departureTimer);
       departureTimer = window.setTimeout(() => {
@@ -332,6 +335,37 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
     set({ match: createMatch(), ...freshScreenState });
   },
 }));
+
+/** Sounds for what just happened on the board (battles and dice play their own, in step with the screen). */
+function playEventSounds(events: MatchEvent[]) {
+  for (const e of events) {
+    switch (e.type) {
+      case 'captainDeployed':
+      case 'captainResumed':
+      case 'reserveSent':
+      case 'knightSent':
+        play('select');
+        break;
+      case 'knightPlaced':
+      case 'knightMoved':
+        play('place');
+        break;
+      case 'duelStarted':
+        play('clash');
+        break;
+      case 'turnStarted':
+        if (e.player === 'p1') play('turn');
+        break;
+      case 'regionSecured':
+      case 'regionTaken':
+        play(e.player === 'p1' ? 'secure' : 'retreat');
+        break;
+      case 'matchWon':
+        play(e.player === 'p1' ? 'victory' : 'defeat');
+        break;
+    }
+  }
+}
 
 /** The computer rolls its own dice, one roll at a time, once the pre-battle window is closed. */
 function scheduleComputerRoll() {

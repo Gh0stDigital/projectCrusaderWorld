@@ -248,6 +248,15 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 - On the Region board the selected Captain's Regions are marked only by the dashed white frame (no tag).
 - The computer assaults when it has at least 1.3× the defender's men; otherwise it sends its reserve (or a Knight) next door. After winning an assault it stations its first eligible Captain.
 
+## Assets, loading and sound — Settled
+
+- **Nothing waits on the network during play.** A loading screen ("Mustering the troops…", with a progress bar) downloads and decodes every image and sound and waits for the font before the title screen appears.
+- **Offline:** the built game registers a service worker (`public/sw.js`) that caches every file it loads. Game files have content-hashed names and are served from the cache first; the page itself is fetched fresh when online and from the cache when not. After the first visit the game loads from disk and works without internet. The dev server does not use it.
+- **Battle avatars** ship as WebP at twice their on-screen size (each frame 660px wide; the decisive-battle group avatar 840px), about 100–170 KB each instead of 1–1.7 MB. The full-size originals live in `design/source-art/sprites` and are not shipped.
+- **Sound** (`src/audio/sound.ts`): Web Audio API. Every effect is decoded into memory at load, so it plays instantly and can overlap itself. Music, when added, streams with `playMusic(url)`. Effects and music have their own volume; a "Sound: On/Off" toggle sits in the bottom-right corner and is remembered between visits. Browsers keep audio locked until the first click or key press, which unlocks it.
+- **Sound files** live in `src/assets/sounds`, named after the sound. The current ones are simple 8-bit placeholders made by `tools/make_placeholder_sounds.py`; replacing a file with a real sound of the same name (.wav, .ogg or .mp3) is all it takes.
+- **What plays:** ui-click (any button), select (deploy or resume a Captain, send men), place (place or move a Knight), clash (a battle starts; a tied clash), slash + hit (a winning clash, Snipe/First Strike, Second Pass, Cover Retreat), kill (a Knight dies), turn (your turn starts; Brace, Ambush, Regroup), die-roll + die-land (each decisive-battle roll), secure (you secure or take a Region), retreat (the enemy does; a loser retreats from the board), report (a report window opens), victory and defeat (the match ends). Battle and dice sounds follow the on-screen playback, not the instant rules.
+
 ## Battles — Provisional (my choices, open to change)
 
 1. Rush beats Flank, Flank beats Counter, Counter beats Rush.
