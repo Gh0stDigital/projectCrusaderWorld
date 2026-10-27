@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { musicUrl, playMusic } from '../audio/sound';
+import { playMusic } from '../audio/sound';
 
 /** Which full-canvas screen is showing. Screen state only, never game rules. */
 export type Screen = 'loading' | 'title' | 'mainMenu' | 'match';
@@ -32,8 +32,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     window.setTimeout(() => {
       set({ screen: 'match', fade: 'black' });
       window.setTimeout(() => {
-        const theme = musicUrl('battle-theme');
-        if (theme) playMusic(theme);
+        playMusic('battle-theme');
         window.setTimeout(() => {
           set({ fade: 'in' });
           window.setTimeout(() => set({ fade: 'none' }), FADE_MS);

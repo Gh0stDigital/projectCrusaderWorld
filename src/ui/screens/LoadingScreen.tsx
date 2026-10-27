@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/appStore';
-import { MUSIC_URLS, SOUND_COUNT, loadSounds } from '../../audio/sound';
+import { MUSIC_URLS, SOUND_COUNT, loadMusic, loadSounds } from '../../audio/sound';
 import './screens.css';
 
 /** Every image the game uses, found at build time. */
@@ -37,8 +37,7 @@ export function LoadingScreen() {
     void Promise.all([
       ...IMAGES.map((url) => loadImage(url).then(tick)),
       loadSounds(tick),
-      // Music streams when played; fetching it now puts it in the cache so it starts at once.
-      ...MUSIC_URLS.map((url) => fetch(url).then((r) => r.blob()).catch(() => {}).then(tick)),
+      loadMusic(tick),
       document.fonts.ready.then(tick),
     ]).then(() => {
       if (!cancelled) window.setTimeout(() => goTo('title'), 250);

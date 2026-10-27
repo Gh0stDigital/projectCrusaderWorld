@@ -2,7 +2,8 @@
  * Sound system. Every sound effect is downloaded and decoded once, at startup
  * (see the loading screen), and kept in memory as an AudioBuffer, so playing
  * one later starts within a few milliseconds and never waits on the network.
- * Music streams instead (long files), with a short fade.
+ * Music is decoded into memory too, so it loops without a gap, between loop
+ * points chosen to match (see MUSIC_LOOPS).
  *
  * Browsers keep audio locked until the player interacts with the page; the
  * first click or key press unlocks it.
@@ -31,8 +32,40 @@ export function musicUrl(name: string): string | null {
   return entry ? entry[1] : null;
 }
 
-/** Every music file, so the loading screen can fetch them into the cache ahead of time. */
+/** Every music file, so the loading screen can decode them ahead of time. */
 export const MUSIC_URLS = Object.values(MUSIC);
+
+/**
+ * Where each track loops, in seconds: when playback reaches `end` it jumps
+ * back to `start`, the first time through playing everything from the top.
+ * Found by matching the waveform: the bars before `end` are the same as the
+ * bars before `start`, so the jump can't be heard. Tracks not listed loop whole.
+ */
+const MUSIC_LOOPS: Record<string, { start: number; end: number }> = {
+  // The rip cuts off mid-phrase in its last second; the closing phrase at
+  // 117.95 s matches the one at 63.04 s (98% waveform match).
+  'battle-theme': { start: 63.0369, end: 117.9535 },
+};
+const musicBuffers = new Map<string, AudioBuffer>();
+
+/** Download and decode every music track (so it starts at once and loops cleanly). */
+export async function loadMusic(onEach?: () => void): Promise<void> {
+  const audio = context();
+  await Promise.all(
+    Object.entries(MUSIC).map(async ([path, url]) => {
+      try {
+        if (audio) {
+          const data = await (await fetch(url)).arrayBuffer();
+          musicBuffers.set(path.split('/').pop()!.replace(/\.(mp3|ogg)$/, ''), await audio.decodeAudioData(data));
+        }
+      } catch {
+        // Unreadable track: playMusic falls back to streaming it.
+      } finally {
+        onEach?.();
+      }
+    }),
+  );
+}
 
 /** Sound effects, by file name. */
 export type SoundName =
@@ -88,7 +121,7 @@ let musicGain: GainNode | null = null;
 const buffers = new Map<string, AudioBuffer>();
 let settings = loadSettings();
 const listeners = new Set<(s: SoundSettings) => void>();
-let music: { el: HTMLAudioElement; node: MediaElementAudioSourceNode } | null = null;
+let music: { stop: () => void } | null = null;
 
 function context(): AudioContext | null {
   if (ctx) return ctx;
@@ -168,26 +201,43 @@ export function play(name: SoundName, options: { volume?: number; rate?: number 
   source.start();
 }
 
-/** Start a music track (streamed, looping), fading out any current one. */
-export function playMusic(url: string) {
+/**
+ * Start a music track by name (e.g. 'battle-theme'), replacing any current one.
+ * Decoded tracks loop gaplessly between their loop points; a track that isn't
+ * decoded yet streams and loops whole.
+ */
+export function playMusic(name: string) {
   const audio = context();
   if (!audio || !musicGain) return;
   stopMusic();
+  const buffer = musicBuffers.get(name);
+  if (buffer) {
+    const source = audio.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    const points = MUSIC_LOOPS[name];
+    if (points && points.end <= buffer.duration) {
+      source.loopStart = points.start;
+      source.loopEnd = points.end;
+    }
+    source.connect(musicGain);
+    source.start();
+    music = { stop: () => { source.stop(); source.disconnect(); } };
+    return;
+  }
+  const url = musicUrl(name);
+  if (!url) return;
   const el = new Audio(url);
   el.loop = true;
-  el.crossOrigin = 'anonymous';
   const node = audio.createMediaElementSource(el);
   node.connect(musicGain);
-  music = { el, node };
   void el.play().catch(() => {});
+  music = { stop: () => { el.pause(); node.disconnect(); } };
 }
 
 export function stopMusic() {
-  if (!music) return;
-  const { el, node } = music;
+  music?.stop();
   music = null;
-  el.pause();
-  node.disconnect();
 }
 
 export function getSoundSettings(): SoundSettings {
