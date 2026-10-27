@@ -17,8 +17,12 @@ export function App() {
     const onPress = (e: PointerEvent) => {
       const button = (e.target as HTMLElement).closest('button');
       if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true') return;
-      // Main (gold) buttons confirm something; the die roll has its own sounds.
-      if (button.classList.contains('btn--primary') && !button.classList.contains('decisive__roll')) play('confirm');
+      // Main (gold) buttons confirm something, as does placing a Lord in the turn order;
+      // the die roll has its own sounds.
+      const confirms =
+        (button.classList.contains('btn--primary') && !button.classList.contains('decisive__roll')) ||
+        button.classList.contains('lord-setup__choice');
+      if (confirms) play('confirm');
       else play('ui-click', { volume: 0.5 });
     };
     window.addEventListener('pointerdown', onPress);
