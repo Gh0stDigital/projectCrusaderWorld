@@ -1,4 +1,5 @@
 import militia from '../assets/cards/militia.png';
+import sergeant from '../assets/cards/sergeant.png';
 import aubrey from '../assets/cards/lords/aubrey.png';
 import jermaine from '../assets/cards/lords/jermaine.png';
 import nevadius from '../assets/cards/lords/nevadius.png';
@@ -29,6 +30,7 @@ export interface ArtEntry {
 
 export const artCatalog = {
   militia: { src: militia, face: { x: 51, y: 19, zoom: 3.4 } },
+  sergeant: { src: sergeant, face: { x: 47, y: 19, zoom: 3.4 } },
   aubrey: { src: aubrey, face: { x: 44, y: 32, zoom: 3.4 } },
   jermaine: { src: jermaine, face: { x: 49, y: 34, zoom: 3.4 } },
   nevadius: { src: nevadius, face: { x: 50, y: 32, zoom: 3.4 } },

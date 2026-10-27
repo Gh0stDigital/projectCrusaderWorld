@@ -292,7 +292,7 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 ## Sergeant icons — Settled
 
 - Tactics are shown as rock, paper and scissors, matching who beats whom: **Rush = rock**, **Flank = scissors**, **Counter = paper** (rock beats scissors, scissors beat paper, paper beats rock). The names stay Rush, Flank and Counter.
-- Each Sergeant row in battle shows a small Sergeant avatar on the left. There is no Sergeant art yet, so it uses the face from the militia card (greyed out once the Sergeant has fought or been lost).
+- Each Sergeant row in battle shows a small avatar on the left: the face from the Sergeant card art (greyed out once the Sergeant has fought or been lost).
 - Undoing a Captain deployment or choice, cancelling a stationed Captain's orders, and taking a Lord back out of the turn order (or Reset) play the cancel sound.
 
 ## Battles — Provisional (my choices, open to change)

@@ -31,7 +31,7 @@ export function SergeantBox({ tactic, militia, state = 'ready', onPick, compact 
     <>
       {!compact && (
         <span className="sergeant-box__avatar">
-          <Portrait art="militia" size={28} />
+          <Portrait art="sergeant" size={28} />
         </span>
       )}
       <TacticIcon tactic={tactic} size={compact ? 20 : 28} />
