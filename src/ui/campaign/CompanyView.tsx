@@ -9,10 +9,12 @@ import {
   knightName,
   knightPersonalName,
   lordPersona,
-  SUBCLASS_SHORT,
+  SUBCLASS_NAMES,
+  SUBCLASS_LORD,
 } from '../../data/names';
 import { Card } from '../components/Card';
 import { KnightDetails } from '../components/KnightDetails';
+import { battleSprite } from '../components/battleSprites';
 import { useHoldPopover } from '../components/useHoldPopover';
 import type { ReactNode } from 'react';
 import { KnightSprite } from '../components/KnightSprite';
@@ -98,17 +100,28 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
               label={`${knightName(knight)}: ${STATUS_LABEL[knight.status]}${alive ? `, ${knight.hp} HP` : ''}. Press and hold for details.`}
             >
                 <span className="knight-token__icon">
-                  <KnightSprite owner={player} width={44} />
+                  {knight.status === 'unmanned' || !knight.subclass ? (
+                    <KnightSprite owner={player} width={44} />
+                  ) : (
+                    <span
+                      className="knight-token__avatar"
+                      style={{ backgroundImage: `url(${battleSprite(knight.subclass)[player]})` }}
+                      aria-hidden="true"
+                    />
+                  )}
                   <span className="knight-token__number">{knight.number}</span>
                 </span>
                 <span className="knight-token__text">
                   <span className="knight-token__name">
                     {knight.status === 'unmanned' ? 'Empty slot' : knightPersonalName(knight)}
                   </span>
+                  {knight.subclass && knight.status !== 'unmanned' && (
+                    <span className={`knight-token__type knight-token__type--${SUBCLASS_LORD[knight.subclass]}`}>
+                      {SUBCLASS_NAMES[knight.subclass]}
+                    </span>
+                  )}
                   <span className="knight-token__detail">
-                    {alive
-                      ? `${knight.hp} HP${knight.subclass ? ` · ${SUBCLASS_SHORT[knight.subclass]}` : knight.status === 'fielded' ? ' · fld' : ''}`
-                      : STATUS_LABEL[knight.status]}
+                    {alive ? `${knight.hp} HP` : STATUS_LABEL[knight.status]}
                   </span>
                 </span>
             </HoldableToken>

@@ -95,6 +95,19 @@ export function captainArt(owner: PlayerId, lord: LordClass): ArtId {
   return 'captain';
 }
 
+/** Which Lord's army each Knight type belongs to. */
+export const SUBCLASS_LORD: Record<KnightSubclass, LordClass> = {
+  infantry: 'army',
+  cavalry: 'army',
+  archers: 'army',
+  gatekeeper: 'garrison',
+  watchman: 'garrison',
+  warden: 'garrison',
+  skirmisher: 'raiders',
+  ambusher: 'raiders',
+  saboteur: 'raiders',
+};
+
 export const SUBCLASS_NAMES: Record<KnightSubclass, string> = {
   infantry: 'Infantry',
   cavalry: 'Cavalry',
