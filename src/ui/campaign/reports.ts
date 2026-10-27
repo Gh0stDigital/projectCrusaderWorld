@@ -9,6 +9,12 @@ export interface Report {
   lines: string[];
   /** A Captain to show (their card) beside the text. */
   captainId?: string;
+  /** Small heading above the title, e.g. "Retreat". */
+  kicker?: string;
+  /** Short facts shown as plaques, e.g. Knights 2 / Reserve 160. */
+  stats?: { label: string; value: string }[];
+  /** A closing hint shown under a divider. */
+  hint?: string;
 }
 
 const HUMAN: PlayerId = 'p1';
@@ -95,14 +101,19 @@ export function reportsFor(state: MatchState, events: MatchEvent[]): Report[] {
       const c = state.captains[id]!;
       if (c.owner !== HUMAN) continue;
       const knightsLeft = Object.values(state.knights).filter((k) => k.captainId === id && k.status === 'ready').length;
+      const lord = lordPersona(c.owner, c.lord).name;
       reports.push({
-        title: `${captainName(c)} needs redeployment`,
+        kicker: 'Retreat',
+        title: captainName(c),
         captainId: id,
         tone: 'even',
-        lines: [
-          `${captainName(c)} has retreated to ${lordPersona(c.owner, c.lord).name} and is on Standby.`,
-          `They still have ${knightsLeft} Knight${knightsLeft === 1 ? '' : 's'} and ${c.reserve} men in reserve. Deploy them again on a ${LORD_TITLES[c.lord]} turn.`,
+        lines: [`Driven from ${REGION_NAMES[e.region]}, they fall back to ${lord} and await new orders.`],
+        stats: [
+          { label: 'Knights', value: String(knightsLeft) },
+          { label: 'Reserve', value: String(c.reserve) },
+          { label: 'Lord', value: lord },
         ],
+        hint: `Redeploy them on a ${LORD_TITLES[c.lord]} turn.`,
       });
     }
   }

@@ -185,26 +185,44 @@ export function StationOrders({
 export function ReportWindow({ match, report, onClose }: { match: MatchState; report: Report; onClose: () => void }) {
   return (
     <div className="attack-preview" role="dialog" aria-modal="true" aria-labelledby="report-title">
-      <div className={`attack-preview__window battle-results__window battle-results__window--${report.tone} station`}>
-        <h2 id="report-title" className="attack-preview__title battle-results__title">
-          {report.title}
-        </h2>
-        <div className={report.captainId ? 'report__body report__body--with-card' : 'report__body'}>
+      <div className={`attack-preview__window report report--${report.tone}${report.captainId ? ' report--captain' : ''}`}>
+        <header className="report__head">
+          {report.kicker && <span className="report__kicker">{report.kicker}</span>}
+          <h2 id="report-title" className="report__title">
+            {report.title}
+          </h2>
+          <span className="report__rule" aria-hidden="true" />
+        </header>
+        <div className="report__body">
           {report.captainId && (
-            <Card
-              art={captainArt(match.captains[report.captainId]!.owner, match.captains[report.captainId]!.lord)}
-              size="roster"
-              owner={match.captains[report.captainId]!.owner}
-            />
+            <div className="report__portrait">
+              <Card
+                art={captainArt(match.captains[report.captainId]!.owner, match.captains[report.captainId]!.lord)}
+                size="roster"
+                owner={match.captains[report.captainId]!.owner}
+              />
+              <span className="report__ribbon">Standby</span>
+            </div>
           )}
-          <div>
+          <div className="report__text">
             {report.lines.map((line) => (
-              <p key={line} className="battle-results__verdict">
+              <p key={line} className="report__line">
                 {line}
               </p>
             ))}
+            {report.stats && (
+              <dl className="report__stats">
+                {report.stats.map((s) => (
+                  <div key={s.label} className="report__stat">
+                    <dt>{s.label}</dt>
+                    <dd>{s.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
           </div>
         </div>
+        {report.hint && <p className="report__hint">{report.hint}</p>}
         <div className="attack-preview__actions">
           <button className="btn btn--primary" onClick={onClose} autoFocus>
             Continue
