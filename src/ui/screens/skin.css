@@ -569,9 +569,21 @@
   background: rgba(217, 169, 58, 0.15) !important;
 }
 
-/* Other buttons (Enter / Return) sit left of the End turn plaque. */
+/*
+ * Other buttons (Undo, Enter / Return) sit left of the End turn plaque,
+ * stacked in a column so they never reach the instruction on the scroll.
+ */
 .phase-window__buttons {
   margin-right: 250px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  max-width: 360px;
+}
+
+.phase-window__buttons .btn:not(.phase-window__end-turn) {
+  padding: 9px 16px;
+  font-size: 10px;
 }
 
 /* No Captain here: the note sits inside the empty portrait frame. */

@@ -179,7 +179,7 @@ export function StationOrders({
         )}
 
         <div className="attack-preview__actions">
-          <button className="btn" onClick={onCancel}>
+          <button className="btn" data-sound="cancel" onClick={onCancel}>
             Cancel: choose another Captain
           </button>
         </div>

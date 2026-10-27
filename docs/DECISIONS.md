@@ -289,6 +289,12 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 - Until the turn is confirmed, a Captain's deployment can be undone ("Undo deployment"): the Captain goes back to Standby, its Resources are refunded, and the Lord chooses again (another Region, or another Captain). Giving orders to a deployed Captain can be taken back the same way ("Choose another Captain"); a stationed Captain's orders window already had Cancel.
 - A placement or move must be undone first. Once that Captain attacks, or a stationed Captain gives its order, the choice is final.
 
+## Sergeant icons — Settled
+
+- Tactics are shown as rock, paper and scissors, matching who beats whom: **Rush = rock**, **Flank = scissors**, **Counter = paper** (rock beats scissors, scissors beat paper, paper beats rock). The names stay Rush, Flank and Counter.
+- Each Sergeant row in battle shows a small Sergeant avatar on the left. There is no Sergeant art yet, so it uses the face from the militia card (greyed out once the Sergeant has fought or been lost).
+- Undoing a Captain deployment or choice, cancelling a stationed Captain's orders, and taking a Lord back out of the turn order (or Reset) play the cancel sound.
+
 ## Battles — Provisional (my choices, open to change)
 
 1. Rush beats Flank, Flank beats Counter, Counter beats Rush.

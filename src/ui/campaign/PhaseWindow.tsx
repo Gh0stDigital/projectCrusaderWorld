@@ -114,7 +114,7 @@ export function PhaseWindow({
             </button>
           )}
           {canUndoCommand(match) && !isStationedTurn && (
-            <button className="btn" onClick={onUndoCommand}>
+            <button className="btn" data-sound="cancel" onClick={onUndoCommand}>
               {turn.commandUndo ? 'Undo deployment' : 'Choose another Captain'}
             </button>
           )}

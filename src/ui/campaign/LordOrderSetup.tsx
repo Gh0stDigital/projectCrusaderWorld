@@ -36,7 +36,7 @@ export function LordOrderSetup({ player, draft, onAdd, onConfirm, onReset }: Lor
       </div>
 
       <div className="lord-setup__actions">
-        <button className="btn" onClick={onReset} disabled={draft.length === 0}>
+        <button className="btn" data-sound="cancel" onClick={onReset} disabled={draft.length === 0}>
           Start over
         </button>
         <button className="btn btn--primary" onClick={onConfirm} disabled={!complete}>

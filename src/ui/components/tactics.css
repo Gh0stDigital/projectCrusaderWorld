@@ -5,7 +5,11 @@
   --counter: #a58ae0;
 }
 
-.tactic-icon { flex: none; }
+.tactic-icon {
+  flex: none;
+  /* Dark detail lines drawn over a filled icon (the rock's cracks). */
+  --tactic-ink: rgba(20, 15, 11, 0.85);
+}
 .tactic-icon--rush { color: var(--rush); }
 .tactic-icon--flank { color: var(--flank); }
 .tactic-icon--counter { color: var(--counter); }
@@ -170,4 +174,19 @@
   opacity: 0.35;
   border-style: dotted;
   border-color: #8a6bd6;
+}
+
+/* The Sergeant's rank avatar, left of the tactic icon. */
+.sergeant-box__avatar {
+  display: inline-flex;
+  flex: none;
+  border: 1px solid var(--wood-light);
+  border-radius: 3px;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.sergeant-box--lost .sergeant-box__avatar,
+.sergeant-box--used .sergeant-box__avatar {
+  filter: grayscale(1);
 }

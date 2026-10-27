@@ -93,7 +93,7 @@ export function PlayerPanel({
           return (
             <li key={lord} className={`lord-row${active ? ' lord-row--active' : match.phase === 'turns' && turn ? ' lord-row--resting' : ''}`}>
               {draft ? (
-                <button className="lord-row__draft" onClick={() => draft.remove(lord)} title="Take this Lord back">
+                <button className="lord-row__draft" data-sound="cancel" onClick={() => draft.remove(lord)} title="Take this Lord back">
                   {card}
                 </button>
               ) : (

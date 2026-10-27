@@ -1,6 +1,7 @@
 import type { Tactic } from '../../engine/state';
 import { TACTIC_NAMES } from '../../data/names';
 import { TacticIcon } from './TacticIcon';
+import { Portrait } from './Portrait';
 import './tactics.css';
 
 export type SergeantBoxState = 'ready' | 'used' | 'lost' | 'chosen' | 'ambushed';
@@ -28,6 +29,11 @@ export function SergeantBox({ tactic, militia, state = 'ready', onPick, compact 
   const label = `${TACTIC_NAMES[tactic]} Sergeant, ${militia} men${state === 'lost' ? ', lost' : state === 'used' ? ', already fought' : state === 'ambushed' ? ', ambushed' : ''}`;
   const content = (
     <>
+      {!compact && (
+        <span className="sergeant-box__avatar">
+          <Portrait art="militia" size={28} />
+        </span>
+      )}
       <TacticIcon tactic={tactic} size={compact ? 20 : 28} />
       <span className="sergeant-box__militia">{state === 'lost' ? '✕' : militia}</span>
       {!compact && <span className="sergeant-box__tactic">{TACTIC_NAMES[tactic]}</span>}

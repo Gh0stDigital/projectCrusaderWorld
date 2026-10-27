@@ -93,7 +93,8 @@ export type SoundName =
   | 'captain'
   | 'turn-change'
   | 'card-flip'
-  | 'heist';
+  | 'heist'
+  | 'cancel';
 
 export interface SoundSettings {
   muted: boolean;

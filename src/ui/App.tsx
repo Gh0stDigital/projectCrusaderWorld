@@ -20,6 +20,8 @@ export function App() {
       // Placing a Lord in the turn order sounds like placing a Captain. Main (gold)
       // buttons confirm something; the die roll has its own sounds.
       if (button.classList.contains('lord-setup__choice')) play('captain');
+      // Taking back a Captain or Lord placement.
+      else if (button.dataset.sound === 'cancel') play('cancel');
       else if (button.classList.contains('btn--primary') && !button.classList.contains('decisive__roll')) play('confirm');
       else play('ui-click', { volume: 0.5 });
     };
