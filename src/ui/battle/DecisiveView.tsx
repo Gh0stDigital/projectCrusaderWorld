@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { decisiveRoller } from '../../engine/queries';
 import { DECISIVE_DIVISOR, type DecisiveBattle, type MatchState, type PlayerId } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, captainName } from '../../data/names';
-import armyBattle from '../../assets/sprites/army-battle-anim.png';
-import enemyArmyBattle from '../../assets/sprites/enemy-army-battle-anim.png';
+import armyBattle from '../../assets/sprites/army-battle-anim.webp';
+import enemyArmyBattle from '../../assets/sprites/enemy-army-battle-anim.webp';
 import './decisiveView.css';
 
 const HUMAN: PlayerId = 'p1';
