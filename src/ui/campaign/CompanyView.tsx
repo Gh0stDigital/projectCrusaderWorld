@@ -14,7 +14,6 @@ import {
 } from '../../data/names';
 import { Card } from '../components/Card';
 import { KnightDetails } from '../components/KnightDetails';
-import { battleSprite } from '../components/battleSprites';
 import { useHoldPopover } from '../components/useHoldPopover';
 import type { ReactNode } from 'react';
 import { KnightSprite } from '../components/KnightSprite';
@@ -100,15 +99,8 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
               label={`${knightName(knight)}: ${STATUS_LABEL[knight.status]}${alive ? `, ${knight.hp} HP` : ''}. Press and hold for details.`}
             >
                 <span className="knight-token__icon">
-                  {knight.status === 'unmanned' || !knight.subclass ? (
-                    <KnightSprite owner={player} width={44} />
-                  ) : (
-                    <span
-                      className="knight-token__avatar"
-                      style={{ backgroundImage: `url(${battleSprite(knight.subclass)[player]})` }}
-                      aria-hidden="true"
-                    />
-                  )}
+                  {/* Still in the hub; the selected Knight plays its idle animation. */}
+                  <KnightSprite owner={player} width={44} animate={selectedKnightId === knight.id} />
                   <span className="knight-token__number">{knight.number}</span>
                 </span>
                 <span className="knight-token__text">

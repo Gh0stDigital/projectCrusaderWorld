@@ -284,28 +284,7 @@
   cursor: help;
 }
 
-/* Knight type at a glance: the type's battle avatar (first frame) and its full name. */
-.knight-token__icon {
-  width: 52px;
-  height: 52px;
-}
-
-.knight-token__avatar {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 4px;
-  background-color: rgba(0, 0, 0, 0.35);
-  background-repeat: no-repeat;
-  background-size: 200% auto;
-  background-position: 0 50%;
-  image-rendering: pixelated;
-}
-
-.knight-token--fielded .knight-token__avatar { filter: brightness(0.7); }
-.knight-token--dead .knight-token__avatar,
-.knight-token--captured .knight-token__avatar { filter: grayscale(1) brightness(0.45); }
-
+/* Knight type at a glance: its full name in a tag colored by Lord. */
 .knight-token__type {
   align-self: flex-start;
   margin: 2px 0 1px;
@@ -318,3 +297,8 @@
 .knight-token__type--army { background: #d9a93a; }
 .knight-token__type--garrison { background: #7fb3a8; }
 .knight-token__type--raiders { background: #c48fd6; }
+
+/* The selected Knight: full color, and its sprite animates. */
+.knight-token--selected .knight-token__icon .knight-sprite {
+  filter: none;
+}
