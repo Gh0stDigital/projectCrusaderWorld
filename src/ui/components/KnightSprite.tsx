@@ -4,8 +4,8 @@ import knightSprite from '../../assets/sprites/knight-sprite.png';
 import enemyKnightSprite from '../../assets/sprites/enemy-knight-sprite.png';
 import './knightSprite.css';
 
-/** Each sprite sheet is two 276×261 frames side by side. */
-const FRAME_RATIO = 261 / 276;
+/** Each sprite sheet is two 274×279 frames side by side. */
+const FRAME_RATIO = 279 / 274;
 
 interface KnightSpriteProps {
   owner: PlayerId;
