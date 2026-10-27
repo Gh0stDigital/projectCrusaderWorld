@@ -10,6 +10,7 @@ import { MatchScreen } from './screens/MatchScreen';
 
 export function App() {
   const screen = useAppStore((s) => s.screen);
+  const fade = useAppStore((s) => s.fade);
 
   // A quiet click on every enabled button press.
   useEffect(() => {
@@ -46,6 +47,7 @@ export function App() {
       {screen === 'mainMenu' && <MainMenuScreen />}
       {screen === 'match' && <MatchScreen />}
       {screen !== 'loading' && <SoundToggle />}
+      {fade !== 'none' && <div className={`screen-fade screen-fade--${fade}`} aria-hidden="true" />}
     </Stage>
   );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/appStore';
-import { SOUND_COUNT, loadSounds } from '../../audio/sound';
+import { MUSIC_URLS, SOUND_COUNT, loadSounds } from '../../audio/sound';
 import './screens.css';
 
 /** Every image the game uses, found at build time. */
@@ -28,7 +28,7 @@ async function loadImage(url: string): Promise<void> {
  */
 export function LoadingScreen() {
   const goTo = useAppStore((s) => s.goTo);
-  const total = IMAGES.length + SOUND_COUNT + 1;
+  const total = IMAGES.length + SOUND_COUNT + MUSIC_URLS.length + 1;
   const [done, setDone] = useState(0);
 
   useEffect(() => {
@@ -37,6 +37,8 @@ export function LoadingScreen() {
     void Promise.all([
       ...IMAGES.map((url) => loadImage(url).then(tick)),
       loadSounds(tick),
+      // Music streams when played; fetching it now puts it in the cache so it starts at once.
+      ...MUSIC_URLS.map((url) => fetch(url).then((r) => r.blob()).catch(() => {}).then(tick)),
       document.fonts.ready.then(tick),
     ]).then(() => {
       if (!cancelled) window.setTimeout(() => goTo('title'), 250);

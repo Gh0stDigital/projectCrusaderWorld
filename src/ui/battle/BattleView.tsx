@@ -78,6 +78,8 @@ export function BattleView({ match, duel, onCommit, onClose, onChooseRetreat }: 
         play('slash');
         window.setTimeout(() => play(pendingClash.hpAfter[pendingClash.winner === 'attacker' ? 'defender' : 'attacker'] <= 0 ? 'kill' : 'hit'), 140);
       }
+      // Saboteur: Sabotage chips away after the clash.
+      if (pendingClash.sabotaged.length > 0) window.setTimeout(() => play('sabotage'), 500);
     }
   }, [phase, pendingClash]);
   useEffect(() => {
@@ -97,8 +99,9 @@ export function BattleView({ match, duel, onCommit, onClose, onChooseRetreat }: 
     if (!effect) return;
     if (effect.type === 'regroup') play('heal');
     else {
-      play('slash');
-      window.setTimeout(() => play(effect.killed ? 'kill' : 'hit'), 140);
+      // Archers' Cover Retreat and Cavalry's Second Pass have their own sounds.
+      play(effect.type === 'coverRetreat' ? 'archer' : 'second-pass');
+      window.setTimeout(() => play(effect.killed ? 'kill' : 'hit'), 450);
     }
   }, [phase, effectIndex, duel.aftermath]);
 

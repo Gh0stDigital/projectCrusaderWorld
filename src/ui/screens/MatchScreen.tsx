@@ -1,4 +1,5 @@
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { play, stopMusic } from '../../audio/sound';
 import { useAppStore } from '../../store/appStore';
 import { useMatchStore } from '../../store/matchStore';
 import { actingCaptain, actionableCaptains, commandOptions, commandableRegions, stationedOrdersOpen } from '../../engine/queries';
@@ -41,6 +42,13 @@ export function MatchScreen() {
   // During a battle the side panels hold still until the battle screen has shown the result.
   const panelMatch = battleOpen && battleSnapshot ? battleSnapshot : match;
   const [draft, setDraft] = useState<LordClass[]>([]);
+
+  // The camera zooming into or out of a Region (yours or the computer's).
+  const lastFocus = useRef(focusedRegion);
+  useEffect(() => {
+    if (lastFocus.current !== focusedRegion) play('zoom');
+    lastFocus.current = focusedRegion;
+  }, [focusedRegion]);
 
   const ordering = match.phase === 'lordOrder' ? match.orderingPlayer : null;
   const turn = match.turn;
@@ -107,6 +115,7 @@ export function MatchScreen() {
   };
 
   const leave = () => {
+    stopMusic();
     store.newMatch();
     setDraft([]);
     goTo('mainMenu');

@@ -8,3 +8,7 @@ coverage/
 .DS_Store
 Thumbs.db
 *.tsbuildinfo
+
+# Licensed music: kept on this computer only, not published in the public repo.
+src/assets/music/*
+!src/assets/music/README.md

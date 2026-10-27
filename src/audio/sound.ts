@@ -18,6 +18,22 @@ const FILES = import.meta.glob('../assets/sounds/*.{wav,ogg,mp3}', {
   import: 'default',
 }) as Record<string, string>;
 
+/** Music tracks in src/assets/music (kept out of git; may be absent). */
+const MUSIC = import.meta.glob('../assets/music/*.{mp3,ogg}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>;
+
+/** URL of a music track by file name (e.g. 'battle-theme'), or null if that file isn't there. */
+export function musicUrl(name: string): string | null {
+  const entry = Object.entries(MUSIC).find(([path]) => path.split('/').pop()!.replace(/\.(mp3|ogg)$/, '') === name);
+  return entry ? entry[1] : null;
+}
+
+/** Every music file, so the loading screen can fetch them into the cache ahead of time. */
+export const MUSIC_URLS = Object.values(MUSIC);
+
 /** Sound effects, by file name. */
 export type SoundName =
   | 'ui-click'
@@ -35,7 +51,11 @@ export type SoundName =
   | 'defeat'
   | 'retreat'
   | 'modal'
-  | 'heal';
+  | 'heal'
+  | 'sabotage'
+  | 'zoom'
+  | 'archer'
+  | 'second-pass';
 
 export interface SoundSettings {
   muted: boolean;

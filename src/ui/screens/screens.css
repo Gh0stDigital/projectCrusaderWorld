@@ -111,3 +111,20 @@
   font-size: 9px;
   cursor: pointer;
 }
+
+/* Slow fade to and from black (starting a match). Blocks input while showing. */
+.screen-fade {
+  position: absolute;
+  inset: 0;
+  z-index: 500;
+  background: #000;
+}
+
+.screen-fade--out { animation: screen-fade-out 1400ms ease-in both; }
+.screen-fade--black { opacity: 1; }
+.screen-fade--in { animation: screen-fade-out 1400ms ease-out reverse both; }
+
+@keyframes screen-fade-out {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
