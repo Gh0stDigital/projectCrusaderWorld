@@ -249,3 +249,35 @@
   font-size: 8px;
   white-space: nowrap;
 }
+
+/* Knights held captive here: a lock with the count, in the captured side's color. */
+.region__captured {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: rgba(14, 11, 8, 0.92);
+  border: 2px solid currentColor;
+  font-family: var(--font-display);
+  font-size: 11px;
+}
+
+.region__captured svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.region__captured--p1 { color: #5b9cf0; }
+.region__captured--p2 { color: #e2604f; }
+
+/* Secured tiles can be pressed and held for details. */
+.region--secured[aria-disabled='true'] {
+  cursor: help;
+}

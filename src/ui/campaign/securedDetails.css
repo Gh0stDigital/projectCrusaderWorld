@@ -1,0 +1,78 @@
+/* Press-and-hold on a secured Region: who holds it and with what, HP first. */
+.secured-details {
+  width: 460px;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.secured-details__head {
+  display: flex;
+  gap: 14px;
+}
+
+.secured-details__men {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--parchment);
+}
+
+.secured-details__men span {
+  font-size: 10px;
+  color: var(--parchment-dim);
+}
+
+.secured-details__knights {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.secured-details__knight {
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.secured-details__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.secured-details__name {
+  font-size: 10px;
+  color: var(--parchment);
+}
+
+.secured-details__hp {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: #b7d26b;
+}
+
+.secured-details__hp small {
+  font-size: 9px;
+  color: var(--parchment-dim);
+}
+
+.secured-details__bar {
+  margin-top: 4px;
+  height: 8px;
+}
+
+.secured-details__sub {
+  margin: 4px 0 0;
+  font-size: 8px;
+  color: var(--parchment-dim);
+}
+
+.secured-details__captives {
+  margin: 0;
+  font-size: 9px;
+  color: #e2604f;
+}

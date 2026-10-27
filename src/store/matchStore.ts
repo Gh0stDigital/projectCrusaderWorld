@@ -461,10 +461,15 @@ function screenUpdatesFor(state: MatchState, events: MatchEvent[]): Partial<Matc
       case 'knightMoved':
         updates.selectedKnightId = null;
         break;
-      case 'knightOrderUndone':
-        // The Knight is back where it was: ready to try again.
-        updates.selectedKnightId = event.knightId;
+      case 'knightOrderUndone': {
+        // Ready to try again: the Knight itself if it is waiting again (an undone
+        // placement), otherwise a waiting Knight so placement squares show.
+        const k = state.knights[event.knightId];
+        const acting = actingCaptain(state);
+        updates.selectedKnightId =
+          k?.status === 'ready' ? k.id : acting ? (reserveKnights(state, acting.id)[0]?.id ?? event.knightId) : event.knightId;
         break;
+      }
       case 'decisiveStarted':
         updates.decisiveOpen = true;
         updates.decisiveBegun = false;

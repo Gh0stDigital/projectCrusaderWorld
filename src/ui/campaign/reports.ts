@@ -1,6 +1,6 @@
 import type { MatchEvent } from '../../engine/events';
 import type { MatchState, PlayerId } from '../../engine/state';
-import { PLAYER_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
+import { LORD_TITLES, PLAYER_NAMES, REGION_NAMES, captainName, knightName, lordPersona } from '../../data/names';
 
 /** A pop-up summary of what just happened to a Region or to sent men, from Player 1's point of view. */
 export interface Report {
@@ -84,6 +84,23 @@ export function reportsFor(state: MatchState, events: MatchEvent[]): Report[] {
           });
         }
         break;
+    }
+  }
+  // Your own Captains sent home: a notice of their own, so redeploying them isn't missed.
+  for (const e of events) {
+    if (e.type !== 'regionSecured' && e.type !== 'decisiveEnded') continue;
+    for (const id of e.returnedCaptainIds) {
+      const c = state.captains[id]!;
+      if (c.owner !== HUMAN) continue;
+      const knightsLeft = Object.values(state.knights).filter((k) => k.captainId === id && k.status === 'ready').length;
+      reports.push({
+        title: `${captainName(c)} needs redeployment`,
+        tone: 'even',
+        lines: [
+          `${captainName(c)} has retreated to ${lordPersona(c.owner, c.lord).name} and is on Standby.`,
+          `They still have ${knightsLeft} Knight${knightsLeft === 1 ? '' : 's'} and ${c.reserve} men in reserve. Deploy them again on a ${LORD_TITLES[c.lord]} turn.`,
+        ],
+      });
     }
   }
   return reports;

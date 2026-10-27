@@ -3,6 +3,9 @@ import { REGIONS, SQUARES, type MatchState, type PlayerId, type RegionIndex } fr
 import { PLAYER_NAMES, REGION_NAMES, captainArt, captainName } from '../../data/names';
 import { Portrait } from '../components/Portrait';
 import { Card } from '../components/Card';
+import { useHoldPopover } from '../components/useHoldPopover';
+import { SecuredDetails } from './SecuredDetails';
+import type { ReactNode } from 'react';
 import './regionBoard.css';
 
 export const REGION_TILE = 260;
@@ -50,12 +53,14 @@ export function RegionBoard({ match, clickable, active, required = null, playabl
           .filter(Boolean)
           .join(' ');
         return (
-          <button
+          <RegionTile
             key={region}
+            match={match}
+            region={region}
             className={classes}
-            disabled={!isClickable}
+            clickable={isClickable}
             onClick={() => onClickRegion(region)}
-            aria-label={`${REGION_NAMES[region]}${isClickable ? `, ${labelFor(region)}` : ''}`}
+            label={`${REGION_NAMES[region]}${isClickable ? `, ${labelFor(region)}` : ''}${match.secured[region] ? '. Press and hold for its forces.' : ''}`}
           >
             <span className="region__header">
               <CaptainMarker match={match} region={region} player="p1" />
@@ -79,7 +84,8 @@ export function RegionBoard({ match, clickable, active, required = null, playabl
             {required === region && <span className="region__required">Fated Move · play here</span>}
             {playable?.has(region) && <span className="region__required region__required--playable">Playable</span>}
             {isClickable && <span className="region__action">{labelFor(region)}</span>}
-          </button>
+            <CapturedBadge match={match} region={region} />
+          </RegionTile>
         );
       })}
     </div>
@@ -123,5 +129,68 @@ function CaptainMarker({ match, region, player }: { match: MatchState; region: R
       owner={player}
       title={`${PLAYER_NAMES[player]}: ${captainName(captain)}`}
     />
+  );
+}
+
+/**
+ * One Region tile. Secured Regions stay enabled (but do nothing on click) so
+ * they can be pressed and held for the forces holding them.
+ */
+function RegionTile({
+  match,
+  region,
+  className,
+  clickable,
+  onClick,
+  label,
+  children,
+}: {
+  match: MatchState;
+  region: RegionIndex;
+  className: string;
+  clickable: boolean;
+  onClick: () => void;
+  label: string;
+  children: ReactNode;
+}) {
+  const hold = useHoldPopover<HTMLButtonElement>();
+  const held = Boolean(match.secured[region]);
+  return (
+    <>
+      <button
+        ref={hold.ref}
+        className={className}
+        disabled={!clickable && !held}
+        aria-disabled={!clickable}
+        onClick={() => clickable && onClick()}
+        onClickCapture={hold.guardClick}
+        aria-label={label}
+        {...(held ? hold.handlers : {})}
+      >
+        {children}
+      </button>
+      {held && <SecuredDetails match={match} region={region} at={hold.at} root={hold.root()} />}
+    </>
+  );
+}
+
+/** Knights captured in a secured Region and still held: a shackle icon with the count, in the captured side's color. */
+function CapturedBadge({ match, region }: { match: MatchState; region: RegionIndex }) {
+  const held = match.secured[region];
+  if (!held) return null;
+  const captured = held.capturedKnightIds.filter((id) => match.knights[id]?.status === 'captured');
+  if (captured.length === 0) return null;
+  const side = match.knights[captured[0]!]!.owner;
+  return (
+    <span
+      className={`region__captured region__captured--${side}`}
+      title={`${captured.length} ${PLAYER_NAMES[side]} Knight${captured.length === 1 ? '' : 's'} captured here`}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7 11V8a5 5 0 0 1 10 0v3" fill="none" strokeWidth="2.5" />
+        <rect x="4" y="11" width="16" height="10" rx="2" />
+      </svg>
+      <span>×{captured.length}</span>
+    </span>
   );
 }
