@@ -363,7 +363,7 @@ function playEventSounds(events: MatchEvent[]) {
         play('heal');
         break;
       case 'turnStarted':
-        if (e.player === 'p1') play('turn');
+        play('turn-change');
         break;
       case 'regionSecured':
         play(e.player === 'p1' ? 'secure' : 'retreat');

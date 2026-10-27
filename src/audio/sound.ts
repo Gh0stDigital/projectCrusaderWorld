@@ -57,7 +57,8 @@ export type SoundName =
   | 'archer'
   | 'second-pass'
   | 'confirm'
-  | 'captain';
+  | 'captain'
+  | 'turn-change';
 
 export interface SoundSettings {
   muted: boolean;
