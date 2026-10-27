@@ -1,6 +1,7 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
-import { actingCaptain, knightAt, moveSquares, nextOrdersStep, winningLine } from '../queries';
+import { actingCaptain, knightAt, knightMilitia, moveSquares, nextOrdersStep, winningLine } from '../queries';
+import { charge } from './resources';
 import { SQUARES, type MatchState, type PlayerId, type RegionIndex, type SquareIndex } from '../state';
 
 /**
@@ -32,14 +33,15 @@ export function placeKnight(
   if (knightAt(state, captain.region, square)) return reject('That square is taken.');
 
   const region = captain.region;
+  const paid = charge(state, player, knightMilitia(knight), { knightId });
   const placed: MatchState = {
-    ...state,
-    knights: { ...state.knights, [knightId]: { ...knight, status: 'fielded', position: { region, square } } },
+    ...paid.state,
+    knights: { ...paid.state.knights, [knightId]: { ...paid.state.knights[knightId]!, status: 'fielded', position: { region, square } } },
     // The square sends the opponent to the Region in the same position.
     route: square,
     turn: { ...turn, placedKnightId: knightId, undo: snapshot(state) },
   };
-  return settleOrder(placed, region, player, captain.id, [{ type: 'knightPlaced', player, knightId, region, square }]);
+  return settleOrder(placed, region, player, captain.id, [{ type: 'knightPlaced', player, knightId, region, square }, ...paid.events]);
 }
 
 /**
@@ -67,14 +69,16 @@ export function moveKnight(
   const knight = state.knights[knightId]!;
   const region = knight.position!.region;
   const from = knight.position!.square;
+  const paid = charge(state, player, knightMilitia(knight), { knightId });
   const moved: MatchState = {
-    ...state,
-    knights: { ...state.knights, [knightId]: { ...knight, position: { region, square } } },
+    ...paid.state,
+    knights: { ...paid.state.knights, [knightId]: { ...paid.state.knights[knightId]!, position: { region, square } } },
     route: square,
     turn: { ...turn, movedKnightId: knightId, undo: snapshot(state) },
   };
   const result = settleOrder(moved, region, player, captain.id, [
     { type: 'knightMoved', player, knightId, region, from, to: square },
+    ...paid.events,
   ]);
   // No attack follows a move.
   return result.ok ? { ...result, state: { ...result.state, turn: { ...result.state.turn!, step: 'end' } } } : result;
@@ -100,7 +104,7 @@ export function undoKnight(state: MatchState, player: PlayerId): EngineResult<Ma
 
 /** What a placement or move changes, saved so it can be undone. */
 function snapshot(state: MatchState) {
-  return { knights: state.knights, captains: state.captains, secured: state.secured, route: state.route };
+  return { resources: state.resources, knights: state.knights, captains: state.captains, secured: state.secured, route: state.route };
 }
 
 /**

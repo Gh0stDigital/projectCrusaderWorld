@@ -95,6 +95,13 @@ export function DecisivePreview({
           <CaptainSummary match={match} setup={setup} player="p2" role={role('p2')} />
         </div>
 
+        {onCancel && match.resources && setup.attacker && (
+          <p className={`attack-preview__cost${match.resources[setup.attacker] === 0 ? ' attack-preview__cost--out' : ''}`}>
+            {match.resources[setup.attacker] > 0
+              ? `Costs ${setup.men[setup.attacker]} Resources (${match.resources[setup.attacker]} left)`
+              : 'Out of Resources: assaulting costs 1 man'}
+          </p>
+        )}
         <p className="attack-preview__rules">
           Each Captain fights with every man they have. Sides take turns rolling a die, one roll per Knight of theirs on
           {setup.kind === 'assault' ? ' their own board' : ' this board'}; each roll costs the other side (your men × die)

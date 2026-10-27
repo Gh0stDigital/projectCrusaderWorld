@@ -3,6 +3,7 @@ import type { MatchEvent } from '../events';
 import {
   assaultTargets,
   captainMilitia,
+  knightMilitia,
   knightsOf,
   knightsOnBoard,
   sendTargets,
@@ -21,6 +22,7 @@ import {
 } from '../state';
 import { settle } from './decisive';
 import { passTurn } from './turns';
+import { charge } from './resources';
 
 /**
  * A Captain holding a secured Region gives one order per turn (chosen on a Free
@@ -52,18 +54,20 @@ export function sendReserve(
   if (typeof to === 'string') return reject(to);
   if (!Number.isInteger(amount) || amount <= 0) return reject('Send at least one man.');
   if (amount > from.reserve) return reject('The Captain does not have that many men in reserve.');
+  const paid = charge(state, player, amount, { captainId: from.id });
+  const payer = paid.state.captains[from.id]!;
   return {
     ok: true,
     state: {
-      ...state,
+      ...paid.state,
       captains: {
-        ...state.captains,
-        [from.id]: { ...from, reserve: from.reserve - amount },
+        ...paid.state.captains,
+        [from.id]: { ...payer, reserve: Math.max(0, payer.reserve - amount) },
         [to.id]: { ...to, reserve: to.reserve + amount },
       },
       turn: { ...state.turn!, stationOrder: true, step: 'end' },
     },
-    events: [{ type: 'reserveSent', player, fromCaptainId: from.id, toCaptainId: to.id, amount }],
+    events: [{ type: 'reserveSent', player, fromCaptainId: from.id, toCaptainId: to.id, amount }, ...paid.events],
   };
 }
 
@@ -80,16 +84,20 @@ export function sendKnight(
   if (typeof to === 'string') return reject(to);
   const knight = sendableKnights(state, from).find((k) => k.id === knightId);
   if (!knight) return reject('That Knight cannot be sent.');
-  const knights = { ...state.knights };
-  if (!joinCaptain(knights, knight.id, to.id)) return reject(`${'That Captain'} has no free Knight slot.`);
+  if (!Object.values(state.knights).some((k) => k.captainId === to.id && k.status === 'unmanned')) {
+    return reject('That Captain has no free Knight slot.');
+  }
+  const paid = charge(state, player, knightMilitia(knight), { knightId: knight.id });
+  const knights = { ...paid.state.knights };
+  joinCaptain(knights, knight.id, to.id);
   return {
     ok: true,
     state: {
-      ...state,
+      ...paid.state,
       knights,
       turn: { ...state.turn!, stationOrder: true, step: 'end' },
     },
-    events: [{ type: 'knightSent', player, knightId: knight.id, fromCaptainId: from.id, toCaptainId: to.id }],
+    events: [{ type: 'knightSent', player, knightId: knight.id, fromCaptainId: from.id, toCaptainId: to.id }, ...paid.events],
   };
 }
 
@@ -104,6 +112,9 @@ export function assault(state: MatchState, player: PlayerId, region: RegionIndex
   if (!assaultTargets(state, from).includes(region)) {
     return reject('You can only assault an adjacent Region the enemy holds.');
   }
+  // Resources: the assaulting Captain's whole company pays before the battle.
+  const paid = charge(state, player, captainMilitia(state, from.id), { captainId: from.id });
+  state = paid.state;
   const defender = state.captains[state.secured[region]!.captainId]!;
   const enemy = otherPlayer(player);
   const captains = { [player]: from.id, [enemy]: defender.id } as Record<PlayerId, string>;
@@ -130,7 +141,7 @@ export function assault(state: MatchState, player: PlayerId, region: RegionIndex
   return {
     ok: true,
     state: { ...state, decisive, turn: { ...state.turn!, stationOrder: true, step: 'decisive' } },
-    events: [{ type: 'decisiveStarted', region, first: player }],
+    events: [{ type: 'decisiveStarted', region, first: player }, ...paid.events],
   };
 }
 

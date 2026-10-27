@@ -1,6 +1,7 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
-import { commandOptions, reserveKnights } from '../queries';
+import { captainMilitia, commandOptions, reserveKnights } from '../queries';
+import { charge } from './resources';
 import { REGIONS, type Captain, type MatchState, type PlayerId, type RegionIndex } from '../state';
 
 /** Shared checks: it's this player's Command step and the Captain is theirs. */
@@ -37,14 +38,15 @@ export function deployCaptain(
     return reject('You cannot deploy to that Region.');
   }
 
+  const paid = charge(state, player, captainMilitia(state, captain.id), { captainId });
   return {
     ok: true,
     state: {
-      ...state,
-      captains: { ...state.captains, [captainId]: { ...captain, region } },
+      ...paid.state,
+      captains: { ...paid.state.captains, [captainId]: { ...paid.state.captains[captainId]!, region } },
       turn: { ...state.turn!, step: 'orders', captainId },
     },
-    events: [{ type: 'captainDeployed', player, captainId, lord: captain.lord, region }],
+    events: [{ type: 'captainDeployed', player, captainId, lord: captain.lord, region }, ...paid.events],
   };
 }
 

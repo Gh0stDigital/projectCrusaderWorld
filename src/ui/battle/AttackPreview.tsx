@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Knight, MatchState } from '../../engine/state';
 import { PLAYER_NAMES, SUBCLASS_ABILITIES, SUBCLASS_NAMES, captainName, knightArt, knightName } from '../../data/names';
-import { normalMaxHp, sergeantMilitia } from '../../engine/queries';
+import { knightMilitia, normalMaxHp, sergeantMilitia } from '../../engine/queries';
 import { Card } from '../components/Card';
 import { SergeantBox, TacticLegend } from '../components/SergeantBox';
 import './attackPreview.css';
@@ -98,6 +98,16 @@ export function AttackPreview({ match, attacker, defender, mode = 'attack', onCa
           </div>
         )}
 
+        {match.resources && !defending && (
+          <p className={`attack-preview__cost${match.resources[attacker.owner] === 0 ? ' attack-preview__cost--out' : ''}`}>
+            {match.resources[attacker.owner] > 0
+              ? `Costs ${knightMilitia(attacker)} Resources (${match.resources[attacker.owner]} left)`
+              : 'Out of Resources: attacking costs 1 man'}
+          </p>
+        )}
+        {match.resources && defending && amount > 0 && (
+          <p className="attack-preview__cost">Reinforcements cost {amount} Resources ({match.resources[defender.owner]} left)</p>
+        )}
         <p className="attack-preview__rules">
           Up to five clashes. Each side secretly sends one Sergeant per clash; the winning tactic deals its men as
           damage. The Knight with less HP at the end is driven from the field.

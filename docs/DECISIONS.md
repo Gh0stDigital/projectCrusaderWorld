@@ -260,6 +260,21 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 - **Music** lives in `src/assets/music` (currently `battle-theme.mp3`, looping for the whole match) and is **not committed**: the repository is public and the track is a commercial soundtrack. The game plays it when the file is present and stays silent otherwise, so a fresh checkout still builds. The loading screen fetches it ahead of time so it starts at once.
 - **What plays:** ui-click (any button), select (deploy or resume a Captain, send men), place (place or move a Knight), clash (a battle starts; a tied clash), slash + hit (a winning clash, Snipe/First Strike, Second Pass, Cover Retreat), kill (a Knight dies), turn (Ambush), heal (a unit gains HP or men: Brace, Regroup, reinforcements), modal (any pop-up window opens), die-roll + die-land (each decisive-battle roll), secure (you secure or take a Region), retreat (the enemy does; a loser retreats from the board), victory and defeat (the match ends). hit is the sound of a unit taking damage (clashes, abilities, dice). Battle and dice sounds follow the on-screen playback, not the instant rules.
 
+## Resources — Experimental (switchable)
+
+- Switched on or off in `src/engine/config.ts` (`RESOURCES.enabled`); the starting amount and the out-of-Resources numbers live there too. With it off the game plays exactly as before.
+- One pool per player, **12,000** to start (from 40 simulated games: about 7,300 spent by a player's 10th turn, 12,500 by the 20th, 16,000 by the 30th, so it runs out late in a typical match). No income for now.
+- Costs, 1 Resource per man in the party acting:
+  - Deploying a Captain: their whole company, reserve included.
+  - Placing a Knight, moving a Knight, attacking: that Knight's men.
+  - Reinforcing a defender: the men sent. Sending reserve or a Knight from a secured Region: the men sent. Assaulting: the assaulting Captain's whole company.
+  - End of each turn: the Lord who played pays for their troops (their Captains' Knights, waiting or on the board; not reserves).
+- An action the pool can't fully cover still happens; the pool goes to 0.
+- **Out of Resources:** each action costs 1 man instead (from the acting Captain's reserve, or the acting Knight), and at the end of each of a Lord's turns their troops (not reserves) lose 10% of their men (rounded up per Knight; a Knight left with no men falls).
+- Shown in each player's header (gold; red at 0), on deploy labels, the attack and assault windows, and the send-men confirmations. A report window opens when a player runs out, and each time your troops lose men to it.
+- The computer ignores costs when choosing moves (experimental).
+- Undoing a placement or move refunds what it cost.
+
 ## Battles — Provisional (my choices, open to change)
 
 1. Rush beats Flank, Flank beats Counter, Counter beats Rush.

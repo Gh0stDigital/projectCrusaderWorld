@@ -172,6 +172,7 @@ export interface TurnState {
   stationOrder: boolean;
   /** What the board looked like before this turn's placement or move, while it can still be undone. */
   undo: {
+    resources: Record<PlayerId, number> | null;
     knights: Record<string, Knight>;
     captains: Record<string, Captain>;
     secured: Partial<Record<RegionIndex, SecuredRegion>>;
@@ -297,6 +298,8 @@ export interface MatchState {
   } | null;
   /** Whoever secured three Regions in a row. Set when the match ends. */
   winner: PlayerId | null;
+  /** Resources left per player (experimental), or null when the rule is switched off. */
+  resources: Record<PlayerId, number> | null;
 }
 
 /** Each roll does (roller's men × die) ÷ 10 damage, rounded down. */

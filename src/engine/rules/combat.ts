@@ -2,6 +2,8 @@ import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
 import { adjacentSquares, attackTargets, attackers, availableSergeants, duelKnight, duelRoleOf, knightAt, nextOrdersStep } from '../queries';
 import { AMBUSH_COUNT, SABOTAGE_DAMAGE, SECOND_PASS_SHARE } from '../state';
+import { knightMilitia } from '../queries';
+import { charge } from './resources';
 import type {
   AftermathEffect,
   PreludeEffect,
@@ -47,6 +49,9 @@ export function declareAttack(
     return reject('That Knight is not an enemy in reach.');
   }
 
+  // Resources: the attacking party pays before the battle starts.
+  const paid = charge(state, player, knightMilitia(state.knights[attackerKnightId]!), { knightId: attackerKnightId });
+  state = paid.state;
   const attacker = state.knights[attackerKnightId]!;
   const duel: Duel = {
     region: attacker.position!.region,
@@ -130,6 +135,7 @@ export function declareAttack(
   };
   const events: MatchEvent[] = [
     { type: 'duelStarted', attackerId: attacker.id, defenderId: target.id, region: duel.region },
+    ...paid.events,
   ];
   // A duel where neither side has a Sergeant to send ends at once.
   if (isDuelOver(next, duel)) {

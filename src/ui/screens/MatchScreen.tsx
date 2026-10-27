@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { play, stopMusic } from '../../audio/sound';
 import { useAppStore } from '../../store/appStore';
 import { useMatchStore } from '../../store/matchStore';
-import { actingCaptain, actionableCaptains, commandOptions, commandableRegions, stationedOrdersOpen } from '../../engine/queries';
+import { actingCaptain, actionableCaptains, captainMilitia, commandOptions, commandableRegions, stationedOrdersOpen } from '../../engine/queries';
 import type { LordClass, RegionIndex } from '../../engine/state';
 import { LORD_NAMES, PLAYER_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
 import { PlayerPanel } from '../campaign/PlayerPanel';
@@ -85,8 +85,13 @@ export function MatchScreen() {
       ? [...choices].filter(([, c]) => c.captainId === selected.id).map(([r]) => r)
       : [],
   );
-  const regionLabel = (region: RegionIndex) =>
-    turn?.step !== 'command' ? 'Enter' : choices.get(region)?.deploy ? 'Deploy here' : 'Give orders';
+  const regionLabel = (region: RegionIndex) => {
+    if (turn?.step !== 'command') return 'Enter';
+    const choice = choices.get(region);
+    if (!choice?.deploy) return 'Give orders';
+    if (!match.resources) return 'Deploy here';
+    return match.resources[turn.player] > 0 ? `Deploy here · ${captainMilitia(match, choice.captainId)} res` : 'Deploy here · 1 man';
+  };
 
   const clickRegion = (region: RegionIndex) => {
     const choice = choices.get(region);

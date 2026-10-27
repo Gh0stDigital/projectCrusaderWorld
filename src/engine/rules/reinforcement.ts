@@ -1,6 +1,7 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
 import type { MatchState, PlayerId } from '../state';
+import { charge } from './resources';
 
 /**
  * Before the first clash, the defending player may send militia from the
@@ -25,18 +26,22 @@ export function reinforceKnight(
   const captain = state.captains[knight.captainId]!;
   if (amount > captain.reserve) return reject('The Captain does not have that many men in reserve.');
 
+  // Resources: the men sent cost 1 each (or, with none left, the reserve loses 1 more man).
+  const paid = charge(state, player, amount, { captainId: captain.id });
+  const payer = paid.state.captains[captain.id]!;
+  const sent = Math.min(amount, payer.reserve);
   return {
     ok: true,
     state: {
-      ...state,
-      captains: { ...state.captains, [captain.id]: { ...captain, reserve: captain.reserve - amount } },
+      ...paid.state,
+      captains: { ...paid.state.captains, [captain.id]: { ...payer, reserve: payer.reserve - sent } },
       // A braced Gatekeeper's men are worth 2 HP each, reinforcements included.
-      knights: { ...state.knights, [knightId]: { ...knight, hp: knight.hp + amount * (knight.braced ? 2 : 1) } },
+      knights: { ...paid.state.knights, [knightId]: { ...knight, hp: knight.hp + sent * (knight.braced ? 2 : 1) } },
       duel: {
         ...duel,
-        defender: { ...duel.defender, startHp: duel.defender.startHp + amount * (knight.braced ? 2 : 1) },
+        defender: { ...duel.defender, startHp: duel.defender.startHp + sent * (knight.braced ? 2 : 1) },
       },
     },
-    events: [{ type: 'knightReinforced', player, knightId, captainId: captain.id, amount }],
+    events: [{ type: 'knightReinforced', player, knightId, captainId: captain.id, amount: sent }, ...paid.events],
   };
 }

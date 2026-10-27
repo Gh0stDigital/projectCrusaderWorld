@@ -74,6 +74,36 @@ export function reportsFor(state: MatchState, events: MatchEvent[]): Report[] {
           ],
         });
         break;
+      case 'resourcesDepleted':
+        reports.push({
+          kicker: 'Supplies',
+          title: e.player === HUMAN ? 'Out of Resources' : `${PLAYER_NAMES[e.player]} is out of Resources`,
+          tone: e.player === HUMAN ? 'loss' : 'win',
+          lines: [
+            e.player === HUMAN
+              ? 'Your armies have nothing left to live on.'
+              : 'The enemy\u2019s armies have nothing left to live on.',
+          ],
+          stats: [
+            { label: 'Each action', value: '1 man' },
+            { label: 'Each Lord\u2019s turn', value: '\u221210% troops' },
+          ],
+          hint: 'Reserves are spared; Knights in the field and waiting are not.',
+        });
+        break;
+      case 'attrition':
+        if (e.player === HUMAN && e.menLost > 0) {
+          reports.push({
+            kicker: 'Supplies',
+            title: 'Troops waste away',
+            tone: 'loss',
+            lines: [
+              `Without Resources, the ${LORD_TITLES[e.lord]}\u2019s troops lost ${e.menLost} men this turn.`,
+              ...(e.fallenKnightIds.length ? [`Fallen: ${list(e.fallenKnightIds, knight)}.`] : []),
+            ],
+          });
+        }
+        break;
       case 'reserveSent':
         if (e.player !== HUMAN) {
           reports.push({

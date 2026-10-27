@@ -3,6 +3,7 @@ import {
   assaultTargets,
   captainMilitia,
   hasFreeSlot,
+  knightMilitia,
   knightsOnBoard,
   sendTargets,
   sendableKnights,
@@ -50,6 +51,12 @@ export function StationOrders({
   const toCaptain = receivers.find((c) => c.id === to);
   const toLabel = toCaptain ? `${captainName(toCaptain)} in ${REGION_NAMES[toCaptain.region!]}` : '';
   const roomy = toCaptain ? hasFreeSlot(match, toCaptain.id) : false;
+  const costNote = (men: number) =>
+    !match.resources
+      ? ''
+      : match.resources[captain.owner] > 0
+        ? ` Costs ${men} Resources (${match.resources[captain.owner]} left).`
+        : ' Out of Resources: this costs 1 man.';
 
   if (confirm) {
     return (
@@ -118,7 +125,7 @@ export function StationOrders({
                 disabled={!to || amount <= 0 || captain.reserve <= 0}
                 onClick={() =>
                   setConfirm({
-                    text: `${captainName(captain)} sends ${amount} men from ${where} to ${toLabel}. They join that Captain's reserve.`,
+                    text: `${captainName(captain)} sends ${amount} men from ${where} to ${toLabel}. They join that Captain's reserve.${costNote(amount)}`,
                     run: () => onSendReserve(to, amount),
                   })
                 }
@@ -142,7 +149,7 @@ export function StationOrders({
                   title={roomy ? undefined : 'That Captain has no free Knight slot'}
                   onClick={() =>
                     setConfirm({
-                      text: `${captainName(captain)} sends ${knightName(match.knights[knightId]!)} from ${where} to ${toLabel}. The Knight joins that Captain, waiting to be placed.`,
+                      text: `${captainName(captain)} sends ${knightName(match.knights[knightId]!)} from ${where} to ${toLabel}. The Knight joins that Captain, waiting to be placed.${costNote(knightMilitia(match.knights[knightId]!))}`,
                       run: () => onSendKnight(knightId, to),
                     })
                   }

@@ -275,3 +275,15 @@
   font-size: 10px;
   color: var(--parchment);
 }
+
+/* Resources cost of the action (experimental rule). */
+.attack-preview__cost {
+  margin: 0 0 8px;
+  font-size: 10px;
+  text-align: center;
+  color: var(--gold);
+}
+
+.attack-preview__cost--out {
+  color: #e2604f;
+}

@@ -1,3 +1,4 @@
+import { startingResources } from './rules/resources';
 import {
   CAPTAIN_RESERVE,
   SUBCLASS_HP,
@@ -117,5 +118,6 @@ export function createMatch(): MatchState {
     decisive: null,
     pendingStation: null,
     winner: null,
+    resources: startingResources(),
   };
 }
