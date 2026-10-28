@@ -188,22 +188,21 @@ describe('Routing', () => {
     expect(next.captains['p2-garrison-1']!.region).toBe(7);
   });
 
-  it('is not mandatory when the routed Region holds another Lord\u2019s Captain: deploy elsewhere or command them', () => {
+  it('is not mandatory when the routed Region holds another Lord\u2019s Captain: a Free Choice, never that Captain', () => {
     let s = deployAndPlace(startedMatch(), 'p1-raiders-1', 4, 0); // p2 -> Region 0
     s = deployAndPlace(s, 'p2-garrison-1', 0, 4); // p1 -> Region 4, where Raiders Captain I stands
     expect(s.turn!.lord).toBe('army');
     const o = commandOptions(s);
-    expect(o).toMatchObject({ mode: 'free', route: 4, resumeCaptainIds: ['p1-raiders-1'] });
+    expect(o).toMatchObject({ mode: 'free', route: 4, resumeCaptainIds: [] });
     expect(o.deployRegions).not.toContain(4);
     expect(o.deployRegions).toContain(7);
-    // Either choice is allowed.
     const deployed = act(s, { type: 'deployCaptain', player: 'p1', captainId: 'p1-army-1', region: 7 });
     expect(deployed.captains['p1-army-1']!.region).toBe(7);
-    const resumed = act(s, { type: 'resumeCaptain', player: 'p1', captainId: 'p1-raiders-1' });
-    expect(legalSquares(resumed)).toEqual(emptySquares(resumed, 4));
+    // The Army Lord cannot command the Raiders' Captain.
+    expect(applyAction(s, { type: 'resumeCaptain', player: 'p1', captainId: 'p1-raiders-1' }).ok).toBe(false);
   });
 
-  it('becomes must-play-here when nowhere else is open', () => {
+  it('with nowhere else open and no Captain of their own able to act, the Lord can end the turn', () => {
     let s = deployAndPlace(startedMatch(), 'p1-raiders-1', 4, 0);
     s = deployAndPlace(s, 'p2-garrison-1', 0, 4); // p1 Army routed to Region 4
     // Fill every other Region so a Ready Captain has nowhere to go.
@@ -218,7 +217,8 @@ describe('Routing', () => {
     }
     s = { ...s, knights: { ...s.knights } };
     const o = commandOptions(s);
-    expect(o).toMatchObject({ mode: 'routed', route: 4, deployRegions: [], resumeCaptainIds: ['p1-raiders-1'] });
+    expect(o).toMatchObject({ mode: 'free', route: 4, deployRegions: [], resumeCaptainIds: [] });
+    expect(canEndTurn(s)).toBe(true);
   });
 
   it('stays mandatory when the routed Region holds the current Lord\u2019s own Captain', () => {
