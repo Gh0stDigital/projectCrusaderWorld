@@ -213,7 +213,7 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
   - Judges an attack by playing it out several times in its head with the real battle rules, weighing the chance of clearing the square (and what that square means: a blocker of its own line, a piece of the human's) against the chance of losing its own Knight and the men traded. It attacks first when that clears the way to three in a row.
   - Moves a Knight when the step secures a Region, or when it has nothing better.
   - Picks Sergeants by expected trade against the human's remaining Sergeants (weighted, never certain, so it can't be read).
-  - Reinforces a defending Knight from its Captain's reserve when the Knight is outmatched or holds an important square, keeping half the reserve back. A banner on the battle screen says how many men were sent.
+  - Reinforces a defending Knight from its Captain's reserve when the Knight is outmatched or holds an important square, keeping half the reserve back. Before the battle screen opens, an "Enemy reinforcements!" window shows how many men were sent and the Knight's HP before and after (To battle continues); the battle header also shows it.
   - Stationed Captains assault when their men × rolls clearly beat the defender's (or the Region would win the match), otherwise send men or a Knight to the neighbouring Captain with the most at stake, keeping men back when an enemy next door could assault them.
   - Chooses between deploying and giving orders by how promising each Region looks, not just the first option.
   - Spends a little more carefully once its Resources run low.

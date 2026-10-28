@@ -14,6 +14,7 @@ import { PhaseWindow } from '../campaign/PhaseWindow';
 import { TurnAnnouncement } from '../overlays/TurnAnnouncement';
 import { OrdersNotice } from '../overlays/OrdersNotice';
 import { AttackPreview } from '../battle/AttackPreview';
+import { ReinforcementNotice } from '../battle/ReinforcementNotice';
 import { BattleView } from '../battle/BattleView';
 import { DecisiveView } from '../battle/DecisiveView';
 import { DecisivePreview, assaultSetup, setupFromBattle } from '../battle/DecisivePreview';
@@ -256,6 +257,9 @@ export function MatchScreen() {
                 onCancel={() => store.openAttackPreview(null)}
                 onCommence={store.commenceAttack}
               />
+            )}
+            {store.reinforcementNotice && (
+              <ReinforcementNotice match={match} notice={store.reinforcementNotice} onContinue={store.continueToBattle} />
             )}
             {incoming && (
               <AttackPreview

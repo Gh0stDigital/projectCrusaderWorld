@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { MatchAction } from '../engine/actions';
 import type { MatchEvent } from '../engine/events';
 import { applyAction } from '../engine/match';
+import type { EnemyReinforcement } from '../ui/battle/ReinforcementNotice';
 import { chooseCommand, chooseDecisiveFate, chooseLordOrder, chooseOrders, chooseReinforcement, chooseSergeant, chooseRetreat as chooseComputerRetreat, chooseStation } from '../ai';
 import { commandSummary } from '../ui/campaign/commandText';
 import { reportsFor, type Report } from '../ui/campaign/reports';
@@ -70,6 +71,10 @@ interface MatchStore {
    * battle plays, so they don't reveal results before the battle screen does.
    */
   battleSnapshot: MatchState | null;
+  /** The computer reinforced the Knight the human attacked: shown before the battle opens. */
+  reinforcementNotice: (EnemyReinforcement & { snapshot: MatchState }) | null;
+  /** Close the reinforcement notice and open the battle. */
+  continueToBattle: () => void;
   /** The loser of the last battle leaving the board; End turn waits for it. */
   departure: Departure | null;
   /** The computer has attacked the human: the pre-battle window offers reinforcements. */
@@ -126,6 +131,7 @@ const freshScreenState = {
   attackPreviewId: null,
   battleOpen: false,
   battleSnapshot: null,
+  reinforcementNotice: null,
   defensePromptOpen: false,
   decisiveOpen: false,
   decisiveBegun: false,
@@ -238,9 +244,22 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
       attackerKnightId: selectedKnightId,
       targetKnightId: attackPreviewId,
     } as const;
+    const hpBefore = before.knights[attackPreviewId]!.hp;
     if (get().dispatch(action)) {
+      // The defender reinforced (the computer decides at once): say so before the battle.
+      const sent = get().match.duel?.reinforced;
+      if (sent) {
+        set({ reinforcementNotice: { knightId: attackPreviewId, amount: sent, hpBefore, snapshot: before } });
+        return;
+      }
       set({ battleOpen: true, battleSnapshot: before });
     }
+  },
+
+  continueToBattle: () => {
+    const notice = get().reinforcementNotice;
+    if (!notice) return;
+    set({ reinforcementNotice: null, battleOpen: true, battleSnapshot: notice.snapshot });
   },
 
   beginDecisive: () => {

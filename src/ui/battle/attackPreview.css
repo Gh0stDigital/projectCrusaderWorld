@@ -293,3 +293,37 @@
   color: var(--gold);
   font-size: 10px;
 }
+
+/* The computer's reinforcements, shown before the battle opens. */
+.reinforcement-notice {
+  max-width: 620px;
+}
+
+.reinforcement-notice__body {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 8px 0 16px;
+}
+
+.reinforcement-notice__amount {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: #ff9b8f;
+  text-shadow: 0 2px 0 #000;
+}
+
+.reinforcement-notice__hp {
+  margin: 8px 0 0;
+  font-size: 12px;
+}
+
+.reinforcement-notice__hp strong {
+  color: var(--gold);
+}
+
+.reinforcement-notice__over {
+  color: var(--gold);
+  font-size: 10px;
+}
