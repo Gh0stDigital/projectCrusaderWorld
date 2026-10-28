@@ -13,6 +13,7 @@ import {
   attackTargets,
   attackers,
   availableSergeants,
+  canUseAttrition,
   canEndTurn,
   captainMilitia,
   commandOptions,
@@ -34,6 +35,7 @@ import {
   stationedOrdersOpen,
 } from '../engine/queries';
 import {
+  ATTRITION,
   LORD_CLASSES,
   REGIONS,
   otherPlayer,
@@ -85,7 +87,10 @@ export function chooseSergeant(state: MatchState, player: PlayerId, random: Rand
   const role = duelRoleOf(duel, player);
   if (!role || duel.pending[role]) return null;
   const options = availableSergeants(state, duel, role);
-  if (options.length === 0) return null;
+  if (options.length === 0) {
+    // Every Sergeant has fallen: Attrition is the last resort (once per battle).
+    return canUseAttrition(state, duel, role) ? { type: 'commitSergeant', player, sergeantId: ATTRITION } : null;
+  }
   const otherRole = role === 'attacker' ? 'defender' : 'attacker';
   const theirs = availableSergeants(state, duel, otherRole);
   const me = state.knights[duel[role].knightId]!;

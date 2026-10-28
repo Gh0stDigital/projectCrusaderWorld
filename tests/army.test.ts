@@ -4,6 +4,11 @@ import { createMatch } from '../src/engine/setup';
 import type { MatchAction } from '../src/engine/actions';
 import type { KnightSubclass, MatchState, Sergeant, Tactic } from '../src/engine/state';
 
+/** These tests predate Attrition: mark it spent so the battle ends when the Sergeants do. */
+function noAttrition(s: MatchState): MatchState {
+  return s.duel ? { ...s, duel: { ...s.duel, attritionUsed: { attacker: true, defender: true } } } : s;
+}
+
 function act(state: MatchState, action: MatchAction): MatchState {
   const result = applyAction(state, action);
   if (!result.ok) throw new Error(result.reason);
@@ -45,7 +50,7 @@ function setup(
       [DEFENDER]: { ...s.knights[DEFENDER]!, sergeants: sg(DEFENDER, defender.tactics), hp: defender.hp ?? 50 },
     },
   };
-  return act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
+  return noAttrition(act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER }));
 }
 
 function clash(s: MatchState, a: number, d: number): MatchState {
@@ -166,7 +171,7 @@ describe('Archers', () => {
     };
     // Player 2's turn: pretend their Knight was just placed and attacks.
     s = { ...s, turn: { ...s.turn!, step: 'orders', attacked: false, placedKnightId: cav, captainId: 'p2-garrison-1' } };
-    s = act(s, { type: 'declareAttack', player: 'p2', attackerKnightId: cav, targetKnightId: p1Inf });
+    s = noAttrition(act(s, { type: 'declareAttack', player: 'p2', attackerKnightId: cav, targetKnightId: p1Inf }));
     s = act(s, { type: 'commitSergeant', player: 'p2', sergeantId: `${cav}-s1` });
     return act(s, { type: 'commitSergeant', player: 'p1', sergeantId: `${p1Inf}-s1` });
   }

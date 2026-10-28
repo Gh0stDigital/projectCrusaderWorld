@@ -16,6 +16,11 @@ import { chooseSergeant } from '../src/ai';
 import type { MatchAction } from '../src/engine/actions';
 import type { MatchState, Sergeant, Tactic } from '../src/engine/state';
 
+/** These tests predate Attrition: mark it spent so the battle ends when the Sergeants do. */
+function noAttrition(s: MatchState): MatchState {
+  return s.duel ? { ...s, duel: { ...s.duel, attritionUsed: { attacker: true, defender: true } } } : s;
+}
+
 function act(state: MatchState, action: MatchAction): MatchState {
   const result = applyAction(state, action);
   if (!result.ok) throw new Error(result.reason);
@@ -199,7 +204,7 @@ describe('Ending a duel', () => {
     let s = readyToAttack();
     s = setSergeants(s, ATTACKER, ['rush', 'rush']);
     s = setSergeants(s, DEFENDER, ['flank', 'flank']);
-    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
+    s = noAttrition(act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER }));
     s = clash(s, 1, 1);
     return clash(s, 2, 2);
   }
@@ -236,7 +241,7 @@ describe('Ending a duel', () => {
     s = { ...s, knights: { ...s.knights, [ATTACKER]: { ...s.knights[ATTACKER]!, hp: 5 } } };
     s = setSergeants(s, ATTACKER, ['rush']);
     s = setSergeants(s, DEFENDER, ['flank']);
-    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
+    s = noAttrition(act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER }));
     s = clash(s, 1, 1);
     expect(s.knights[DEFENDER]!.hp).toBe(40);
     expect(s.duel!.outcome!.winner).toBe('defender');
@@ -292,5 +297,59 @@ describe('Computer Sergeant choice', () => {
     const s = act(readyToAttack(), { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
     const action = chooseSergeant(s, 'p2', () => 0);
     expect(action).toEqual({ type: 'commitSergeant', player: 'p2', sergeantId: `${DEFENDER}-s1` });
+  });
+});
+
+describe('Attrition', () => {
+  /** The defender's only Sergeant falls in clash 1; the attacker still has one left. */
+  function lastSergeantLost(): MatchState {
+    let s = readyToAttack();
+    s = setSergeants(s, ATTACKER, ['rush', 'rush']);
+    s = setSergeants(s, DEFENDER, ['flank']);
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
+    return clash(s, 1, 1);
+  }
+
+  it('opens once every Sergeant has fallen, and the battle waits for it', () => {
+    const s = lastSergeantLost();
+    expect(s.knights[DEFENDER]!.sergeants).toEqual([]);
+    expect(s.duel!.outcome).toBeNull();
+    expect(rejected(s, { type: 'commitSergeant', player: 'p1', sergeantId: 'attrition' })).toMatch(/Attrition/);
+  });
+
+  it('costs 10% of current HP (rounded up) and deals the same; an enemy Sergeant still strikes and survives', () => {
+    let s = lastSergeantLost();
+    const def = s.knights[DEFENDER]!.hp; // 40
+    const att = s.knights[ATTACKER]!.hp; // 50
+    s = act(s, { type: 'commitSergeant', player: 'p2', sergeantId: 'attrition' });
+    s = act(s, { type: 'commitSergeant', player: 'p1', sergeantId: `${ATTACKER}-s2` });
+    const c = s.duel!.clashes[1]!;
+    expect(c.attrition).toEqual({ defender: 4 });
+    expect(s.knights[ATTACKER]!.hp).toBe(att - 4);
+    // Defender: pays 4, then the Rush Sergeant strikes unopposed for 10.
+    expect(s.knights[DEFENDER]!.hp).toBe(def - 4 - 10);
+    expect(s.knights[ATTACKER]!.sergeants.find((x) => x.id === `${ATTACKER}-s2`)!.militia).toBe(10);
+  });
+
+  it('can be used only once per battle', () => {
+    let s = readyToAttack();
+    s = setSergeants(s, ATTACKER, ['rush', 'rush', 'rush']);
+    s = setSergeants(s, DEFENDER, ['flank']);
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
+    s = clash(s, 1, 1);
+    s = act(s, { type: 'commitSergeant', player: 'p2', sergeantId: 'attrition' });
+    s = act(s, { type: 'commitSergeant', player: 'p1', sergeantId: `${ATTACKER}-s2` });
+    // The defender has nothing left: the attacker's last Sergeant strikes unopposed.
+    expect(rejected(s, { type: 'commitSergeant', player: 'p2', sergeantId: 'attrition' })).toMatch(/once per battle/);
+    s = act(s, { type: 'commitSergeant', player: 'p1', sergeantId: `${ATTACKER}-s3` });
+    expect(s.duel!.clashes).toHaveLength(3);
+  });
+
+  it('rounds up, so a Knight on 7 HP pays and deals 1', () => {
+    let s = lastSergeantLost();
+    s = { ...s, knights: { ...s.knights, [DEFENDER]: { ...s.knights[DEFENDER]!, hp: 7 } } };
+    s = act(s, { type: 'commitSergeant', player: 'p2', sergeantId: 'attrition' });
+    s = act(s, { type: 'commitSergeant', player: 'p1', sergeantId: `${ATTACKER}-s2` });
+    expect(s.duel!.clashes[1]!.attrition).toEqual({ defender: 1 });
   });
 });

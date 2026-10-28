@@ -217,7 +217,18 @@ export interface Clash {
   heist?: DuelRole;
   /** Saboteur: sides that lost SABOTAGE_DAMAGE HP after this clash. */
   sabotaged: DuelRole[];
+  /** Attrition: HP each side that used it paid, and dealt to the other Knight. */
+  attrition?: Partial<Record<DuelRole, number>>;
 }
+
+/**
+ * Attrition: once all of a Knight's Sergeants are dead, it may use this once per
+ * battle instead of a Sergeant. It can't be beaten: it costs the Knight a share
+ * of its current HP (rounded up, at least 1) and deals the same to the enemy.
+ * An enemy Sergeant in the same clash still strikes, unopposed, and survives.
+ */
+export const ATTRITION = 'attrition';
+export const ATTRITION_SHARE = 0.1;
 
 export interface DuelOutcome {
   /** null when both Knights end on equal HP: the defender holds and both stay. */
@@ -244,6 +255,8 @@ export interface Duel {
   blocked: Record<DuelRole, string[]>;
   /** Abilities that took effect after the duel, in order. */
   aftermath: AftermathEffect[];
+  /** Sides that have used Attrition this battle (once each). */
+  attritionUsed?: Partial<Record<DuelRole, boolean>>;
   /** Men sent to reinforce the defender (once per battle), if any. */
   reinforced?: number;
 }

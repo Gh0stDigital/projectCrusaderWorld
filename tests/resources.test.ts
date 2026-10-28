@@ -6,6 +6,11 @@ import { RESOURCES } from '../src/engine/config';
 import type { MatchAction } from '../src/engine/actions';
 import type { MatchState, Sergeant, Tactic } from '../src/engine/state';
 
+/** These tests predate Attrition: mark it spent so the battle ends when the Sergeants do. */
+function noAttrition(s: MatchState): MatchState {
+  return s.duel ? { ...s, duel: { ...s.duel, attritionUsed: { attacker: true, defender: true } } } : s;
+}
+
 function act(state: MatchState, action: MatchAction): MatchState {
   const result = applyAction(state, action);
   if (!result.ok) throw new Error(result.reason);
@@ -118,7 +123,7 @@ function defenderLoses(): MatchState {
   let s = readyToAttack();
   s = setSergeants(s, ATTACKER, ['rush']);
   s = setSergeants(s, DEFENDER, ['flank']);
-  s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
+  s = noAttrition(act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER }));
   s = act(s, { type: 'commitSergeant', player: 'p2', sergeantId: `${DEFENDER}-s1` });
   return act(s, { type: 'commitSergeant', player: 'p1', sergeantId: `${ATTACKER}-s1` });
 }

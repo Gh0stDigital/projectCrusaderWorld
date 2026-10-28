@@ -388,6 +388,17 @@ export function availableSergeants(state: MatchState, duel: Duel, role: DuelRole
   return duelKnight(state, duel, role).sergeants.filter((s) => s.militia > 0 && !used.has(s.id) && !blocked.has(s.id));
 }
 
+/** Attrition is open: every Sergeant of this Knight is dead, and it hasn't used Attrition this battle. */
+export function canUseAttrition(state: MatchState, duel: Duel, role: DuelRole): boolean {
+  const knight = duelKnight(state, duel, role);
+  return knight.hp > 0 && knight.sergeants.every((s) => s.militia <= 0) && !duel.attritionUsed?.[role];
+}
+
+/** Whether a side has anything to send into the next clash: a Sergeant, or Attrition. */
+export function canClash(state: MatchState, duel: Duel, role: DuelRole): boolean {
+  return availableSergeants(state, duel, role).length > 0 || canUseAttrition(state, duel, role);
+}
+
 /** The duel role a player has in the current duel, if any. */
 export function duelRoleOf(duel: Duel, player: PlayerId): DuelRole | null {
   if (duel.attacker.player === player) return 'attacker';

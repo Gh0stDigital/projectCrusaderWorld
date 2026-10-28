@@ -532,3 +532,28 @@
   font-size: 10px;
   white-space: nowrap;
 }
+
+/* Attrition: the last resort once every Sergeant has fallen. */
+.battle-hud .combatant__sergeants .sergeant-box--attrition {
+  border-color: #e2604f;
+  color: #ffb3a6;
+  background: rgba(60, 14, 10, 0.92);
+  animation: attrition-pulse 1.2s ease-in-out infinite;
+}
+
+.battle-hud .combatant__sergeants .sergeant-box--attrition .sergeant-box__tactic {
+  color: #ffb3a6;
+}
+
+@keyframes attrition-pulse {
+  50% { box-shadow: 0 0 14px rgba(226, 96, 79, 0.6); }
+}
+
+.revealed--attrition {
+  border-color: #e2604f;
+  color: #ffb3a6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-hud .combatant__sergeants .sergeant-box--attrition { animation: none; }
+}

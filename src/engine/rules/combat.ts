@@ -1,7 +1,7 @@
 import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
-import { adjacentSquares, attackTargets, attackers, availableSergeants, duelKnight, duelRoleOf, knightAt, nextOrdersStep } from '../queries';
-import { AMBUSH_COUNT, SABOTAGE_DAMAGE, SECOND_PASS_SHARE } from '../state';
+import { adjacentSquares, attackTargets, attackers, availableSergeants, canClash, canUseAttrition, duelKnight, duelRoleOf, knightAt, nextOrdersStep } from '../queries';
+import { AMBUSH_COUNT, ATTRITION, ATTRITION_SHARE, SABOTAGE_DAMAGE, SECOND_PASS_SHARE } from '../state';
 import { knightMilitia } from '../queries';
 import { charge, openWager } from './resources';
 import type {
@@ -160,7 +160,9 @@ export function commitSergeant(
   const role = duelRoleOf(duel, player);
   if (!role) return reject('You are not part of this battle.');
   if (duel.pending[role]) return reject('You have already chosen a Sergeant for this clash.');
-  if (!availableSergeants(state, duel, role).some((s) => s.id === sergeantId)) {
+  if (sergeantId === ATTRITION) {
+    if (!canUseAttrition(state, duel, role)) return reject('Attrition is only open once every Sergeant has fallen, once per battle.');
+  } else if (!availableSergeants(state, duel, role).some((s) => s.id === sergeantId)) {
     return reject('That Sergeant cannot fight this clash.');
   }
 
@@ -170,7 +172,7 @@ export function commitSergeant(
 
   // Resolve once the other side has committed too, or has nobody left to send.
   const other = OTHER[role];
-  if (committed.pending[other] || availableSergeants(next, committed, other).length === 0) {
+  if (committed.pending[other] || !canClash(next, committed, other)) {
     const resolved = resolveClash(next);
     next = resolved.state;
     events.push(...resolved.events);
@@ -180,7 +182,7 @@ export function commitSergeant(
 
 function pickFor(state: MatchState, duel: Duel, role: DuelRole): ClashPick | null {
   const id = duel.pending[role];
-  if (!id) return null;
+  if (!id || id === ATTRITION) return null;
   const sergeant = duelKnight(state, duel, role).sergeants.find((s) => s.id === id)!;
   return { sergeantId: sergeant.id, tactic: sergeant.tactic, militia: sergeant.militia };
 }
@@ -237,7 +239,31 @@ function resolveClash(state: MatchState): { state: MatchState; events: MatchEven
   }
 
   let damage = 0;
-  if (winner === 'tie') {
+  // Attrition: it can't be beaten. Each user pays a share of its HP and deals the
+  // same to the enemy; an enemy Sergeant still strikes unopposed and survives.
+  const using = { attacker: duel.pending.attacker === ATTRITION, defender: duel.pending.defender === ATTRITION };
+  let attrition: Partial<Record<DuelRole, number>> | undefined;
+  if (using.attacker || using.defender) {
+    attrition = {};
+    for (const role of ['attacker', 'defender'] as const) {
+      if (using[role]) attrition[role] = Math.max(1, Math.ceil(knights[role].hp * ATTRITION_SHARE));
+    }
+    for (const role of ['attacker', 'defender'] as const) {
+      const cost = attrition[role];
+      if (!cost) continue;
+      knights[role] = { ...knights[role], hp: Math.max(0, knights[role].hp - cost) };
+      knights[OTHER[role]] = { ...knights[OTHER[role]], hp: Math.max(0, knights[OTHER[role]].hp - cost) };
+    }
+    winner = using.attacker && using.defender ? 'tie' : using.attacker ? 'attacker' : 'defender';
+    for (const role of ['attacker', 'defender'] as const) {
+      const pick = picks[role];
+      if (!pick) continue;
+      damage = Math.min(pick.militia, knights[OTHER[role]].hp);
+      knights[OTHER[role]] = { ...knights[OTHER[role]], hp: knights[OTHER[role]].hp - damage };
+      winner = role;
+    }
+    heist = undefined;
+  } else if (winner === 'tie') {
     for (const role of ['attacker', 'defender'] as const) {
       const pick = picks[role]!;
       knights[role] = withSergeant(knights[role], pick.sergeantId, pick.militia - tieLoss(pick.militia));
@@ -273,13 +299,19 @@ function resolveClash(state: MatchState): { state: MatchState; events: MatchEven
     hpAfter: { attacker: knights.attacker.hp, defender: knights.defender.hp },
     sergeantsAfter: { attacker: knights.attacker.sergeants, defender: knights.defender.sergeants },
     sabotaged,
+    ...(attrition ? { attrition } : {}),
     ...(heist ? { heist } : {}),
   };
 
   let next: MatchState = {
     ...state,
     knights: { ...state.knights, [knights.attacker.id]: knights.attacker, [knights.defender.id]: knights.defender },
-    duel: { ...duel, clashes: [...duel.clashes, clash], pending: { attacker: null, defender: null } },
+    duel: {
+      ...duel,
+      clashes: [...duel.clashes, clash],
+      pending: { attacker: null, defender: null },
+      ...(attrition ? { attritionUsed: { ...duel.attritionUsed, ...(using.attacker ? { attacker: true } : {}), ...(using.defender ? { defender: true } : {}) } } : {}),
+    },
   };
   const events: MatchEvent[] = [{ type: 'clashResolved', clash }];
 
@@ -294,7 +326,7 @@ function resolveClash(state: MatchState): { state: MatchState; events: MatchEven
 /** The duel ends when a Knight falls to 0 HP or neither side has a Sergeant left to send. */
 function isDuelOver(state: MatchState, duel: Duel): boolean {
   if (duelKnight(state, duel, 'attacker').hp <= 0 || duelKnight(state, duel, 'defender').hp <= 0) return true;
-  return availableSergeants(state, duel, 'attacker').length === 0 && availableSergeants(state, duel, 'defender').length === 0;
+  return !canClash(state, duel, 'attacker') && !canClash(state, duel, 'defender');
 }
 
 /**

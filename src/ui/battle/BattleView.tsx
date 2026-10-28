@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { availableSergeants, duelRoleOf, normalMaxHp } from '../../engine/queries';
+import { availableSergeants, canUseAttrition, duelRoleOf, normalMaxHp } from '../../engine/queries';
+import { ATTRITION, ATTRITION_SHARE } from '../../engine/state';
 import {
   type AftermathEffect,
   type PreludeEffect,
@@ -208,6 +209,7 @@ export function BattleView({ match, duel, onCommit, onClose, onChooseRetreat }: 
         preludes={preludes}
         activePrelude={activePrelude}
         options={myOptions}
+        attritionOpen={canChoose && canUseAttrition(match, duel, myRole)}
         onPick={onCommit}
       />
 
@@ -237,6 +239,8 @@ interface CombatantProps {
   match: MatchState;
   duel: Duel;
   role: DuelRole;
+  /** Every Sergeant has fallen and Attrition can be used this clash. */
+  attritionOpen?: boolean;
   /** Top: the enemy, on the right facing left. Bottom: you, on the left facing right. */
   position: 'top' | 'bottom';
   upTo: number;
@@ -273,6 +277,7 @@ function Combatant({
   upTo,
   current,
   options,
+  attritionOpen = false,
   onPick,
   effects = [],
   activeEffect,
@@ -362,7 +367,20 @@ function Combatant({
             />
           );
         })}
-        {side.startSergeants.length === 0 && <span className="combatant__none">No Sergeants</span>}
+        {side.startSergeants.length === 0 && !attritionOpen && <span className="combatant__none">No Sergeants</span>}
+        {attritionOpen && onPick && (
+          <button
+            className="sergeant-box sergeant-box--attrition sergeant-box--pickable"
+            onClick={() => onPick(ATTRITION)}
+            title="Every Sergeant has fallen. Attrition can't be beaten: it costs 10% of this Knight's HP and deals the same to the enemy. Once per battle."
+          >
+            <span className="sergeant-box__militia">Attrition</span>
+            <span className="sergeant-box__tactic">−{Math.max(1, Math.ceil(hp * ATTRITION_SHARE))} HP · {Math.max(1, Math.ceil(hp * ATTRITION_SHARE))} dmg</span>
+          </button>
+        )}
+        {duel.attritionUsed?.[role] && upTo >= duel.clashes.findIndex((c) => c.attrition?.[role]) + 1 && (
+          <span className="combatant__none">Attrition used</span>
+        )}
       </div>
     </div>
   );
@@ -548,9 +566,9 @@ function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, myRol
     return (
       <div className="battle-msg">
         <div className="clash-reveal">
-          <RevealedPick label="You" pick={clash[myRole]} winner={phase === 'result' && clash.winner === myRole} />
+          <RevealedPick label="You" pick={clash[myRole]} attrition={clash.attrition?.[myRole]} winner={phase === 'result' && clash.winner === myRole} />
           <span className="clash-reveal__vs">vs</span>
-          <RevealedPick label="Enemy" pick={clash[enemyRole]} winner={phase === 'result' && clash.winner === enemyRole} />
+          <RevealedPick label="Enemy" pick={clash[enemyRole]} attrition={clash.attrition?.[enemyRole]} winner={phase === 'result' && clash.winner === enemyRole} />
         </div>
         <span className={`battle-msg__small${phase === 'result' ? ' battle-msg__verdict' : ''}`}>
           {phase === 'reveal' ? 'Revealing…' : verdict(clash, knightName(attacker), knightName(defender))}
@@ -564,7 +582,16 @@ function CenterPanel({ match, duel, phase, clash, clashNumber, enemyReady, myRol
   return null;
 }
 
-function RevealedPick({ label, pick, winner }: { label: string; pick: Clash['attacker']; winner: boolean }) {
+function RevealedPick({ label, pick, attrition, winner }: { label: string; pick: Clash['attacker']; attrition?: number; winner: boolean }) {
+  if (attrition) {
+    return (
+      <span className="revealed revealed--attrition">
+        <span className="revealed__who">{label}</span>
+        <span className="revealed__name">Attrition</span>
+        <span className="revealed__men">−{attrition} HP · {attrition} dmg</span>
+      </span>
+    );
+  }
   if (!pick) {
     return (
       <span className="revealed revealed--none">
@@ -591,6 +618,17 @@ function verdict(clash: Clash, attackerName: string, defenderName: string): stri
 
 function baseVerdict(clash: Clash, attackerName: string, defenderName: string): string {
   const target = clash.winner === 'attacker' ? defenderName : attackerName;
+  if (clash.attrition) {
+    const name = (r: 'attacker' | 'defender') => (r === 'attacker' ? attackerName : defenderName);
+    const lines = (['attacker', 'defender'] as const)
+      .filter((r) => clash.attrition![r])
+      .map((r) => `${name(r)} fights on with Attrition: pays ${clash.attrition![r]} HP and deals ${clash.attrition![r]}.`);
+    for (const r of ['attacker', 'defender'] as const) {
+      const pick = clash[r];
+      if (pick) lines.push(`${TACTIC_NAMES[pick.tactic]} strikes unopposed: ${clash.damage} damage to ${name(r === 'attacker' ? 'defender' : 'attacker')}.`);
+    }
+    return lines.join(' ');
+  }
   if (clash.heist) {
     const thief = clash.heist === 'attacker' ? attackerName : defenderName;
     return `Heist! ${thief} wins the clash outright: ${clash.damage} damage to ${target}.`;
