@@ -596,10 +596,13 @@ function baseVerdict(clash: Clash, attackerName: string, defenderName: string): 
     return `Heist! ${thief} wins the clash outright: ${clash.damage} damage to ${target}.`;
   }
   if (clash.winner === 'tie') {
-    return `Both sent ${TACTIC_NAMES[clash.attacker!.tactic]}: each Sergeant loses half their men.`;
+    return `Both sent ${TACTIC_NAMES[clash.attacker!.tactic]} with ${clash.attacker!.militia} men: each Sergeant loses half.`;
   }
   const win = clash[clash.winner]!;
   const lose = clash.winner === 'attacker' ? clash.defender : clash.attacker;
   if (!lose) return `Unopposed! ${clash.damage} damage to ${target}.`;
+  if (win.tactic === lose.tactic) {
+    return `Both sent ${TACTIC_NAMES[win.tactic]}: ${win.militia} men beat ${lose.militia}! ${clash.damage} damage to ${target}.`;
+  }
   return `${TACTIC_NAMES[win.tactic]} beats ${TACTIC_NAMES[lose.tactic]}! ${clash.damage} damage to ${target}.`;
 }

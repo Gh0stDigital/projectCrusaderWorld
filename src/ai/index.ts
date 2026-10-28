@@ -61,7 +61,13 @@ function sergeantValue(mine: Sergeant, theirs: Sergeant[], myHp: number, theirHp
   if (theirs.length === 0) return Math.min(mine.militia, theirHp);
   let total = 0;
   for (const other of theirs) {
-    if (mine.tactic === other.tactic) total += Math.ceil(other.militia / 2) - Math.ceil(mine.militia / 2);
+    if (mine.tactic === other.tactic) {
+      // Same tactic: the bigger Sergeant wins by the difference; equal ties.
+      const diff = mine.militia - other.militia;
+      if (diff > 0) total += Math.min(diff, theirHp) + other.militia * 0.25;
+      else if (diff < 0) total -= Math.min(-diff, myHp) + mine.militia;
+      else total += 0;
+    }
     else if (BEATS[mine.tactic] === other.tactic) total += Math.min(mine.militia, theirHp) + other.militia * 0.25;
     else total -= Math.min(other.militia, myHp) + mine.militia;
   }
@@ -484,13 +490,13 @@ function stationOrderFor(state: MatchState, captain: Captain): { action: MatchAc
   const player = captain.owner;
   const enemy = otherPlayer(player);
   const mine = captainMilitia(state, captain.id);
-  const myRolls = Math.max(1, knightsOnBoard(state, captain.region!, player).length);
+  const myRolls = knightsOnBoard(state, captain.region!, player).length + 1; // + the Captain
   const options: { action: MatchAction; value: number }[] = [];
 
   for (const region of assaultTargets(state, captain)) {
     const holder = state.secured[region]!.captainId;
     const theirs = captainMilitia(state, holder);
-    const theirRolls = Math.max(1, knightsOnBoard(state, region, enemy).length);
+    const theirRolls = knightsOnBoard(state, region, enemy).length + 1;
     // Each roll costs the other side (men × die) ÷ divisor: men × rolls is the punch.
     const edge = (mine * myRolls) / Math.max(1, theirs * theirRolls);
     const prize = 40 + regionWorth({ ...state, secured: { ...state.secured, [region]: undefined } }, region, player);
@@ -548,10 +554,28 @@ export function chooseStation(state: MatchState, player: PlayerId): MatchAction 
   return captain ? { type: 'stationCaptain', player, captainId: captain.id } : null;
 }
 
+/**
+ * After losing a Decisive battle with men and a Knight left: a beaten defender
+ * holds its Region while it still has at least half the winner's men, otherwise
+ * retreats to keep its Knights. A beaten attacker keeps its own Region unless it
+ * has almost nothing left.
+ */
+export function chooseDecisiveFate(state: MatchState, player: PlayerId): MatchAction | null {
+  const d = state.decisive;
+  const o = d?.outcome;
+  if (!d || !o?.winner || o.loserChoice !== 'deciding' || otherPlayer(o.winner) !== player) return null;
+  const share = d.men[player] / Math.max(1, d.men[o.winner]);
+  const defending = d.first !== player;
+  return { type: 'decisiveChoice', player, retreat: defending ? share < 0.5 : share < 0.2 };
+}
+
 /** Decisive battle: roll when it is this player's roll; the player whose turn it is closes it once it is over. */
 export function chooseDecisive(state: MatchState, player: PlayerId, random: Random = Math.random): MatchAction | null {
   const d = state.decisive;
   if (!d) return null;
+  if (d.outcome?.loserChoice === 'deciding') {
+    return d.outcome.winner && otherPlayer(d.outcome.winner) === player ? chooseDecisiveFate(state, player) : null;
+  }
   if (d.outcome) return state.turn?.player === player ? { type: 'finishDecisive', player } : null;
   return decisiveRoller(state) === player ? { type: 'rollDie', player, value: 1 + Math.floor(random() * 6) } : null;
 }

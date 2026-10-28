@@ -37,9 +37,10 @@ export function assaultSetup(match: MatchState, fromCaptainId: string, region: R
     attacker: from.owner,
     captains,
     men: { [from.owner]: captainMilitia(match, from.id), [defender.owner]: captainMilitia(match, defender.id) } as Record<PlayerId, number>,
+    // One roll per Knight on each Captain's own board, plus the Captain.
     chances: {
-      [from.owner]: knightsOnBoard(match, from.region!, from.owner).length,
-      [defender.owner]: knightsOnBoard(match, region, defender.owner).length,
+      [from.owner]: knightsOnBoard(match, from.region!, from.owner).length + 1,
+      [defender.owner]: knightsOnBoard(match, region, defender.owner).length + 1,
     } as Record<PlayerId, number>,
   };
 }
@@ -63,10 +64,10 @@ export function DecisivePreview({
   const where = REGION_NAMES[setup.region];
   const title =
     setup.kind === 'stalemate'
-      ? `Stalemate in ${where}! Decisive battle`
+      ? `Stalemate in ${where}! Last Stand`
       : setup.attacker === 'p1'
-        ? `Assault ${where}?`
-        : `${PLAYER_NAMES[setup.attacker!]} is assaulting ${where}!`;
+        ? `Decisive battle: assault ${where}?`
+        : `Decisive battle! ${PLAYER_NAMES[setup.attacker!]} is assaulting ${where}`;
   const role = (p: PlayerId) =>
     setup.kind === 'stalemate' ? (p === 'p1' ? 'Your Captain' : 'Enemy Captain') : `${p === 'p1' ? 'Your' : 'Enemy'} Captain · ${setup.attacker === p ? 'attacking' : 'defending'}`;
 
@@ -104,11 +105,11 @@ export function DecisivePreview({
         )}
         <p className="attack-preview__rules">
           Each Captain fights with every man they have. Sides take turns rolling a die, one roll per Knight of theirs on
-          {setup.kind === 'assault' ? ' their own board' : ' this board'}; each roll costs the other side (your men × die)
-          ÷ {DECISIVE_DIVISOR}. Most men left when the rolls run out wins; at 0 men a Captain falls.
+          {setup.kind === 'assault' ? ' their own board' : ' this board'} plus one for the Captain; each roll costs the
+          other side (your men × die) ÷ {DECISIVE_DIVISOR}. Most men left when the rolls run out wins; at 0 men a Captain falls.
           {setup.kind === 'assault'
-            ? ' If the attacker wins, they take the Region and free their captured Knights there; if not, only men are lost.'
-            : ' The winner secures the Region.'}
+            ? ' The loser, if they still have men and a Knight, chooses: hold their ground (only men are lost) or retreat with every living Knight and give up their Region to the winner.'
+            : ' The side with fewer men loses: the winner secures the Region and the loser retreats.'}
         </p>
 
         <div className="attack-preview__actions">
@@ -141,7 +142,7 @@ function CaptainSummary({ match, setup, player, role }: { match: MatchState; set
           </p>
           <p className="knight-summary__line">Reserve {captain.reserve}</p>
           <p className="knight-summary__line">
-            Rolls: {setup.chances[player]} (one per Knight on the board)
+            Rolls: {setup.chances[player]} (one per Knight on the board, plus the Captain)
           </p>
         </div>
       </div>

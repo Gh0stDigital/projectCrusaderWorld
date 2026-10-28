@@ -91,10 +91,10 @@ export function PhaseWindow({
             ? 'Orders complete.'
             : match.decisive
               ? decisiveRoller(match) === 'p1'
-                ? 'Decisive battle: roll the die.'
+                ? `${battleName(match)}: roll the die.`
                 : match.decisive.outcome
-                  ? 'The decisive battle is over.'
-                  : 'Decisive battle!'
+                  ? `The ${battleName(match)} is over.`
+                  : `${battleName(match)}!`
             : turn && turn.player !== 'p1' && !battleOpen
               ? 'The enemy is taking their turn…'
             : battleOpen
@@ -137,6 +137,11 @@ export function PhaseWindow({
   );
 }
 
+/** Last Stand (a stalemated Region) or Decisive battle (an assault). */
+function battleName(match: MatchState): string {
+  return match.decisive?.kind === 'assault' ? 'Decisive battle' : 'Last Stand';
+}
+
 function instructionFor(match: MatchState, selectedCaptainId: string | null, focusedRegion: RegionIndex | null): string {
   const turn = match.turn;
   if (!turn) return 'Each player places their Lords in turn order.';
@@ -158,7 +163,7 @@ function instructionFor(match: MatchState, selectedCaptainId: string | null, foc
 
   const captain = actingCaptain(match);
   const where = captain?.region != null ? REGION_NAMES[captain.region] : 'the Region';
-  if (turn.step === 'decisive') return `Stalemate in ${where}: decisive battle!`;
+  if (turn.step === 'decisive') return `Stalemate in ${where}: Last Stand!`;
   if (turn.step === 'station') return 'Choose a Captain to station in the Region you took.';
   if (turn.step === 'orders' && captain && isStationed(match, captain) && !turn.stationOrder) {
     return `${captainName(captain)} holds ${where}: give one order.`;

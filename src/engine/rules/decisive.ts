@@ -14,9 +14,9 @@ import { passTurn } from './turns';
 import { finishAssault } from './stationed';
 
 /**
- * The Region stalemated as `first`'s turn ended: its two Captains fight a
- * decisive battle with every man they have. Each side rolls once per Knight of
- * theirs on that board.
+ * The Region stalemated as `first`'s turn ended: its two Captains make a Last
+ * Stand with every man they have. Each side rolls once per Knight of theirs on
+ * that board, plus once for the Captain.
  */
 export function startDecisive(
   state: MatchState,
@@ -34,7 +34,7 @@ export function startDecisive(
     captains: { p1: a.id, p2: b.id },
     startMen: { ...men },
     men,
-    chances: { p1: knightsOnBoard(state, region, 'p1').length, p2: knightsOnBoard(state, region, 'p2').length },
+    chances: { p1: knightsOnBoard(state, region, 'p1').length + 1, p2: knightsOnBoard(state, region, 'p2').length + 1 },
     rolls: [],
     outcome: null,
   });
@@ -63,11 +63,14 @@ export function rollDie(state: MatchState, player: PlayerId, value: number): Eng
   if (!Number.isInteger(value) || value < 1 || value > 6) return reject('A die shows 1 to 6.');
   const target = otherPlayer(player);
   const damage = Math.min(Math.floor((d.men[player] * value) / DECISIVE_DIVISOR), d.men[target]);
-  const next = settle({
-    ...d,
-    men: { ...d.men, [target]: d.men[target] - damage },
-    rolls: [...d.rolls, { player, value, damage }],
-  });
+  const next = withLoserChoice(
+    state,
+    settle({
+      ...d,
+      men: { ...d.men, [target]: d.men[target] - damage },
+      rolls: [...d.rolls, { player, value, damage }],
+    }),
+  );
   return {
     ok: true,
     state: { ...state, decisive: next },
@@ -76,7 +79,32 @@ export function rollDie(state: MatchState, player: PlayerId, value: number): Eng
 }
 
 /**
- * After the decisive battle: losses are spread evenly over each Captain's men.
+ * Decisive battle (assault) lost with men and a living Knight left: the loser
+ * gets to choose between holding their ground and retreating.
+ */
+export function withLoserChoice(state: MatchState, d: DecisiveBattle): DecisiveBattle {
+  const o = d.outcome;
+  if (d.kind !== 'assault' || !o?.winner || o.loserKilled || o.loserChoice) return d;
+  const loserId = d.captains[otherPlayer(o.winner)];
+  const alive = knightsOf(state, loserId).some((k) => k.status === 'ready' || k.status === 'fielded');
+  return alive ? { ...d, outcome: { ...o, loserChoice: 'deciding' } } : d;
+}
+
+/** The loser of a Decisive battle holds their ground or retreats. */
+export function chooseDecisiveFate(state: MatchState, player: PlayerId, retreat: boolean): EngineResult<MatchState, MatchEvent> {
+  const d = state.decisive;
+  const o = d?.outcome;
+  if (!d || !o || o.loserChoice !== 'deciding') return reject('There is no choice to make.');
+  if (otherPlayer(o.winner!) !== player) return reject('Only the losing side chooses.');
+  return {
+    ok: true,
+    state: { ...state, decisive: { ...d, outcome: { ...o, loserChoice: retreat ? 'retreat' : 'hold' } } },
+    events: [{ type: 'decisiveLoserChose', player, retreat }],
+  };
+}
+
+/**
+ * After the battle: losses are spread evenly over each Captain's men.
  * The winner secures the Region; the loser's Knights on its board are captured
  * and the loser's Captain returns to their Lord with the Knights they never
  * deployed (or dies, wiped out). Level: nobody secures it, the Region closes and
@@ -84,8 +112,9 @@ export function rollDie(state: MatchState, player: PlayerId, value: number): Eng
  */
 export function finishDecisive(state: MatchState, player: PlayerId): EngineResult<MatchState, MatchEvent> {
   const d = state.decisive;
-  if (!d?.outcome) return reject('The decisive battle is not over.');
+  if (!d?.outcome) return reject('The battle is not over.');
   if (state.turn?.player !== player) return reject('It is not your turn.');
+  if (d.outcome.loserChoice === 'deciding') return reject('The losing Captain must first hold their ground or retreat.');
 
   const knights = { ...state.knights };
   const captains = { ...state.captains };

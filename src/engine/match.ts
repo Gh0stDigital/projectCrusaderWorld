@@ -14,6 +14,7 @@ import {
   deployCaptain,
   endTurn,
   finishDecisive,
+  chooseDecisiveFate,
   moveKnight,
   placeKnight,
   undoKnight,
@@ -53,6 +54,8 @@ export function applyAction(state: MatchState, action: MatchAction): EngineResul
       return rollDie(state, action.player, action.value);
     case 'finishDecisive':
       return finishDecisive(state, action.player);
+    case 'decisiveChoice':
+      return chooseDecisiveFate(state, action.player, action.retreat);
     case 'sendReserve':
       return sendReserve(state, action.player, action.toCaptainId, action.amount);
     case 'sendKnight':

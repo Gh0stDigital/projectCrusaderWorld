@@ -40,7 +40,7 @@ export function endTurn(state: MatchState, player: PlayerId): EngineResult<Match
       orders: stationedOrdersOpen(state)
         ? 'Give your stationed Captain an order before ending your turn.'
         : 'Place a Knight or attack before ending your turn.',
-      decisive: 'Finish the decisive battle first.',
+      decisive: 'Finish the battle first.',
       station: 'Choose a Captain to station in the Region you took.',
       battle: 'Finish the battle before ending your turn.',
     };
@@ -50,7 +50,7 @@ export function endTurn(state: MatchState, player: PlayerId): EngineResult<Match
   // Only a placement (or move) routes the opponent; a turn without one leaves them a free choice.
   const routed: MatchState = turn.placedKnightId || turn.movedKnightId ? state : { ...state, route: null };
 
-  // The Region played in stalemated: its Captains fight a decisive battle before the turn passes.
+  // The Region played in stalemated: its Captains make a Last Stand before the turn passes.
   const region = actingCaptain(routed)?.region ?? null;
   if (region !== null && isStalemate(routed, region)) {
     const fight = startDecisive(routed, region, player);

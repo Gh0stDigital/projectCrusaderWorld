@@ -152,17 +152,30 @@ describe('Clashes', () => {
     expect(clash(duel(['rush', 'flank'], ['counter', 'flank']), 1, 1).duel!.clashes[0]!.winner).toBe('defender');
   });
 
-  it('a tie costs both Sergeants half their men, rounded up, and no HP', () => {
+  it('a tie (same tactic, same men) costs both Sergeants half their men, rounded up, and no HP', () => {
     let s = readyToAttack();
     s = setSergeants(s, ATTACKER, ['rush', 'flank'], 7);
-    s = setSergeants(s, DEFENDER, ['rush', 'flank'], 10);
+    s = setSergeants(s, DEFENDER, ['rush', 'flank'], 7);
     s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
     s = clash(s, 1, 1);
     expect(s.duel!.clashes[0]).toMatchObject({ winner: 'tie', damage: 0 });
     expect(s.knights[ATTACKER]!.sergeants[0]!.militia).toBe(3);
-    expect(s.knights[DEFENDER]!.sergeants[0]!.militia).toBe(5);
+    expect(s.knights[DEFENDER]!.sergeants[0]!.militia).toBe(3);
     expect(s.knights[ATTACKER]!.hp).toBe(50);
     expect(tieLoss(1)).toBe(1);
+  });
+
+  it('same tactic, more men: the bigger Sergeant wins, dealing the difference; the smaller one is lost', () => {
+    let s = readyToAttack();
+    s = setSergeants(s, ATTACKER, ['rush', 'flank'], 7);
+    s = setSergeants(s, DEFENDER, ['rush', 'flank'], 10);
+    s = act(s, { type: 'declareAttack', player: 'p1', attackerKnightId: ATTACKER, targetKnightId: DEFENDER });
+    const hp = s.knights[ATTACKER]!.hp;
+    s = clash(s, 1, 1);
+    expect(s.duel!.clashes[0]).toMatchObject({ winner: 'defender', damage: 3 });
+    expect(s.knights[ATTACKER]!.hp).toBe(hp - 3);
+    expect(s.knights[ATTACKER]!.sergeants.map((x) => x.tactic)).toEqual(['flank']);
+    expect(s.knights[DEFENDER]!.sergeants[0]!.militia).toBe(10);
   });
 
   it('never lets a Sergeant fight twice in one duel', () => {

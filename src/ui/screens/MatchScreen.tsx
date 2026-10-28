@@ -292,6 +292,7 @@ export function MatchScreen() {
                 decisive={match.decisive}
                 onRoll={store.rollDecisive}
                 onReturn={store.closeDecisive}
+                onChoose={(retreat) => store.dispatch({ type: 'decisiveChoice', player: 'p1', retreat })}
               />
             )}
             {turn && !locked && !battleOpen && !store.decisiveOpen && store.assaultPreview === null && stationedOrdersOpen(match) && (

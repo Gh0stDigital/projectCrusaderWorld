@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { MatchAction } from '../engine/actions';
 import type { MatchEvent } from '../engine/events';
 import { applyAction } from '../engine/match';
-import { chooseCommand, chooseLordOrder, chooseOrders, chooseReinforcement, chooseSergeant, chooseRetreat as chooseComputerRetreat, chooseStation } from '../ai';
+import { chooseCommand, chooseDecisiveFate, chooseLordOrder, chooseOrders, chooseReinforcement, chooseSergeant, chooseRetreat as chooseComputerRetreat, chooseStation } from '../ai';
 import { commandSummary } from '../ui/campaign/commandText';
 import { reportsFor, type Report } from '../ui/campaign/reports';
 import { play } from '../audio/sound';
@@ -181,6 +181,9 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
         if (reply) get().dispatch(reply);
       }
     }
+    // A Decisive battle the computer lost: it holds or retreats at once.
+    const fate = chooseDecisiveFate(result.state, COMPUTER);
+    if (fate) get().dispatch(fate);
     scheduleComputerRoll();
     // The computer decides at once whether its surviving loser retreats or holds.
     if (retreatDecider(result.state) === COMPUTER) {
@@ -414,6 +417,13 @@ function runComputerStep() {
     if (match.orderingPlayer === COMPUTER) {
       store.dispatch({ type: 'setLordOrder', player: COMPUTER, order: chooseLordOrder() });
     }
+    return;
+  }
+
+  // The computer won a Region on the human's turn (a beaten attacker retreated): station a Captain there.
+  if (match.pendingStation?.player === COMPUTER) {
+    const action = chooseStation(match, COMPUTER);
+    if (action) store.dispatch(action);
     return;
   }
 

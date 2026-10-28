@@ -82,12 +82,12 @@ describe('A Captain holding a secured Region', () => {
     expect(s.secured[4]?.player).toBe('p1');
   });
 
-  it('assaults an adjacent enemy-held Region: a decisive battle, attacker first, rolls by Knights on each board', () => {
+  it('assaults an adjacent enemy-held Region: a Decisive battle, attacker first, a roll per Knight on each board plus the Captain', () => {
     let s = resumeHolder(setup());
     expect(assaultTargets(s, s.captains[HOLDER]!)).toEqual([5]);
     s = act(s, { type: 'assault', player: 'p1', region: 5 });
     expect(s.turn!.step).toBe('decisive');
-    expect(s.decisive).toMatchObject({ kind: 'assault', region: 5, fromRegion: 4, first: 'p1', chances: { p1: 2, p2: 2 } });
+    expect(s.decisive).toMatchObject({ kind: 'assault', region: 5, fromRegion: 4, first: 'p1', chances: { p1: 3, p2: 3 } });
     expect(decisiveRoller(s)).toBe('p1');
   });
 
@@ -134,6 +134,90 @@ describe('A Captain holding a secured Region', () => {
     expect(s.secured[4]).toMatchObject({ player: 'p1', captainId: HOLDER });
     expect(s.secured[5]).toMatchObject({ player: 'p2', captainId: ENEMY });
     expect(s.knights[LOST]!.status).toBe('captured');
+  });
+});
+
+describe('Decisive battle: the loser holds or retreats', () => {
+  const rollOut = (s: MatchState) => {
+    while (decisiveRoller(s)) s = act(s, { type: 'rollDie', player: decisiveRoller(s)!, value: 1 });
+    return s;
+  };
+  const defenderLoses = () => {
+    let s = setup();
+    s.captains[HOLDER] = { ...s.captains[HOLDER]!, reserve: 1000 };
+    s = act(resumeHolder(s), { type: 'assault', player: 'p1', region: 5 });
+    s = rollOut(s);
+    expect(s.decisive!.outcome).toEqual({ winner: 'p1', loserKilled: false, loserChoice: 'deciding' });
+    return s;
+  };
+  const attackerLoses = () => {
+    let s = setup();
+    s.captains[ENEMY] = { ...s.captains[ENEMY]!, reserve: 600 };
+    s = act(resumeHolder(s), { type: 'assault', player: 'p1', region: 5 });
+    s = rollOut(s);
+    expect(s.decisive!.outcome).toEqual({ winner: 'p2', loserKilled: false, loserChoice: 'deciding' });
+    return s;
+  };
+
+  it('waits for the loser’s choice before the battle can close', () => {
+    const s = defenderLoses();
+    expect(rejected(s, { type: 'finishDecisive', player: 'p1' })).toMatch(/hold their ground or retreat/);
+    expect(rejected(s, { type: 'decisiveChoice', player: 'p1', retreat: true })).toMatch(/losing side/);
+  });
+
+  it('a defender who holds keeps the Region; only men were lost', () => {
+    let s = act(defenderLoses(), { type: 'decisiveChoice', player: 'p2', retreat: false });
+    s = act(s, { type: 'finishDecisive', player: 'p1' });
+    expect(s.secured[5]).toMatchObject({ player: 'p2', captainId: ENEMY });
+    expect(s.knights[`${ENEMY}-k1`]!.status).toBe('fielded');
+    expect(s.knights[LOST]!.status).toBe('captured');
+  });
+
+  it('a defender who retreats keeps every living Knight and gives up the Region', () => {
+    let s = act(defenderLoses(), { type: 'decisiveChoice', player: 'p2', retreat: true });
+    s = act(s, { type: 'finishDecisive', player: 'p1' });
+    expect(s.captains[ENEMY]).toMatchObject({ region: null, fallen: false });
+    expect([`${ENEMY}-k1`, `${ENEMY}-k2`].map((id) => s.knights[id]!.status)).toEqual(['ready', 'ready']);
+    // The attacker takes it: the freed Knight's Captain moves in.
+    expect(s.secured[5]).toMatchObject({ player: 'p1', captainId: 'p1-raiders-2' });
+    expect(s.knights[LOST]!.status).toBe('ready');
+  });
+
+  it('a beaten attacker who retreats gives up their own Region; the winner stations a Captain there', () => {
+    let s = act(attackerLoses(), { type: 'decisiveChoice', player: 'p1', retreat: true });
+    s = act(s, { type: 'finishDecisive', player: 'p1' });
+    expect(s.captains[HOLDER]).toMatchObject({ region: null, fallen: false });
+    expect([`${HOLDER}-k1`, `${HOLDER}-k2`].map((id) => s.knights[id]!.status)).toEqual(['ready', 'ready']);
+    expect(s.secured[4]).toBeUndefined();
+    expect(s.pendingStation).toMatchObject({ region: 4, player: 'p2' });
+    s = act(s, { type: 'stationCaptain', player: 'p2', captainId: 'p2-army-1' });
+    expect(s.secured[4]).toMatchObject({ player: 'p2', captainId: 'p2-army-1' });
+    expect(s.turn!.player).toBe('p2');
+  });
+
+  it('a beaten attacker who holds keeps their Region', () => {
+    let s = act(attackerLoses(), { type: 'decisiveChoice', player: 'p1', retreat: false });
+    s = act(s, { type: 'finishDecisive', player: 'p1' });
+    expect(s.secured[4]).toMatchObject({ player: 'p1', captainId: HOLDER });
+    expect(s.secured[5]).toMatchObject({ player: 'p2', captainId: ENEMY });
+  });
+});
+
+describe('Routing into a conquered Region', () => {
+  it('is no longer mandatory: a Free Choice', () => {
+    const s = { ...setup(), route: 4 as RegionIndex };
+    expect(commandOptions(s).mode).toBe('free');
+    expect(commandOptions(s).deployRegions.length).toBeGreaterThan(0);
+  });
+
+  it('never lets the Lord command another Lord’s Captain stationed there', () => {
+    const s = setup();
+    // Army I holds North instead; it is the Raiders' turn and they are routed there.
+    s.secured = { ...s.secured, 1: { player: 'p1', captainId: NEIGHBOUR, capturedKnightIds: [] } };
+    s.knights[`${NEIGHBOUR}-k1`] = { ...s.knights[`${NEIGHBOUR}-k1`]!, status: 'fielded', position: { region: 1, square: 0 } };
+    const routed = { ...s, route: 1 as RegionIndex };
+    expect(commandOptions(routed).mode).toBe('free');
+    expect(commandOptions(routed).resumeCaptainIds).not.toContain(NEIGHBOUR);
   });
 });
 

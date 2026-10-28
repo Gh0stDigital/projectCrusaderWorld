@@ -228,7 +228,9 @@ function resolveClash(state: MatchState): { state: MatchState; events: MatchEven
     heist = heisting[0]!;
     winner = heist;
   } else if (a && d) {
-    winner = a.tactic === d.tactic ? 'tie' : BEATS[a.tactic] === d.tactic ? 'attacker' : 'defender';
+    if (a.tactic !== d.tactic) winner = BEATS[a.tactic] === d.tactic ? 'attacker' : 'defender';
+    // Same tactic: the bigger Sergeant wins; equal numbers tie.
+    else winner = a.militia === d.militia ? 'tie' : a.militia > d.militia ? 'attacker' : 'defender';
   } else {
     // Only one side had a Sergeant to send: an unopposed blow.
     winner = a ? 'attacker' : 'defender';
@@ -242,7 +244,10 @@ function resolveClash(state: MatchState): { state: MatchState; events: MatchEven
     }
   } else {
     const loser = OTHER[winner];
-    damage = Math.min(picks[winner]!.militia, knights[loser].hp);
+    // Same tactic: only the difference in men lands as damage.
+    const sameTactic = a && d && a.tactic === d.tactic && !heist;
+    const blow = sameTactic ? picks[winner]!.militia - picks[loser]!.militia : picks[winner]!.militia;
+    damage = Math.min(blow, knights[loser].hp);
     knights[loser] = { ...knights[loser], hp: knights[loser].hp - damage };
     const loserPick = picks[loser];
     // The beaten Sergeant and their men are lost.

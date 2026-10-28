@@ -44,9 +44,10 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
   - The square a Knight is placed on sends the opponent to the Region in the same position next turn. The first turn of the match is a free choice.
   - While the current Lord has a Ready Captain, they must play in the routed Region: deploy a Ready Captain there. They cannot revisit other Regions.
   - If the routed Region holds the current Lord's own stationed Captain, that Captain must take the turn there.
+  - **A routed Region that has been conquered (secured) is no longer mandatory (Oct 2026):** the turn is a Free Choice. A Lord only ever commands their own Captains: this fixed a bug where being routed into a secured Region held by another Lord's Captain let the current Lord command that Captain, and where "nobody can deploy" let any Lord's Captain act.
   - If it holds a Captain of a different Lord, routing is not mandatory: the current Lord may deploy a Ready Captain to any open Region, or give that other Captain orders in the routed Region. If no other Region is open, it becomes must-play-here (that Captain takes the turn).
   - Once the current Lord has deployed both Captains: if the routed Region holds one of them who can act, it is a Fated Move and that Captain must take the turn there. Otherwise routing is ignored and the player chooses one of that Lord's deployed Captains. Their placement still routes the opponent.
-  - If the routed Region is closed to them (no room, or nobody able to act), they deploy to any open Region; if none is open, any stationed Captain may act.
+  - If the routed Region is closed to them (no room, or nobody able to act), they deploy to any open Region; if none is open, any of the current Lord's deployed Captains who can act may.
   - The routed Region is highlighted on the Region board ("Fated Move · play here") and named in the turn banner; each empty square in the Region view shows where it would send the opponent.
 - Move types (named in the turn instructions during the command step):
   - **Fated Move:** routing forces where the Lord plays (deploy in the routed Region, or command their own Captain there).
@@ -223,14 +224,15 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 - Reinforced men join the Knight's HP and may take it above the normal maximum of 50; the window says so, and battle HP shows the bonus in gold (e.g. 70 / 50 HP (+20)). The extra is permanent for the rest of the game (it can be lost in battle; nothing restores it).
 - Only the defender reinforces, only before the first clash, and once per battle (the window only ever offered it once; the rules now enforce it). Attackers cannot reinforce (not requested).
 
-## Decisive battles — Settled
+## Last Stand and Decisive battles — Settled
 
-- **Stalemate:** when a turn ends (after any battle that turn), if the Region it was played in can take no more placements (board full, or neither Captain there has a Knight left to place), nobody holds it, and both players have a Captain there, those Captains fight a decisive battle before the turn passes. Attacks still possible there do not prevent it.
+- Two names (Oct 2026): a **Last Stand** is the dice battle when a Region stalemates; a **Decisive battle** is an assault by a stationed Captain on a neighbouring enemy-held Region (see Secured Regions). Both use the dice rules below.
+- **Stalemate (Last Stand):** when a turn ends (after any battle that turn), if the Region it was played in can take no more placements (board full, or neither Captain there has a Knight left to place), nobody holds it, and both players have a Captain there, those Captains make a Last Stand before the turn passes. Attacks still possible there do not prevent it.
 - **Men:** each side's HP is their Captain's total militia (reserve, waiting Knights, Knights on the board and their Sergeants).
-- **Dice:** each side rolls a six-sided die once per Knight of theirs on that board. The player whose turn just ended rolls first; then they alternate, and a side with rolls left keeps rolling once the other runs out. Each roll costs the other side (roller's current men × die) ÷ 10 men, rounded down.
+- **Dice:** each side rolls a six-sided die once per Knight of theirs on that board, plus once for the Captain (Oct 2026). The player whose turn just ended rolls first; then they alternate, and a side with rolls left keeps rolling once the other runs out. Each roll costs the other side (roller's current men × die) ÷ 10 men, rounded down.
 - **End:** when every roll is used, or a side reaches 0 men. Most men wins.
 - **Losses** are spread evenly over each Captain's men: reserve and every Knight in proportion to their men; within a Knight, across HP and Sergeants. A Knight only dies if all its men are gone.
-- **Winner** secures the Region (like three in a row). **Loser at 0 men:** the Captain dies with all their Knights. **Loser alive:** their Knights on that board are captured and the Captain returns to their Lord with the Knights they never deployed (or falls if no men are left off the board).
+- **Last Stand result:** the side with fewer men loses. The **winner** secures the Region (like three in a row). **Loser at 0 men:** the Captain dies with all their Knights. **Loser alive:** their Knights on that board are captured and the Captain returns to their Lord with the Knights they never deployed (or falls if no men are left off the board).
 - **Level:** nobody secures the Region; it closes (no more deployments or placements) and both Captains return to their Lords. Their Knights on the board stay there.
 - Before every decisive battle or assault a pre-battle window shows both Captains' cards (yours on the left), their men, reserve and rolls, and the rules; in an assault an arrow points from attacker to defender. When you launch an assault yourself it comes up first with Cancel and Launch assault; otherwise it has Begin the battle. Nobody rolls until it is closed.
 - The human rolls with a button; the computer rolls on its own. The screen is a battlefield with each side's group avatar (lance rider, crossbowman and swordsman together), men bars, rolls left, and the die.
@@ -242,9 +244,13 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 - A Captain holding a secured Region (stationed) can be chosen on a Free Choice (not on a Fated Move). Its turn is one order:
   - **Send reserve** (the player picks the amount, in steps of 10) to one of their own Captains (any Lord) deployed in an adjacent, unsecured Region. It joins that Captain's reserve.
   - **Send one Knight** (waiting, or lifted off the secured board) to such a Captain. It joins them, waiting to be placed, and lives or dies under them by the usual rules.
-  - **Assault** an adjacent Region held by the enemy (with its Captain there): a decisive battle between the two Captains with all their men. Each side rolls once per Knight on its own Region's board; the attacker rolls first. Losses spread as in other decisive battles.
-- **Assault won:** the defender's Knights on that board are captured and their Captain returns to their Lord (or dies at 0 men). The attacker's Knights the enemy had captured there are freed and rejoin their own Captain. If that Captain is alive and on Standby, they take the Region with those Knights. Otherwise the player stations a Standby Captain who still has a Knight (freed Knights whose Captain has fallen join them). With no such Captain, the Region empties and reopens.
-- **Assault lost or level:** only men are lost (at 0 men the attacker dies); both Regions stay as they were.
+  - **Assault** an adjacent Region held by the enemy (with its Captain there): a Decisive battle between the two Captains with all their men. Each side rolls once per Knight on its own Region's board, plus once for the Captain; the attacker rolls first. Losses spread as in other decisive battles.
+- **Losing a Decisive battle is not automatically losing the Region (Oct 2026).** A loser (attacker or defender) left with men and at least one living Knight chooses:
+  - **Hold their ground:** their Region stays theirs; only the men killed are lost.
+  - **Retreat:** their Captain goes back to Standby with every living Knight (none captured) and gives up their Region (the defender's: the one assaulted; the attacker's: their own). The winner takes it as below, including the chance to station their own Captain there.
+  - The human chooses in the results window (Hold your ground / Retreat). The computer holds as a defender while it has at least half the winner's men (otherwise retreats), and as an attacker unless it has under a fifth of the winner's men.
+- **Assault won, defender with no choice** (no living Knight): the defender's Knights on that board are captured and their Captain returns to their Lord (or dies at 0 men). The attacker's Knights the enemy had captured there are freed and rejoin their own Captain. If that Captain is alive and on Standby, they take the Region with those Knights. Otherwise the player stations a Standby Captain who still has a Knight (freed Knights whose Captain has fallen join them). With no such Captain, the Region empties and reopens.
+- **Assault lost and held, or level:** only men are lost (at 0 men the attacker dies); both Regions stay as they were.
 - Each secured Region records the enemy Knights captured there, so they can be freed later.
 - Sending reserve or a Knight asks for confirmation (Confirm / Cancel). The orders window also has "Cancel: choose another Captain", which backs out of choosing that Captain before any order is given.
 - A Knight that joins another Captain fills one of that Captain's empty (unmanned) slots: the two slots swap, so every Captain keeps six. With no free slot the Knight cannot be sent there.
@@ -255,7 +261,7 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 - After undoing a move, a waiting Knight is selected so placement squares show right away; after undoing a placement, that Knight is selected again.
 - During a decisive battle or assault, each side panel shows that side's Captain hub (card, militia, reserve, Knights); in an assault the attacker's hub is their own Region's.
 - On the Region board the selected Captain's Regions are marked only by the dashed white frame (no tag).
-- The computer assaults when it has at least 1.3× the defender's men; otherwise it sends its reserve (or a Knight) next door. After winning an assault it stations its first eligible Captain.
+- (Superseded by the smarter computer below.) The computer assaults when it has at least 1.3× the defender's men; otherwise it sends its reserve (or a Knight) next door. After winning an assault it stations its first eligible Captain.
 
 ## Assets, loading and sound — Settled
 
@@ -299,7 +305,7 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 
 1. Rush beats Flank, Flank beats Counter, Counter beats Rush.
 2. The beaten Sergeant is lost with all their men. The winning Sergeant is unharmed.
-3. Same tactic: both Sergeants lose half their men (loss rounded up), and no HP damage.
+3. Same tactic (Oct 2026): the Sergeant with more men wins, dealing only the difference as damage to the losing Knight; the beaten Sergeant is lost with all their men. Same tactic and same men: a tie, both Sergeants lose half their men (loss rounded up), and no HP damage.
 4. Up to 5 clashes; each Sergeant fights once per duel. The duel ends early at 0 HP. If one side runs out of Sergeants, the other's remaining Sergeants strike unopposed.
 5. Equal HP at the end: the defender holds and both Knights stay.
 6. The losing Knight dies at 0 HP; otherwise its side chooses to retreat it to its Captain (with its remaining HP and Sergeants, to be placed again later) or hold its square.

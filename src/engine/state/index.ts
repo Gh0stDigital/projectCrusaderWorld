@@ -325,7 +325,10 @@ export interface DecisiveRoll {
  * whose turn ended first). Most men left wins; at 0 the Captain dies.
  */
 export interface DecisiveBattle {
-  /** stalemate: a full Region's two Captains. assault: a stationed Captain attacks an adjacent enemy-held Region. */
+  /**
+   * stalemate: a Last Stand between a full Region's two Captains.
+   * assault: a Decisive battle, a stationed Captain attacking an adjacent enemy-held Region.
+   */
   kind: 'stalemate' | 'assault';
   /** The Region fought over (for an assault: the enemy-held one under attack). */
   region: RegionIndex;
@@ -336,11 +339,15 @@ export interface DecisiveBattle {
   captains: Record<PlayerId, string>;
   startMen: Record<PlayerId, number>;
   men: Record<PlayerId, number>;
-  /** Total rolls each side gets. */
+  /** Total rolls each side gets: one per Knight on the board, plus one for the Captain. */
   chances: Record<PlayerId, number>;
   rolls: DecisiveRoll[];
-  /** Set once every roll is used or a side is wiped out. null winner means level: the Region closes. */
-  outcome: { winner: PlayerId | null; loserKilled: boolean } | null;
+  /**
+   * Set once every roll is used or a side is wiped out. null winner means level.
+   * loserChoice (Decisive battles only): a loser left with men and a living
+   * Knight chooses to hold their ground or retreat ('deciding' until they do).
+   */
+  outcome: { winner: PlayerId | null; loserKilled: boolean; loserChoice?: 'deciding' | 'hold' | 'retreat' } | null;
 }
 
 export interface SecuredRegion {

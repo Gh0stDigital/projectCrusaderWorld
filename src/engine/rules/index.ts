@@ -5,5 +5,5 @@ export { moveKnight, placeKnight, undoKnight } from './knightPlacement';
 export { chooseRetreat, commitSergeant, declareAttack } from './combat';
 export { reinforceKnight } from './reinforcement';
 export { endTurn, passTurn, startTurn } from './turns';
-export { finishDecisive, rollDie } from './decisive';
+export { chooseDecisiveFate, finishDecisive, rollDie } from './decisive';
 export { assault, cancelStationOrders, sendKnight, sendReserve, stationCaptain } from './stationed';

@@ -108,7 +108,7 @@ describe('Decisive battle', () => {
       region: 4,
       first: 'p1',
       startMen: { p1: 400, p2: 400 },
-      chances: { p1: 3, p2: 3 },
+      chances: { p1: 4, p2: 4 },
       outcome: null,
     });
     expect(decisiveRoller(s)).toBe('p1');
@@ -127,16 +127,16 @@ describe('Decisive battle', () => {
   it('gives the winner the Region; the loser’s Knights there are captured and its Captain returns', () => {
     let s = act(stalemate(), { type: 'endTurn', player: 'p1' });
     s = act(s, { type: 'rollDie', player: 'p1', value: 6 });
-    for (let i = 0; i < 5; i++) s = act(s, { type: 'rollDie', player: decisiveRoller(s)!, value: 1 });
-    expect(s.decisive!.men).toEqual({ p1: 364, p2: 85 });
+    for (let i = 0; i < 7; i++) s = act(s, { type: 'rollDie', player: decisiveRoller(s)!, value: 1 });
+    expect(s.decisive!.men).toEqual({ p1: 360, p2: 49 });
     expect(s.decisive!.outcome).toEqual({ winner: 'p1', loserKilled: false });
     s = act(s, { type: 'finishDecisive', player: 'p1' });
     expect(s.secured[4]).toMatchObject({ player: 'p1', captainId: P1 });
     expect(['k1', 'k2', 'k3'].map((k) => s.knights[`${P2}-${k}`]!.status)).toEqual(['captured', 'captured', 'captured']);
     expect(s.captains[P2]).toMatchObject({ region: null, fallen: false });
     // Losses were spread over each Captain's men.
-    expect(captainMilitia(s, P1)).toBe(364);
-    expect(s.captains[P2]!.reserve).toBe(Math.round(170 - (170 / 400) * 315));
+    expect(captainMilitia(s, P1)).toBe(360);
+    expect(s.captains[P2]!.reserve).toBe(Math.round(170 - (170 / 400) * 351));
     expect(s.turn).toMatchObject({ player: 'p2', step: 'command' });
     expect(s.decisive).toBeNull();
   });
@@ -158,9 +158,12 @@ describe('Decisive battle', () => {
       s.knights[`${P1}-${k}`] = { ...s.knights[`${P1}-${k}`]!, status: 'dead', position: null };
       s.knights[`${P2}-${k}`] = { ...s.knights[`${P2}-${k}`]!, status: 'dead', position: null };
     }
-    s.captains[P1] = { ...s.captains[P1]!, reserve: 100 };
-    s.captains[P2] = { ...s.captains[P2]!, reserve: 100 };
+    // Only the Captains' own rolls, too few men to hurt: level.
+    s.captains[P1] = { ...s.captains[P1]!, reserve: 5 };
+    s.captains[P2] = { ...s.captains[P2]!, reserve: 5 };
     s = act(s, { type: 'endTurn', player: 'p1' });
+    s = act(s, { type: 'rollDie', player: 'p1', value: 1 });
+    s = act(s, { type: 'rollDie', player: 'p2', value: 1 });
     expect(s.decisive!.outcome).toEqual({ winner: null, loserKilled: false });
     s = act(s, { type: 'finishDecisive', player: 'p1' });
     expect(s.closed).toEqual([4]);

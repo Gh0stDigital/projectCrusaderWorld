@@ -201,12 +201,14 @@ export function commandOptions(state: MatchState): CommandOptions {
   const lordCaptains = captainsOf(state, player, turn.lord);
   const ready = lordCaptains.filter((c) => c.region === null && !c.fallen && reserveKnights(state, c.id).length > 0);
   const route = state.route;
+  // A routed Region that has been conquered (secured) no longer binds: the turn is a Free Choice.
+  const live = route !== null && !state.secured[route] ? route : null;
 
   if (ready.length === 0) {
     // Both Captains deployed: a route into a Region where one of them can act
     // is a Fated Move (that Captain must play there). Otherwise the Lord chooses.
-    if (route !== null) {
-      const own = lordCaptains.find((c) => c.region === route && captainCanAct(state, c));
+    if (live !== null) {
+      const own = lordCaptains.find((c) => c.region === live && captainCanAct(state, c));
       if (own) return { mode: 'routed', route, deployRegions: [], resumeCaptainIds: [own.id] };
     }
     return {
@@ -217,8 +219,8 @@ export function commandOptions(state: MatchState): CommandOptions {
     };
   }
 
-  if (route !== null) {
-    const stationed = captainInRegion(state, route, player);
+  if (live !== null) {
+    const stationed = captainInRegion(state, live, player);
     if (stationed && captainCanAct(state, stationed)) {
       // The current Lord's own Captain is there: they must play it.
       if (stationed.lord === turn.lord) {
@@ -238,8 +240,8 @@ export function commandOptions(state: MatchState): CommandOptions {
       }
       return { mode: 'routed', route, deployRegions: [], resumeCaptainIds: [stationed.id] };
     }
-    if (!stationed && emptySquares(state, route).length > 0) {
-      return { mode: 'routed', route, deployRegions: [route], resumeCaptainIds: [] };
+    if (!stationed && emptySquares(state, live).length > 0) {
+      return { mode: 'routed', route, deployRegions: [live], resumeCaptainIds: [] };
     }
   }
 
@@ -249,7 +251,8 @@ export function commandOptions(state: MatchState): CommandOptions {
     mode: 'free',
     route,
     deployRegions: [],
-    resumeCaptainIds: captainsOf(state, player)
+    // Nowhere open: any of the current Lord's own deployed Captains who can act.
+    resumeCaptainIds: lordCaptains
       .filter((c) => c.region !== null && captainCanAct(state, c))
       .map((c) => c.id),
   };

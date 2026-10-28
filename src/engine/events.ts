@@ -25,6 +25,7 @@ export type MatchEvent =
   | { type: 'knightSent'; player: PlayerId; knightId: string; fromCaptainId: string; toCaptainId: string }
   | { type: 'regionTaken'; player: PlayerId; region: RegionIndex; captainId: string | null; rescuedKnightIds: string[] }
   | { type: 'dieRolled'; player: PlayerId; value: number; damage: number }
+  | { type: 'decisiveLoserChose'; player: PlayerId; retreat: boolean }
   | {
       type: 'decisiveEnded';
       region: RegionIndex;

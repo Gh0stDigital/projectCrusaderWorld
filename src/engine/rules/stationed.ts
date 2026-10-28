@@ -20,7 +20,7 @@ import {
   type PlayerId,
   type RegionIndex,
 } from '../state';
-import { settle } from './decisive';
+import { settle, withLoserChoice } from './decisive';
 import { passTurn } from './turns';
 import { undoCommand } from './captainDeployment';
 import { charge } from './resources';
@@ -123,9 +123,10 @@ export function assault(state: MatchState, player: PlayerId, region: RegionIndex
     PlayerId,
     number
   >;
+  // One roll per Knight on each Captain's own board, plus one for the Captain.
   const chances = {
-    [player]: knightsOnBoard(state, from.region!, player).length,
-    [enemy]: knightsOnBoard(state, region, enemy).length,
+    [player]: knightsOnBoard(state, from.region!, player).length + 1,
+    [enemy]: knightsOnBoard(state, region, enemy).length + 1,
   } as Record<PlayerId, number>;
   const decisive: DecisiveBattle = settle({
     kind: 'assault',
@@ -141,19 +142,23 @@ export function assault(state: MatchState, player: PlayerId, region: RegionIndex
   });
   return {
     ok: true,
-    state: { ...state, decisive, turn: { ...state.turn!, stationOrder: true, step: 'decisive' } },
+    state: { ...state, decisive: withLoserChoice(state, decisive), turn: { ...state.turn!, stationOrder: true, step: 'decisive' } },
     events: [{ type: 'decisiveStarted', region, first: player }, ...paid.events],
   };
 }
 
 /**
- * After an assault (losses already spread over both Captains' men):
- * - Attacker wins: the defender's Knights on that board are captured and their
- *   Captain returns to their Lord (or dies at 0 men). The attacker's Knights the
- *   enemy had captured there are freed. If their own Captain is alive and on
- *   Standby, that Captain takes the Region with them; otherwise the player
- *   stations a Standby Captain who still has a Knight; with none, the Region reopens.
- * - Attacker loses (or level): only men are lost; at 0 men the attacker dies.
+ * After a Decisive battle (losses already spread over both Captains' men).
+ * A loser left with men and a living Knight has chosen to hold or retreat:
+ * - Hold: their Region stays theirs; only men were lost.
+ * - Retreat: their Captain returns to Standby with every living Knight (none
+ *   captured) and gives up their Region, which the winner then takes.
+ * A loser with no choice (no living Knight) loses as before: a beaten defender's
+ * Knights on the board are captured and their Captain returns to their Lord;
+ * a beaten attacker only loses men. A side wiped out falls.
+ * Taking a Region frees the taker's Knights captured there; if their own Captain
+ * is alive on Standby that Captain takes it, otherwise the taker stations a
+ * Standby Captain who still has a Knight; with none, the Region reopens.
  */
 export function finishAssault(
   state: MatchState,
@@ -164,7 +169,7 @@ export function finishAssault(
 ): EngineResult<MatchState, MatchEvent> {
   const attacker = state.turn!.player;
   const enemy = otherPlayer(attacker);
-  const { winner, loserKilled } = d.outcome!;
+  const { winner, loserKilled, loserChoice } = d.outcome!;
   const capturedKnightIds: string[] = [];
   const returnedCaptainIds: string[] = [];
   const fallenCaptainIds: string[] = [];
@@ -180,15 +185,55 @@ export function finishAssault(
     captains[captainId] = { ...captains[captainId]!, region: null, fallen: true, reserve: 0 };
     fallenCaptainIds.push(captainId);
   };
+  // Retreat: back to Standby with every living Knight, none captured.
+  const retreat = (captainId: string) => {
+    for (const k of Object.values(knights)) {
+      if (k.captainId === captainId && k.status === 'fielded') knights[k.id] = { ...k, status: 'ready', position: null };
+    }
+    captains[captainId] = { ...captains[captainId]!, region: null };
+    returnedCaptainIds.push(captainId);
+  };
 
-  let secured = { ...state.secured };
+  const secured = { ...state.secured };
   let pendingStation: MatchState['pendingStation'] = null;
+
+  /** `taker` takes `region` from the loser. */
+  const take = (taker: PlayerId, region: RegionIndex) => {
+    // Free the taker's Knights captured here: back to their own Captain if alive.
+    const freed = (state.secured[region]?.capturedKnightIds ?? []).filter(
+      (id) => knights[id]?.status === 'captured' && knights[id]!.owner === taker,
+    );
+    const orphanKnightIds: string[] = [];
+    for (const id of freed) {
+      const k = knights[id]!;
+      if (captains[k.captainId]?.fallen) orphanKnightIds.push(id);
+      else knights[id] = { ...k, status: 'ready', position: null };
+    }
+    // Their Captain, if alive and on Standby, takes the Region with them.
+    const previous = freed.map((id) => captains[knights[id]!.captainId]!).find((c) => !c.fallen && c.region === null);
+    delete secured[region];
+    if (previous) {
+      captains[previous.id] = { ...previous, region };
+      secured[region] = { player: taker, captainId: previous.id, capturedKnightIds };
+      orphanKnightIds.forEach((id) => joinCaptain(knights, id, previous.id));
+      events.push({ type: 'regionTaken', player: taker, region, captainId: previous.id, rescuedKnightIds: freed });
+    } else if (stationCandidates({ ...state, knights, captains }, taker).length > 0) {
+      pendingStation = { region, player: taker, orphanKnightIds, capturedKnightIds };
+    } else {
+      events.push({ type: 'regionTaken', player: taker, region, captainId: null, rescuedKnightIds: freed });
+    }
+  };
 
   if (winner === attacker) {
     const defenderId = d.captains[enemy];
     if (loserKilled) {
       kill(defenderId);
-    } else {
+      take(attacker, d.region);
+    } else if (loserChoice === 'retreat') {
+      retreat(defenderId);
+      take(attacker, d.region);
+    } else if (loserChoice !== 'hold') {
+      // No living Knight to make a stand with: the Region falls as before.
       for (const k of Object.values(knights)) {
         if (k.status === 'fielded' && k.owner === enemy && k.position?.region === d.region) {
           knights[k.id] = { ...k, status: 'captured', position: null };
@@ -199,36 +244,15 @@ export function finishAssault(
       const hasMen = c.reserve > 0 || Object.values(knights).some((k) => k.captainId === c.id && k.status === 'ready');
       captains[c.id] = { ...c, region: null, fallen: !hasMen };
       (hasMen ? returnedCaptainIds : fallenCaptainIds).push(c.id);
+      take(attacker, d.region);
     }
-
-    // Free our Knights the enemy captured here: back to their own Captain if alive.
-    const freed = (state.secured[d.region]?.capturedKnightIds ?? []).filter(
-      (id) => knights[id]?.status === 'captured' && knights[id]!.owner === attacker,
-    );
-    const orphanKnightIds: string[] = [];
-    for (const id of freed) {
-      const k = knights[id]!;
-      if (captains[k.captainId]?.fallen) orphanKnightIds.push(id);
-      else knights[id] = { ...k, status: 'ready', position: null };
+  } else if (winner === enemy) {
+    if (loserKilled) kill(d.captains[attacker]);
+    else if (loserChoice === 'retreat' && d.fromRegion !== null) {
+      // The beaten attacker gives up their own Region to keep their Knights.
+      retreat(d.captains[attacker]);
+      take(enemy, d.fromRegion);
     }
-    // Their Captain, if alive and on Standby, takes the Region with them.
-    const previous = freed.map((id) => captains[knights[id]!.captainId]!).find((c) => !c.fallen && c.region === null);
-    delete secured[d.region];
-    if (previous) {
-      captains[previous.id] = { ...previous, region: d.region };
-      secured[d.region] = { player: attacker, captainId: previous.id, capturedKnightIds };
-      orphanKnightIds.forEach((id) => joinCaptain(knights, id, previous.id));
-      events.push({ type: 'regionTaken', player: attacker, region: d.region, captainId: previous.id, rescuedKnightIds: freed });
-    } else {
-      const next: MatchState = { ...state, knights, captains };
-      if (stationCandidates(next, attacker).length > 0) {
-        pendingStation = { region: d.region, player: attacker, orphanKnightIds, capturedKnightIds };
-      } else {
-        events.push({ type: 'regionTaken', player: attacker, region: d.region, captainId: null, rescuedKnightIds: freed });
-      }
-    }
-  } else if (winner === enemy && loserKilled) {
-    kill(d.captains[attacker]);
   }
 
   const after: MatchState = { ...state, knights, captains, secured, decisive: null, pendingStation };
