@@ -35,6 +35,9 @@ export function PlayerPanel({
   const order = draft ? draft.order : (match.players[player].lordOrder ?? []);
   const turn = match.turn;
   const isTheirTurn = turn?.player === player;
+  // Next up: the Lord after the current one for whoever is playing; otherwise the Lord they play next.
+  const { lordOrder, turnsTaken } = match.players[player];
+  const nextLord = lordOrder ? lordOrder[(turnsTaken + (isTheirTurn ? 1 : 0)) % lordOrder.length] : undefined;
   const selectable = new Set(isTheirTurn ? actionableCaptains(match).map((c) => c.id) : []);
 
   return (
@@ -80,6 +83,8 @@ export function PlayerPanel({
           }
 
           const active = isTheirTurn && turn?.lord === lord;
+          // The Lord this player uses on their next turn (after the one being played now).
+          const upNext = match.phase === 'turns' && turn !== null && nextLord === lord;
           const card = <LordCard lord={lord} owner={player} size="roster" position={i + 1} />;
 
           return (
@@ -105,6 +110,7 @@ export function PlayerPanel({
                   </span>
                 </p>
                 {active && <span className="lord-row__badge">Taking this turn</span>}
+                {upNext && !active && <span className="lord-row__badge lord-row__badge--next">Next</span>}
                 {match.phase === 'turns' && (
                   <ul className="lord-row__captains">
                     {captainsOf(match, player, lord).map((captain) => (

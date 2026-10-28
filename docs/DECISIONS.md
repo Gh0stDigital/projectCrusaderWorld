@@ -56,6 +56,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
   - Every choice open this turn is clickable on the Region board, whichever Captain is selected: clicking a Region acts with the Captain who belongs there (a Standby Captain deploys, a deployed one takes orders). The selected Captain's choices get a dashed inner ring, and a deployed selected Captain's Region a "Selected Captain" tag.
   - The selected Captain's icon turns green when it can play this turn.
 - Exhibition is against the computer: the human plays Player 1 (blue); the computer plays Player 2 (red).
+- Lord hubs (side panels): the Lord playing now is tagged "Taking this turn" (solid gold); each player's next Lord is tagged "Next" (gold outline): for whoever is playing, the Lord after this one; for the other player, the Lord they play on their coming turn.
 
 ## Knight sprite — Settled
 

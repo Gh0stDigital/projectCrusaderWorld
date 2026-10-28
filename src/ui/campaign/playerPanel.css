@@ -153,6 +153,12 @@
   font-size: 9px;
 }
 
+.lord-row__badge--next {
+  background: rgba(20, 15, 11, 0.92);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+}
+
 .lord-row__captains {
   list-style: none;
   padding: 0;
