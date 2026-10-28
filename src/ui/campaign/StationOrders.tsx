@@ -56,7 +56,7 @@ export function StationOrders({
       ? ''
       : match.resources[captain.owner] > 0
         ? ` Costs ${men} Resources (${match.resources[captain.owner]} left).`
-        : ' Out of Resources: this costs 1 man.';
+        : ' Out of Resources: this costs 1% of the men sent.';
 
   if (confirm) {
     return (

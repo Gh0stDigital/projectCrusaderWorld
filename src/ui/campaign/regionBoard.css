@@ -281,3 +281,18 @@
 .region--secured[aria-disabled='true'] {
   cursor: help;
 }
+
+/* Resources waiting in a wager pool between this Region's Captain and a neighbour. */
+.region__pool {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  z-index: 3;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: rgba(14, 11, 8, 0.92);
+  border: 2px solid var(--gold);
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 10px;
+}

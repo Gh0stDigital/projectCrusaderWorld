@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { decisiveRoller } from '../../engine/queries';
+import { captainMilitia, decisiveRoller } from '../../engine/queries';
 import { DECISIVE_DIVISOR, type DecisiveBattle, type MatchState, type PlayerId } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, captainName } from '../../data/names';
 import armyBattle from '../../assets/sprites/army-battle-anim.webp';
@@ -263,6 +263,12 @@ function Results({
             {l}
           </p>
         ))}
+        {match.resources && loser && decisive.startMen[loser] - decisive.men[loser] > 0 && (
+          <p className="battle-results__verdict battle-results__pool">
+            {PLAYER_NAMES[loser]} pays Resources for every man lost into a wager pool between the two Captains. Whoever
+            leaves their Region first forfeits it.
+          </p>
+        )}
         <p className="battle-results__verdict">
           Men lost: {PLAYER_NAMES.p1} {decisive.startMen.p1 - decisive.men.p1} · {PLAYER_NAMES.p2}{' '}
           {decisive.startMen.p2 - decisive.men.p2} (spread over each Captain's men)
@@ -274,7 +280,7 @@ function Results({
                 Retreat
               </button>
               <button className="btn btn--primary" onClick={() => onChoose(false)} autoFocus>
-                Hold your ground
+                Hold your ground{match.resources ? ` · ${holdCost(match, loser!, decisive.captains[loser!])}` : ''}
               </button>
             </>
           ) : (
@@ -288,4 +294,10 @@ function Results({
       </div>
     </div>
   );
+}
+
+/** What holding ground costs: the Captain's men in Resources, or 1% of them when out. */
+function holdCost(match: MatchState, player: PlayerId, captainId: string): string {
+  const men = captainMilitia(match, captainId);
+  return match.resources![player] > 0 ? `${men} res` : `${Math.max(1, Math.ceil(men * 0.01))} men`;
 }

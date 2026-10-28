@@ -1,3 +1,4 @@
+import { regionPool } from './pools';
 import { captainInRegion, knightAt } from '../../engine/queries';
 import { REGIONS, SQUARES, type MatchState, type PlayerId, type RegionIndex } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, captainArt, captainName } from '../../data/names';
@@ -85,6 +86,11 @@ export function RegionBoard({ match, clickable, active, required = null, playabl
             {playable?.has(region) && <span className="region__required region__required--playable">Playable</span>}
             {isClickable && <span className="region__action">{labelFor(region)}</span>}
             <CapturedBadge match={match} region={region} />
+            {regionPool(match, region) > 0 && (
+              <span className="region__pool" title="Wager pool between two Captains. Whichever leaves their Region first forfeits it to the other.">
+                Pool {regionPool(match, region)}
+              </span>
+            )}
           </RegionTile>
         );
       })}

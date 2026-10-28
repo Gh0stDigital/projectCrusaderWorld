@@ -19,7 +19,9 @@ export type MatchEvent =
   | { type: 'resourcesSpent'; player: PlayerId; amount: number; remaining: number }
   | { type: 'resourcesDepleted'; player: PlayerId }
   | { type: 'suppliesShort'; player: PlayerId; menLost: number }
-  | { type: 'attrition'; player: PlayerId; lord: LordClass; menLost: number; fallenKnightIds: string[] }
+  | { type: 'wagerPlaced'; player: PlayerId; amount: number }
+  | { type: 'wagerWon'; player: PlayerId; amount: number }
+  | { type: 'wagerSplit'; amount: number }
   | { type: 'commandCancelled'; player: PlayerId; captainId: string }
   | { type: 'reserveSent'; player: PlayerId; fromCaptainId: string; toCaptainId: string; amount: number }
   | { type: 'knightSent'; player: PlayerId; knightId: string; fromCaptainId: string; toCaptainId: string }

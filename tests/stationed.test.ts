@@ -195,6 +195,27 @@ describe('Decisive battle: the loser holds or retreats', () => {
     expect(s.turn!.player).toBe('p2');
   });
 
+  it('the loser pays Resources for every man lost into a pool; retreating hands it to the winner', () => {
+    let s = defenderLoses();
+    const lost = s.decisive!.startMen.p2 - s.decisive!.men.p2;
+    const p1 = s.resources!.p1;
+    const p2 = s.resources!.p2;
+    s = act(s, { type: 'decisiveChoice', player: 'p2', retreat: true });
+    s = act(s, { type: 'finishDecisive', player: 'p1' });
+    expect(s.resources!.p2).toBe(p2 - lost);
+    expect(s.resources!.p1).toBe(p1 + lost);
+    expect(s.wagers).toEqual([]);
+  });
+
+  it('a defender who holds pays for holding, and the pool stays between the two Captains', () => {
+    let s = defenderLoses();
+    const lost = s.decisive!.startMen.p2 - s.decisive!.men.p2;
+    s = act(s, { type: 'decisiveChoice', player: 'p2', retreat: false });
+    s = act(s, { type: 'finishDecisive', player: 'p1' });
+    expect(s.wagers).toHaveLength(1);
+    expect(s.wagers[0]).toMatchObject({ amount: lost, sides: [{ captainId: HOLDER, region: 4 }, { captainId: ENEMY, region: 5 }] });
+  });
+
   it('a beaten attacker who holds keeps their Region', () => {
     let s = act(attackerLoses(), { type: 'decisiveChoice', player: 'p1', retreat: false });
     s = act(s, { type: 'finishDecisive', player: 'p1' });

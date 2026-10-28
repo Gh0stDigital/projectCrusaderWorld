@@ -90,7 +90,7 @@ export function MatchScreen() {
     const choice = choices.get(region);
     if (!choice?.deploy) return 'Give orders';
     if (!match.resources) return 'Deploy here';
-    return match.resources[turn.player] > 0 ? `Deploy here · ${captainMilitia(match, choice.captainId)} res` : 'Deploy here · 1 man';
+    return match.resources[turn.player] > 0 ? `Deploy here · ${captainMilitia(match, choice.captainId)} res` : 'Deploy here · 1% of men';
   };
 
   const clickRegion = (region: RegionIndex) => {

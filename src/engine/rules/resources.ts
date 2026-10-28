@@ -1,7 +1,7 @@
 import type { MatchEvent } from '../events';
 import { RESOURCES } from '../config';
-import { captainsOf, knightMilitia, knightsOf } from '../queries';
-import type { LordClass, MatchState, PlayerId } from '../state';
+import { knightMilitia, knightsOf } from '../queries';
+import type { MatchState, PlayerId, Wager, WagerSide } from '../state';
 import { takeLosses } from './decisive';
 
 /**
@@ -14,9 +14,10 @@ import { takeLosses } from './decisive';
 export type Payer = { captainId: string } | { knightId: string };
 
 /**
- * Charge `cost` Resources for an action. With Resources left, the pool pays
- * (down to 0 if it can't cover all of it; the action still happens). With the
- * pool already empty, the acting party loses 1 man instead.
+ * Charge `cost` Resources for an action (cost is the number of men in the party
+ * acting). With Resources left, the pool pays (down to 0 if it can't cover all
+ * of it; the action still happens). With the pool already empty, the acting
+ * party loses a share of its men instead (at least one).
  */
 export function charge(
   state: MatchState,
@@ -33,8 +34,9 @@ export function charge(
     if (left === 0) events.push({ type: 'resourcesDepleted', player });
     return { state: { ...state, resources: { ...state.resources, [player]: left } }, events };
   }
-  const after = loseMen(state, payer, RESOURCES.menPerActionWhenOut);
-  return { state: after, events: [{ type: 'suppliesShort', player, menLost: RESOURCES.menPerActionWhenOut }] };
+  const men = Math.max(1, Math.ceil(cost * RESOURCES.shareOfMenWhenOut));
+  const after = loseMen(state, payer, men);
+  return { state: after, events: [{ type: 'suppliesShort', player, menLost: men }] };
 }
 
 /** Take men from a Captain (reserve first, then a Knight) or from a Knight. */
@@ -59,41 +61,72 @@ function loseMen(state: MatchState, payer: Payer, men: number): MatchState {
   return from ? { ...state, knights: { ...state.knights, [from.id]: takeLosses(from, men) } } : state;
 }
 
-/** A Lord's troops for upkeep: their Captains' Knights (waiting or on the board), not reserves. */
-function lordTroops(state: MatchState, player: PlayerId, lord: LordClass) {
-  return captainsOf(state, player, lord)
-    .flatMap((c) => knightsOf(state, c.id))
-    .filter((k) => knightMilitia(k) > 0);
+// --- Wager pools ---
+
+/**
+ * The loser of a battle pays Resources equal to the men they lost into a pool
+ * between the two sides. Whoever leaves their spot first forfeits it to the
+ * other (see settleWagers).
+ */
+export function openWager(
+  state: MatchState,
+  loser: WagerSide,
+  winner: WagerSide,
+  menLost: number,
+): { state: MatchState; events: MatchEvent[] } {
+  if (!state.resources || menLost <= 0) return { state, events: [] };
+  const have = state.resources[loser.player];
+  const amount = Math.min(have, menLost);
+  if (amount <= 0) return { state, events: [] };
+  const wager: Wager = { id: `w${state.turnNumber}-${state.wagers.length}-${loser.player}`, amount, sides: [winner, loser] };
+  const events: MatchEvent[] = [{ type: 'wagerPlaced', player: loser.player, amount }];
+  if (have - amount === 0) events.push({ type: 'resourcesDepleted', player: loser.player });
+  return {
+    state: {
+      ...state,
+      resources: { ...state.resources, [loser.player]: have - amount },
+      wagers: [...state.wagers, wager],
+    },
+    events,
+  };
+}
+
+/** Whether a side of a wager is still where it was. */
+export function holdsSpot(state: MatchState, side: WagerSide): boolean {
+  if ('knightId' in side) {
+    const k = state.knights[side.knightId];
+    return Boolean(k && k.status === 'fielded' && k.position?.region === side.region && k.position.square === side.square);
+  }
+  const c = state.captains[side.captainId];
+  return Boolean(c && !c.fallen && c.region === side.region);
 }
 
 /**
- * End of a Lord's turn: their troops cost 1 Resource per man. With the pool
- * already empty, each of those Knights loses a share of their men instead.
+ * Pays out every pool where one side has left its spot: the side still there
+ * takes it all. If both left at once, each gets half back.
  */
-export function upkeep(state: MatchState, player: PlayerId, lord: LordClass): { state: MatchState; events: MatchEvent[] } {
-  if (!state.resources) return { state, events: [] };
-  const troops = lordTroops(state, player, lord);
-  const men = troops.reduce((n, k) => n + knightMilitia(k), 0);
-  const have = state.resources[player];
-  if (have > 0) {
-    const paid = Math.min(have, men);
-    const left = have - paid;
-    const events: MatchEvent[] = [{ type: 'resourcesSpent', player, amount: paid, remaining: left }];
-    if (left === 0) events.push({ type: 'resourcesDepleted', player });
-    return { state: { ...state, resources: { ...state.resources, [player]: left } }, events };
+export function settleWagers(state: MatchState): { state: MatchState; events: MatchEvent[] } {
+  if (!state.resources || state.wagers.length === 0) return { state, events: [] };
+  const resources = { ...state.resources };
+  const kept: Wager[] = [];
+  const events: MatchEvent[] = [];
+  for (const w of state.wagers) {
+    const staying = w.sides.filter((s) => holdsSpot(state, s));
+    if (staying.length === 2) {
+      kept.push(w);
+    } else if (staying.length === 1) {
+      const p = staying[0]!.player;
+      resources[p] += w.amount;
+      events.push({ type: 'wagerWon', player: p, amount: w.amount });
+    } else {
+      const half = Math.floor(w.amount / 2);
+      resources[w.sides[0].player] += w.amount - half;
+      resources[w.sides[1].player] += half;
+      events.push({ type: 'wagerSplit', amount: w.amount });
+    }
   }
-  // Out of Resources: the Lord's troops waste away.
-  const knights = { ...state.knights };
-  let lost = 0;
-  const fallenKnightIds: string[] = [];
-  for (const k of troops) {
-    const loss = Math.ceil(knightMilitia(k) * RESOURCES.attritionShare);
-    const after = takeLosses(k, loss);
-    lost += knightMilitia(k) - knightMilitia(after);
-    if (after.status === 'dead') fallenKnightIds.push(k.id);
-    knights[k.id] = after;
-  }
-  return { state: { ...state, knights }, events: [{ type: 'attrition', player, lord, menLost: lost, fallenKnightIds }] };
+  if (events.length === 0) return { state, events };
+  return { state: { ...state, resources, wagers: kept }, events };
 }
 
 /** Starting pools for a new match, or null with Resources switched off. */

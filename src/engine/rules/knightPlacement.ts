@@ -104,7 +104,7 @@ export function undoKnight(state: MatchState, player: PlayerId): EngineResult<Ma
 
 /** What a placement or move changes, saved so it can be undone. */
 function snapshot(state: MatchState) {
-  return { resources: state.resources, knights: state.knights, captains: state.captains, secured: state.secured, route: state.route };
+  return { resources: state.resources, wagers: state.wagers, knights: state.knights, captains: state.captains, secured: state.secured, route: state.route };
 }
 
 /**

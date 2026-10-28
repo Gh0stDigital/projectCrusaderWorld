@@ -119,5 +119,6 @@ export function createMatch(): MatchState {
     pendingStation: null,
     winner: null,
     resources: startingResources(),
+    wagers: [],
   };
 }

@@ -2,6 +2,7 @@ import type { EngineResult } from './engine';
 import type { MatchAction } from './actions';
 import type { MatchEvent } from './events';
 import type { MatchState } from './state';
+import { settleWagers } from './rules/resources';
 import {
   assault,
   cancelStationOrders,
@@ -25,8 +26,18 @@ import {
   setLordOrder,
 } from './rules';
 
-/** The single entry point for changing a match. Humans and the computer both go through here. */
+/**
+ * The single entry point for changing a match. Humans and the computer both go
+ * through here. After every action, wager pools whose side left its spot pay out.
+ */
 export function applyAction(state: MatchState, action: MatchAction): EngineResult<MatchState, MatchEvent> {
+  const result = perform(state, action);
+  if (!result.ok) return result;
+  const settled = settleWagers(result.state);
+  return { ok: true, state: settled.state, events: [...result.events, ...settled.events] };
+}
+
+function perform(state: MatchState, action: MatchAction): EngineResult<MatchState, MatchEvent> {
   switch (action.type) {
     case 'setLordOrder':
       return setLordOrder(state, action.player, action.order);

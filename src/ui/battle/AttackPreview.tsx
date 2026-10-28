@@ -102,11 +102,14 @@ export function AttackPreview({ match, attacker, defender, mode = 'attack', onCa
           <p className={`attack-preview__cost${match.resources[attacker.owner] === 0 ? ' attack-preview__cost--out' : ''}`}>
             {match.resources[attacker.owner] > 0
               ? `Costs ${knightMilitia(attacker)} Resources (${match.resources[attacker.owner]} left)`
-              : 'Out of Resources: attacking costs 1 man'}
+              : 'Out of Resources: attacking costs 1% of its men'}
           </p>
         )}
         {match.resources && defending && amount > 0 && (
           <p className="attack-preview__cost">Reinforcements cost {amount} Resources ({match.resources[defender.owner]} left)</p>
+        )}
+        {match.resources && (
+          <p className="attack-preview__cost">Whoever loses pays 1 Resource per man lost into a wager pool.</p>
         )}
         <p className="attack-preview__rules">
           Up to five clashes. Each side secretly sends one Sergeant per clash; the winning tactic deals its men as

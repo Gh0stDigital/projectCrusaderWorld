@@ -57,7 +57,7 @@ function ResourceBar({ player, value, active }: { player: PlayerId; value: numbe
   return (
     <div
       className={`resource-bar resource-bar--${player} resource-bar--${level}${active ? ' resource-bar--active' : ''}`}
-      title={`${PLAYER_NAMES[player]}: ${value.toLocaleString('en-US')} of ${max.toLocaleString('en-US')} Resources. Every action costs 1 per man, and each Lord's troops cost 1 per man at the end of their turn.`}
+      title={`${PLAYER_NAMES[player]}: ${value.toLocaleString('en-US')} of ${max.toLocaleString('en-US')} Resources. Every action costs 1 per man taking part. A battle's loser pays for every man lost into a wager pool; whoever leaves their spot first forfeits it.`}
     >
       <span className="resource-bar__name">{player === 'p1' ? 'You' : 'Enemy'}</span>
       <div className="resource-bar__track">

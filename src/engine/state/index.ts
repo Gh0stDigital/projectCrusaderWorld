@@ -179,6 +179,7 @@ export interface TurnState {
   /** What the board looked like before this turn's placement or move, while it can still be undone. */
   undo: {
     resources: Record<PlayerId, number> | null;
+    wagers: Wager[];
     knights: Record<string, Knight>;
     captains: Record<string, Captain>;
     secured: Partial<Record<RegionIndex, SecuredRegion>>;
@@ -308,6 +309,24 @@ export interface MatchState {
   winner: PlayerId | null;
   /** Resources left per player (experimental), or null when the rule is switched off. */
   resources: Record<PlayerId, number> | null;
+  /** Wager pools waiting to be collected (Resources rule). */
+  wagers: Wager[];
+}
+
+/** One side of a wager pool: a Knight on its square, or a Captain in their Region. */
+export type WagerSide =
+  | { player: PlayerId; knightId: string; region: RegionIndex; square: SquareIndex }
+  | { player: PlayerId; captainId: string; region: RegionIndex };
+
+/**
+ * Resources a battle's loser paid (equal to the men they lost). Whichever side
+ * leaves its spot first forfeits the pool to the other.
+ */
+export interface Wager {
+  id: string;
+  amount: number;
+  /** [winner, loser] of the battle that opened it. */
+  sides: [WagerSide, WagerSide];
 }
 
 /** Each roll does (roller's men × die) ÷ 10 damage, rounded down. */

@@ -1,3 +1,6 @@
+import { knightPool } from '../campaign/pools';
+import { knightMilitia } from '../../engine/queries';
+import type { Knight } from '../../engine/state';
 import { normalMaxHp } from '../../engine/queries';
 import { type Duel, type DuelRole, type MatchState, type Sergeant } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, captainName, knightArt, knightName } from '../../data/names';
@@ -36,6 +39,7 @@ export function BattleResults({ match, duel, myRole, onReturn, onChooseRetreat }
     : 'Neither Knight gives ground; both keep their squares.';
 
   const enemyRole: DuelRole = myRole === 'attacker' ? 'defender' : 'attacker';
+  const pool = loser ? knightPool(match, loser.id) : 0;
 
   return (
     <div className="attack-preview battle-results" role="dialog" aria-modal="true" aria-labelledby="battle-results-title">
@@ -44,6 +48,11 @@ export function BattleResults({ match, duel, myRole, onReturn, onChooseRetreat }
           {title}
         </h2>
         <p className="battle-results__verdict">{verdict}</p>
+        {pool > 0 && loser && (
+          <p className="battle-results__verdict battle-results__pool">
+            {PLAYER_NAMES[loser.owner]} pays {pool} Resources for the men lost into a wager pool. Whichever Knight leaves its square first forfeits it.
+          </p>
+        )}
 
         <div className="attack-preview__sides">
           {[myRole, enemyRole].map((role, i) => {
@@ -123,7 +132,7 @@ export function BattleResults({ match, duel, myRole, onReturn, onChooseRetreat }
                 Retreat
               </button>
               <button className="btn btn--primary" onClick={() => onChooseRetreat(false)} autoFocus>
-                Hold position
+                Hold position{match.resources ? ` · ${holdCost(match, loser!)}` : ''}
               </button>
             </>
           ) : (
@@ -135,4 +144,10 @@ export function BattleResults({ match, duel, myRole, onReturn, onChooseRetreat }
       </div>
     </div>
   );
+}
+
+/** What holding a square costs: the Knight's men in Resources, or 1% of them when out. */
+function holdCost(match: MatchState, knight: Knight): string {
+  const men = knightMilitia(knight);
+  return match.resources![knight.owner] > 0 ? `${men} res` : `${Math.max(1, Math.ceil(men * 0.01))} men`;
 }

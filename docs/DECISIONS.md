@@ -279,15 +279,17 @@ Raiders effects happen during a battle, whether the Raider attacks or defends.
 
 - Switched on or off in `src/engine/config.ts` (`RESOURCES.enabled`); the starting amount and the out-of-Resources numbers live there too. With it off the game plays exactly as before.
 - One pool per player, **12,000** to start (from 40 simulated games: about 7,300 spent by a player's 10th turn, 12,500 by the 20th, 16,000 by the 30th, so it runs out late in a typical match). No income for now.
-- Costs, 1 Resource per man in the party acting:
+- Costs (Oct 2026), 1 Resource per man in the party acting. You are only charged when an action is made; **nothing is charged at the end of a turn** (the old upkeep is gone):
   - Deploying a Captain: their whole company, reserve included.
   - Placing a Knight, moving a Knight, attacking: that Knight's men.
-  - Reinforcing a defender: the men sent. Sending reserve or a Knight from a secured Region: the men sent. Assaulting: the assaulting Captain's whole company.
-  - End of each turn: the Lord who played pays for their troops (their Captains' Knights, waiting or on the board; not reserves).
+  - Holding ground after losing: a Knight that holds its square pays its men; a Captain that holds after losing a Decisive battle pays the Captain's men.
+  - Launching a Decisive battle (assault): the assaulting Captain's whole company. Sending reserve or a Knight from a secured Region, or reinforcing a defender: the men sent.
 - An action the pool can't fully cover still happens; the pool goes to 0.
-- **Out of Resources:** each action costs 1 man instead (from the acting Captain's reserve, or the acting Knight; a Knight is never starved of its last man by its own action: its Captain's reserve or another of its Knights pays instead), and at the end of each of a Lord's turns their troops (not reserves) lose 10% of their men (rounded up per Knight; a Knight left with no men falls).
-- Shown as health bars across the top of the bottom bar: yours on the left, the enemy's mirrored on the right, with the number on the bar. Green above half, yellow below half, red and throbbing below a quarter; at 0 the empty bar flashes "OUT OF RESOURCES". Spending leaves a pale stretch that drains away a moment later, with the amount shown in the bar; refunds show in green. The bar of whoever's turn it is glows. Costs also show on deploy labels, the attack and assault windows, and the send-men confirmations. A report window opens when a player runs out, and each time your troops lose men to it.
-- The computer spends a little more carefully once its Resources run low.
+- **Wager pools (Oct 2026):** the loser of a Knight battle, a Last Stand or a Decisive battle pays Resources equal to the men they lost in it (as much as they have). It goes into a pool between the two sides: the two Knights on their squares, or the two Captains in their Regions. Whichever side leaves its spot first (retreats, moves, falls or is captured) forfeits the pool to the other, who collects it at once. If both leave at the same moment, each gets half back. A loser who retreats or dies hands the pool straight to the winner; a loser who holds keeps it in play. Undoing a move puts the pool back.
+- Pools show as a gold "Pool N" tag on both Knights' squares in the Region view, and on the Region board for pools between Captains. Battle result windows say what the loser paid in; a report says when a pool is won or lost. The attack window warns that the loser pays per man lost.
+- **Out of Resources (Oct 2026):** each action costs 1% of the acting party's men (rounded up, at least 1), from the acting Captain's reserve, or the acting Knight (never its last man: its Captain's reserve or another of its Knights pays instead). Troops no longer waste away each turn. Winning a pool refills the bar.
+- Shown as health bars across the top of the bottom bar: yours on the left, the enemy's mirrored on the right, with the number on the bar. Green above half, yellow below half, red and throbbing below a quarter; at 0 the empty bar flashes "OUT OF RESOURCES". Spending leaves a pale stretch that drains away a moment later, with the amount shown in the bar; gains show in green. The bar of whoever's turn it is glows. Costs also show on deploy labels, the attack and assault windows, the send-men confirmations and the Hold buttons. A report window opens when a player runs out.
+- The computer spends a little more carefully once its Resources run low. It does not yet weigh wager pools when choosing to hold or retreat.
 - Undoing a placement or move refunds what it cost.
 
 ## Undoing a Captain choice — Settled

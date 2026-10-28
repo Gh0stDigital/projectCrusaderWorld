@@ -2,7 +2,6 @@ import { reject, type EngineResult } from '../engine';
 import type { MatchEvent } from '../events';
 import { actingCaptain, actionableCaptains, canEndTurn, isStalemate, matchWinner, nextLordFor, retreatDecider, stationedOrdersOpen } from '../queries';
 import { startDecisive } from './decisive';
-import { upkeep } from './resources';
 import { otherPlayer, type MatchState, type PlayerId } from '../state';
 
 /** Begin a player's turn with their next Lord. The Lord is fixed here, not when the previous turn ends. */
@@ -63,9 +62,8 @@ export function endTurn(state: MatchState, player: PlayerId): EngineResult<Match
 
 /** Hands the turn to the other player, unless someone has secured three Regions in a row: then the match ends. */
 export function passTurn(before: MatchState, player: PlayerId): { state: MatchState; events: MatchEvent[] } {
-  // Resources: the Lord whose turn it was pays for their troops.
-  const fed = before.turn ? upkeep(before, player, before.turn.lord) : { state: before, events: [] };
-  const state = fed.state;
+  const state = before;
+  const fed = { events: [] as MatchEvent[] };
   const winner = matchWinner(state);
   if (winner) {
     return {

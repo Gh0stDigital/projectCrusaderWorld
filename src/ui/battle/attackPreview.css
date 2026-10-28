@@ -287,3 +287,9 @@
 .attack-preview__cost--out {
   color: #e2604f;
 }
+
+/* A line about Resources paid into a wager pool. */
+.battle-results__pool {
+  color: var(--gold);
+  font-size: 10px;
+}

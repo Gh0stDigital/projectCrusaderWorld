@@ -100,7 +100,7 @@ export function DecisivePreview({
           <p className={`attack-preview__cost${match.resources[setup.attacker] === 0 ? ' attack-preview__cost--out' : ''}`}>
             {match.resources[setup.attacker] > 0
               ? `Costs ${setup.men[setup.attacker]} Resources (${match.resources[setup.attacker]} left)`
-              : 'Out of Resources: assaulting costs 1 man'}
+              : 'Out of Resources: assaulting costs 1% of the men'}
           </p>
         )}
         <p className="attack-preview__rules">

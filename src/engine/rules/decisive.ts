@@ -11,6 +11,7 @@ import {
   type RegionIndex,
 } from '../state';
 import { passTurn } from './turns';
+import { charge, openWager } from './resources';
 import { finishAssault } from './stationed';
 
 /**
@@ -96,10 +97,13 @@ export function chooseDecisiveFate(state: MatchState, player: PlayerId, retreat:
   const o = d?.outcome;
   if (!d || !o || o.loserChoice !== 'deciding') return reject('There is no choice to make.');
   if (otherPlayer(o.winner!) !== player) return reject('Only the losing side chooses.');
+  // Holding their ground costs the Captain's men in Resources.
+  const captainId = d.captains[player];
+  const held = retreat ? { state, events: [] as MatchEvent[] } : charge(state, player, captainMilitia(state, captainId), { captainId });
   return {
     ok: true,
-    state: { ...state, decisive: { ...d, outcome: { ...o, loserChoice: retreat ? 'retreat' : 'hold' } } },
-    events: [{ type: 'decisiveLoserChose', player, retreat }],
+    state: { ...held.state, decisive: { ...d, outcome: { ...o, loserChoice: retreat ? 'retreat' : 'hold' } } },
+    events: [{ type: 'decisiveLoserChose', player, retreat }, ...held.events],
   };
 }
 
@@ -140,8 +144,24 @@ export function finishDecisive(state: MatchState, player: PlayerId): EngineResul
     (hasMen ? returnedCaptainIds : fallenCaptainIds).push(c.id);
   };
 
+  // Resources: the loser pays for every man lost into a pool between the two Captains.
+  const wagerEvents: MatchEvent[] = [];
+  if (d.outcome.winner) {
+    const win = d.outcome.winner;
+    const lose = otherPlayer(win);
+    const spot = (p: PlayerId) => ({
+      player: p,
+      captainId: d.captains[p],
+      region: d.kind === 'assault' && p === state.turn!.player ? d.fromRegion! : d.region,
+    });
+    const pool = openWager(state, spot(lose), spot(win), d.startMen[lose] - d.men[lose]);
+    state = pool.state;
+    wagerEvents.push(...pool.events);
+  }
+
   if (d.kind === 'assault') {
-    return finishAssault(state, player, d, knights, captains);
+    const done = finishAssault(state, player, d, knights, captains);
+    return done.ok ? { ...done, events: [...wagerEvents, ...done.events] } : done;
   }
 
   let secured = state.secured;
@@ -187,6 +207,7 @@ export function finishDecisive(state: MatchState, player: PlayerId): EngineResul
         returnedCaptainIds,
         fallenCaptainIds,
       },
+      ...wagerEvents,
       ...passed.events,
     ],
   };

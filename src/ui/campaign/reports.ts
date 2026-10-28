@@ -84,25 +84,22 @@ export function reportsFor(state: MatchState, events: MatchEvent[]): Report[] {
               ? 'Your armies have nothing left to live on.'
               : 'The enemy\u2019s armies have nothing left to live on.',
           ],
-          stats: [
-            { label: 'Each action', value: '1 man' },
-            { label: 'Each Lord\u2019s turn', value: '\u221210% troops' },
-          ],
-          hint: 'Reserves are spared; Knights in the field and waiting are not.',
+          stats: [{ label: 'Each action', value: '1% of men' }],
+          hint: 'Every order now costs the men carrying it out instead. Win a wager pool to get Resources back.',
         });
         break;
-      case 'attrition':
-        if (e.player === HUMAN && e.menLost > 0) {
-          reports.push({
-            kicker: 'Supplies',
-            title: 'Troops waste away',
-            tone: 'loss',
-            lines: [
-              `Without Resources, the ${LORD_TITLES[e.lord]}\u2019s troops lost ${e.menLost} men this turn.`,
-              ...(e.fallenKnightIds.length ? [`Fallen: ${list(e.fallenKnightIds, knight)}.`] : []),
-            ],
-          });
-        }
+      case 'wagerWon':
+        reports.push({
+          kicker: 'Spoils',
+          title: e.player === HUMAN ? 'Wager pool won' : 'Wager pool lost',
+          tone: e.player === HUMAN ? 'win' : 'loss',
+          lines: [
+            e.player === HUMAN
+              ? 'The enemy gave up their ground: the Resources they lost in battle are yours.'
+              : 'You gave up your ground: the enemy collects the Resources lost in that battle.',
+          ],
+          stats: [{ label: e.player === HUMAN ? 'Collected' : 'To the enemy', value: `${e.amount.toLocaleString('en-US')} res` }],
+        });
         break;
       case 'reserveSent':
         if (e.player !== HUMAN) {

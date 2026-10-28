@@ -3,7 +3,7 @@ import type { MatchEvent } from '../events';
 import { adjacentSquares, attackTargets, attackers, availableSergeants, duelKnight, duelRoleOf, knightAt, nextOrdersStep } from '../queries';
 import { AMBUSH_COUNT, SABOTAGE_DAMAGE, SECOND_PASS_SHARE } from '../state';
 import { knightMilitia } from '../queries';
-import { charge } from './resources';
+import { charge, openWager } from './resources';
 import type {
   AftermathEffect,
   PreludeEffect,
@@ -388,10 +388,25 @@ function finishDuel(state: MatchState): { state: MatchState; events: MatchEvent[
   knights[defender.id] = current.defender;
 
   // Back to orders if a Knight can still be placed this turn; otherwise End.
-  const after: MatchState = { ...state, knights, duel: { ...duel, outcome, aftermath } };
+  let after: MatchState = { ...state, knights, duel: { ...duel, outcome, aftermath } };
+  const events: MatchEvent[] = [{ type: 'duelEnded', outcome, attackerId: attacker.id, defenderId: defender.id }];
+
+  // Resources: the loser pays for every man lost into a pool on the two squares.
+  if (outcome.winner) {
+    const loserRole = OTHER[outcome.winner];
+    const side = (role: DuelRole) => {
+      const k = state.knights[duel[role].knightId]!;
+      return { player: duel[role].player, knightId: k.id, region: k.position!.region, square: k.position!.square };
+    };
+    const startMen = knightMilitia({ ...current[loserRole], status: 'fielded', hp: duel[loserRole].startHp, sergeants: duel[loserRole].startSergeants });
+    const endMen = current[loserRole].status === 'dead' ? 0 : knightMilitia(current[loserRole]);
+    const pool = openWager(after, side(loserRole), side(outcome.winner), startMen - endMen);
+    after = pool.state;
+    events.push(...pool.events);
+  }
   return {
     state: { ...after, turn: after.turn ? { ...after.turn, step: nextOrdersStep(after) } : null },
-    events: [{ type: 'duelEnded', outcome, attackerId: attacker.id, defenderId: defender.id }],
+    events,
   };
 }
 
@@ -406,7 +421,11 @@ export function chooseRetreat(state: MatchState, player: PlayerId, retreat: bool
   }
   const loserRole: DuelRole = OTHER[duel.outcome.winner];
   if (duel[loserRole].player !== player) return reject('Only the losing Knight’s side decides whether it retreats.');
-  const knight = state.knights[duel[loserRole].knightId]!;
+  // Holding the square costs the Knight's men in Resources, like any other action.
+  const loserId = duel[loserRole].knightId;
+  const held = retreat ? { state, events: [] as MatchEvent[] } : charge(state, player, knightMilitia(state.knights[loserId]!), { knightId: loserId });
+  state = held.state;
+  const knight = state.knights[loserId]!;
   const after: MatchState = {
     ...state,
     knights: retreat ? { ...state.knights, [knight.id]: { ...knight, status: 'ready', position: null } } : state.knights,
@@ -417,6 +436,6 @@ export function chooseRetreat(state: MatchState, player: PlayerId, retreat: bool
   return {
     ok: true,
     state: turn && (turn.step === 'orders' || turn.step === 'end') ? { ...after, turn: { ...turn, step: nextOrdersStep(after) } } : after,
-    events: [{ type: 'loserChose', player, knightId: knight.id, retreat }],
+    events: [{ type: 'loserChose', player, knightId: knight.id, retreat }, ...held.events],
   };
 }

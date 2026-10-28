@@ -1,6 +1,7 @@
 import { attackTargets, attackers, knightAt, legalSquares, moveSquares, movers, normalMaxHp } from '../../engine/queries';
 import { SQUARES, type MatchState, type RegionIndex, type SquareIndex } from '../../engine/state';
 import { PLAYER_NAMES, REGION_NAMES, SUBCLASS_NAMES, captainName, knightName, knightPersonalName } from '../../data/names';
+import { knightPool } from './pools';
 import { KnightSprite } from '../components/KnightSprite';
 import { KnightDetails } from '../components/KnightDetails';
 import { useHoldPopover } from '../components/useHoldPopover';
@@ -117,6 +118,11 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
                   <span className={`hp-badge${knight.hp > normalMaxHp(knight) ? ' hp-badge--over' : ''}`}>{knight.hp}</span>
                   <span className="knight-plate">{knightPersonalName(knight)}</span>
                   {knight.subclass && <span className={`type-badge type-badge--${knight.subclass}`}>{SUBCLASS_NAMES[knight.subclass]}</span>}
+                  {knightPool(match, knight.id) > 0 && (
+                    <span className="pool-badge" title="Wager pool: Resources lost in a battle here. Whichever Knight leaves its square first forfeits it to the other.">
+                      Pool {knightPool(match, knight.id)}
+                    </span>
+                  )}
                   {isTarget && <span className="attack-marker">Attack</span>}
                   {mayAttack && (
                     <span className="attack-marker attack-marker--ready">{canAttack.has(knight.id) ? 'Can attack' : 'Can move'}</span>
