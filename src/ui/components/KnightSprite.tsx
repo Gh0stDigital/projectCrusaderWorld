@@ -2,10 +2,14 @@ import type { CSSProperties } from 'react';
 import type { PlayerId } from '../../engine/state';
 import knightSprite from '../../assets/sprites/knight-sprite.png';
 import enemyKnightSprite from '../../assets/sprites/enemy-knight-sprite.png';
+import knightBoardSprite from '../../assets/sprites/knight-board-sprite.png';
+import enemyKnightBoardSprite from '../../assets/sprites/enemy-knight-board-sprite.png';
 import './knightSprite.css';
 
 /** Each sprite sheet is two 276×279 frames side by side. */
 const FRAME_RATIO = 279 / 276;
+/** The board pieces' own sprite: two 275×281 frames. */
+const BOARD_FRAME_RATIO = 281 / 275;
 
 interface KnightSpriteProps {
   owner: PlayerId;
@@ -14,15 +18,18 @@ interface KnightSpriteProps {
   /** Idle animation: switches between the two frames once per second. */
   animate?: boolean;
   title?: string;
+  /** 'board' for pieces on a Region's board (their own sprite); 'icon' for the Knight list. */
+  variant?: 'icon' | 'board';
 }
 
 /** Pixel-art Knight piece: blue for Player 1, red (mirrored) for the enemy. */
-export function KnightSprite({ owner, width, animate = false, title }: KnightSpriteProps) {
+export function KnightSprite({ owner, width, animate = false, title, variant = 'icon' }: KnightSpriteProps) {
+  const board = variant === 'board';
   const style = {
     '--sprite-w': `${width}px`,
     width,
-    height: Math.round(width * FRAME_RATIO),
-    backgroundImage: `url(${owner === 'p1' ? knightSprite : enemyKnightSprite})`,
+    height: Math.round(width * (board ? BOARD_FRAME_RATIO : FRAME_RATIO)),
+    backgroundImage: `url(${board ? (owner === 'p1' ? knightBoardSprite : enemyKnightBoardSprite) : owner === 'p1' ? knightSprite : enemyKnightSprite})`,
   } as CSSProperties;
   return (
     <span

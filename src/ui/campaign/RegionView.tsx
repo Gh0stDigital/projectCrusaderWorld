@@ -99,7 +99,7 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
                   className={`board-piece board-piece--${departure.owner} board-piece--departing board-piece--${departure.fate}`}
                   aria-label={departure.fate === 'killed' ? 'Knight destroyed' : 'Knight retreating'}
                 >
-                  <KnightSprite owner={departure.owner} width={128} />
+                  <KnightSprite owner={departure.owner} width={128} variant="board" />
                   <span className="knight-plate">{knightPersonalName(match.knights[departure.knightId]!)}</span>
                   {departure.fate === 'killed' && <span className="board-piece__x" aria-hidden="true">✕</span>}
                   <span className="board-piece__fate">{departure.fate === 'killed' ? 'Destroyed' : 'Retreats'}</span>
@@ -114,7 +114,7 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
               )}
               {knight && (
                 <HoldablePiece match={match} knight={knight}>
-                  <KnightSprite owner={knight.owner} width={128} animate title={knightName(knight)} />
+                  <KnightSprite owner={knight.owner} width={128} animate title={knightName(knight)} variant="board" />
                   <span className={`hp-badge${knight.hp > normalMaxHp(knight) ? ' hp-badge--over' : ''}`}>{knight.hp}</span>
                   <span className="knight-plate">{knightPersonalName(knight)}</span>
                   {knight.subclass && <span className={`type-badge type-badge--${knight.subclass}`}>{SUBCLASS_NAMES[knight.subclass]}</span>}
