@@ -170,6 +170,63 @@
   color: #b9776c;
 }
 
+/* The Captain's Knights as slots: a diamond, the name, then their status. */
+.captain-details__slots {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.knight-slot {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 6px;
+  font-size: 8px;
+  color: var(--parchment);
+}
+
+.knight-slot__diamond {
+  width: 8px;
+  height: 8px;
+  margin-left: 1px;
+  transform: rotate(45deg);
+  border: 1px solid #000;
+  background: var(--slot-color, var(--parchment-dim));
+  box-shadow: 0 0 4px color-mix(in srgb, var(--slot-color, transparent) 60%, transparent);
+}
+
+.knight-slot__name {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.knight-slot__status {
+  color: var(--slot-color, var(--parchment-dim));
+  white-space: nowrap;
+}
+
+/* Status colors: Ready green, Fielded gold, Fallen red, Captured purple; empty slots hollow. */
+.knight-slot--ready { --slot-color: #6fcf6a; }
+.knight-slot--fielded { --slot-color: #f2d14b; }
+.knight-slot--dead { --slot-color: #c0473c; }
+.knight-slot--captured { --slot-color: #b08ae0; }
+.knight-slot--dead .knight-slot__name,
+.knight-slot--captured .knight-slot__name { color: #b9776c; }
+
+.knight-slot--unmanned .knight-slot__diamond {
+  background: transparent;
+  border-color: rgba(233, 220, 192, 0.35);
+  box-shadow: none;
+}
+.knight-slot--unmanned .knight-slot__name,
+.knight-slot--unmanned .knight-slot__status { color: rgba(233, 220, 192, 0.35); }
+
 @keyframes details-in {
   from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: scale(1); }

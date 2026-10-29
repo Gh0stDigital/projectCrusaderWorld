@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { captainMilitia, knightsOf } from '../../engine/queries';
-import type { Captain, MatchState } from '../../engine/state';
-import { REGION_NAMES, SUBCLASS_SHORT, captainArt, captainName, captainPersonalName, knightPersonalName, lordPersona } from '../../data/names';
+import type { Captain, Knight, MatchState } from '../../engine/state';
+import { REGION_NAMES, captainArt, captainName, captainPersonalName, knightPersonalName, lordPersona } from '../../data/names';
 import { FitText } from '../components/FitText';
 import { Card } from '../components/Card';
 import { Portrait } from '../components/Portrait';
@@ -35,6 +35,15 @@ export function captainStatus(match: MatchState, captain: Captain): CaptainStatu
 }
 
 const HOLD_MS = 350;
+
+/** A Knight's status in the Captain card's slot list. */
+const KNIGHT_STATUS: Record<Knight['status'], string> = {
+  ready: 'Ready',
+  fielded: 'Fielded',
+  unmanned: 'Unmanned',
+  dead: 'Fallen',
+  captured: 'Captured',
+};
 
 interface CaptainIconProps {
   match: MatchState;
@@ -144,7 +153,8 @@ export function CaptainDetails({
   at: { x: number; y: number };
   className?: string;
 }) {
-  const knights = knightsOf(match, captain.id).filter((k) => k.status !== 'unmanned');
+  // Every Knight slot, empty ones included.
+  const knights = knightsOf(match, captain.id);
   return (
     <div className={`captain-details captain-details--${captain.owner} ${className}`} role="tooltip" style={{ left: at.x, top: at.y }}>
       <Card art={captainArt(captain.owner, captain.lord)} size="roster" owner={captain.owner} />
@@ -157,14 +167,17 @@ export function CaptainDetails({
         </p>
         <p className="captain-details__line">Troops {captainMilitia(match, captain.id)}</p>
         <p className="captain-details__line">Reserve {captain.reserve}</p>
-        <ul className="captain-details__knights">
+        <ul className="captain-details__slots">
           {knights.map((k) => (
-            <li key={k.id} className={`captain-details__knight captain-details__knight--${k.status}`}>
-              <span>
-                {knightPersonalName(k)}
-                {k.subclass ? ` (${SUBCLASS_SHORT[k.subclass]})` : ''}
+            <li key={k.id} className={`knight-slot knight-slot--${k.status}`}>
+              <span className="knight-slot__diamond" aria-hidden="true" />
+              <span className="knight-slot__name">
+                {k.status === 'unmanned' ? 'Empty slot' : knightPersonalName(k)}
               </span>
-              <span>{k.status === 'dead' ? 'Fallen' : k.status === 'captured' ? 'Captured' : `${k.hp} HP`}</span>
+              <span className="knight-slot__status">
+                {KNIGHT_STATUS[k.status]}
+                {k.status === 'ready' || k.status === 'fielded' ? ` · ${k.hp} HP` : ''}
+              </span>
             </li>
           ))}
         </ul>
