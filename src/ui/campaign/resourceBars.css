@@ -13,7 +13,44 @@
   z-index: 2;
 }
 
+/* Troops: a slimmer row above Resources. */
+.resource-bars--troops {
+  top: 10px;
+  height: 16px;
+}
+
+/* Resources sits under Troops. */
+.resource-bars--troops + .resource-bars {
+  top: 34px;
+}
+
+.resource-bars--troops .resource-bar__track {
+  height: 14px;
+  border-width: 1px;
+  outline-width: 1px;
+}
+
+.resource-bars--troops .resource-bar__value {
+  font-size: 9px;
+}
+
+.resource-bars--troops .resource-bar__name {
+  visibility: hidden;
+}
+
+.resource-bars--troops .resource-bar__delta {
+  top: 1px;
+  font-size: 10px;
+}
+
+.resource-bars--troops .resource-bars__label {
+  font-size: 9px;
+}
+
+/* The two labels share one width so both rows line up. */
 .resource-bars__label {
+  min-width: 96px;
+  text-align: center;
   font-family: var(--font-display);
   font-size: 10px;
   color: var(--gold);
@@ -66,8 +103,9 @@
   transform: scaleX(-1);
 }
 
-.resource-bar--mid .resource-bar__track { --bar: #e3c33c; --bar-dark: #9a7f17; }
-.resource-bar--low .resource-bar__track { --bar: #e2604f; --bar-dark: #8f2b20; }
+/* Resources is gold, Troops green; either turns red when running low. */
+.resource-bars--resources .resource-bar__track { --bar: #e8b530; --bar-dark: #94650f; }
+.resource-bars .resource-bar--low .resource-bar__track { --bar: #e2604f; --bar-dark: #8f2b20; }
 
 .resource-bar__fill,
 .resource-bar__trail {

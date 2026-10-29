@@ -40,12 +40,6 @@
   color: var(--gold);
 }
 
-.player-panel__militia {
-  margin: 0;
-  font-size: 10px;
-  color: var(--parchment-dim);
-}
-
 .lord-row__class {
   display: block;
   font-family: var(--font-body);

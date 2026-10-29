@@ -1,6 +1,6 @@
-import { actionableCaptains, captainsOf, playerMilitia } from '../../engine/queries';
+import { actionableCaptains, captainsOf } from '../../engine/queries';
 import type { LordClass, MatchState, PlayerId, RegionIndex } from '../../engine/state';
-import { LORD_TITLES, lordPersona, PLAYER_NAMES, formatMilitia } from '../../data/names';
+import { LORD_TITLES, lordPersona, PLAYER_NAMES } from '../../data/names';
 import { LordCard } from '../components/LordCard';
 import { CaptainIcon } from './CaptainIcon';
 import { CompanyView } from './CompanyView';
@@ -49,12 +49,7 @@ export function PlayerPanel({
       }`}
     >
       <header className="player-panel__header">
-        <div>
-          <h2 className="player-panel__name">{PLAYER_NAMES[player]}</h2>
-          <p className="player-panel__militia">
-            {formatMilitia(playerMilitia(match, player))} troops
-          </p>
-        </div>
+        <h2 className="player-panel__name">{PLAYER_NAMES[player]}</h2>
         <p className="player-panel__status">{statusFor(match, player)}</p>
       </header>
 

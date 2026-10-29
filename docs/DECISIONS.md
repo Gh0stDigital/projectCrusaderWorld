@@ -60,6 +60,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - Lord hubs show the Lord's Militia and Reserve as two small health bars with the number centered inside each (Oct 29, 2026). Militia is measured against what a Lord starts with (1,000) and turns yellow below half, red below a quarter; Reserve is a blue bar against the starting 200. Lord reserves don't change yet, so that bar stays full.
 - Each Captain icon in a Lord hub has the Captain's name beneath it (just the name, e.g. "Tancred"). A name too long for the icon's width shrinks to fit (down to 6px, then cut with an ellipsis), with a little space between icon and name.
 - On screen, militia is called "Troops" (Oct 29, 2026): the player's total ("2,400 troops"), the Lord hub bar, Captain details, the company panel, battle results ("Troops lost") and the reinforcement prompt. The docs and code still say militia.
+- The bottom bar shows each player's total Troops as a slim green health bar above the gold Resources bar (Oct 29, 2026), measured against the 3,000 a player starts with; either bar turns red and throbs when low. The side panels no longer show the total under the player's name.
 
 ## Knight sprite — Settled
 
@@ -103,7 +104,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 
 - Fixed 1920×1080 design canvas, scaled evenly to fit the window, with themed bars for leftover space.
 - Minimum supported window: 1280×720.
-- Zones: top bar 64px; Player 1 panel on the left, 400px; board stage in the center, 1120×856; Player 2 panel on the right, 400px; phase window across the bottom, 160px.
+- Zones: top bar 64px; Player 1 panel on the left, 400px; board stage in the center, 1120×834; Player 2 panel on the right, 400px; phase window across the bottom, 182px (Oct 29, 2026: was 856 / 160; 22px moved down to make room for the Troops and Resources bars).
 - Player 1 is always on the left and Player 2 always on the right. Sides never swap.
 - The battle window (~1100×720), announcements, and notices are overlays on the board stage, so both side panels stay visible.
 - Minimum text size about 18px on the canvas.

@@ -51,7 +51,7 @@
 }
 
 .phase-window {
-  background-position: 0 -920px;
+  background-position: 0 -898px;
   border: none;
 }
 
@@ -479,7 +479,7 @@
   grid-column: 3;
   justify-self: end;
 }
-.phase-window__orders { top: 74px; }
+.phase-window__orders { top: 98px; }
 
 /* Captain block: card in the portrait frame, name and Lord on the two plaques. */
 .player-panel--company .company__captain {
@@ -505,7 +505,7 @@
 }
 
 /* ================= Bottom bar fitted to the art's plaques =================
- * Positions are measured from the art (phase window starts at y 920).
+ * Positions are measured from the art (phase window starts at y 898; everything below the bars was moved down 24px when the bar grew).
  */
 .phase-list {
   position: absolute;
@@ -515,7 +515,7 @@
 
 .phase-list__item {
   position: absolute;
-  top: 58px;
+  top: 82px;
   height: 47px !important;
 }
 
@@ -546,7 +546,7 @@
 .phase-window__end-turn {
   position: absolute;
   left: 1645px;
-  top: 50px;
+  top: 74px;
   width: 224px;
   height: 64px;
   padding: 0 !important;

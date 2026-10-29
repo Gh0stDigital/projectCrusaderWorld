@@ -4,7 +4,7 @@ import { REGION_BOARD_SIZE, REGION_GAP, REGION_TILE } from './RegionBoard';
 import './boardStage.css';
 
 const STAGE_WIDTH = 1120;
-const STAGE_HEIGHT = 856;
+const STAGE_HEIGHT = 834;
 
 interface BoardStageProps {
   /** The Region the camera is zoomed into, or null for the whole Region board. */
