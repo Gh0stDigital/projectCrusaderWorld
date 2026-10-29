@@ -146,17 +146,25 @@ export function CaptainDetails({
   status = captainStatus(match, captain),
   at,
   className = '',
+  onHide,
 }: {
   match: MatchState;
   captain: Captain;
   status?: CaptainStatus;
   at: { x: number; y: number };
   className?: string;
+  /** The slide-in card's Hide button. */
+  onHide?: () => void;
 }) {
   // Every Knight slot, empty ones included.
   const knights = knightsOf(match, captain.id);
   return (
     <div className={`captain-details captain-details--${captain.owner} ${className}`} role="tooltip" style={{ left: at.x, top: at.y }}>
+      {onHide && (
+        <button className="details__hide" onClick={onHide} title="Hide this card (it waits as a tab by the panel)">
+          Hide
+        </button>
+      )}
       <Card art={captainArt(captain.owner, captain.lord)} size="roster" owner={captain.owner} />
       <div className="captain-details__info">
         <h3 className="captain-details__name">{captainName(captain)}</h3>

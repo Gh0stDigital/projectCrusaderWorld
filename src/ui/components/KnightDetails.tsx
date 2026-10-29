@@ -33,6 +33,7 @@ export function KnightDetails({
   root = null,
   className = '',
   inline = false,
+  onHide,
 }: {
   match: MatchState;
   knight: Knight;
@@ -40,6 +41,8 @@ export function KnightDetails({
   root?: HTMLElement | null;
   className?: string;
   inline?: boolean;
+  /** The slide-in card's Hide button. */
+  onHide?: () => void;
 }) {
   if (!at || (!root && !inline)) return null;
   const max = normalMaxHp(knight);
@@ -50,6 +53,11 @@ export function KnightDetails({
       role="tooltip"
       style={{ left: at.x, top: at.y }}
     >
+      {onHide && (
+        <button className="details__hide" onClick={onHide} title="Hide this card (it waits as a tab by the panel)">
+          Hide
+        </button>
+      )}
       <Card art={knightArt(knight.owner)} size="roster" owner={knight.owner} />
       <div className="captain-details__info">
         <h3 className="captain-details__name">{knightName(knight)}</h3>

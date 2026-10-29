@@ -1,4 +1,5 @@
 import type { MatchState } from '../../engine/state';
+import { captainPersonalName, knightPersonalName } from '../../data/names';
 import { SlideInCard } from '../components/SlideInCard';
 import { KnightDetails } from '../components/KnightDetails';
 import { CaptainDetails } from './CaptainIcon';
@@ -15,9 +16,12 @@ export function CaptainSlideIn({ match, captainId }: { match: MatchState; captai
       id={captainId}
       anchorSelector={(id) => `[data-captain-id="${id}"]`}
       maxTop={CAPTAIN_MAX_TOP}
-      render={(id, at, className) => {
+      tabLabel={(id) => (match.captains[id] ? captainPersonalName(match.captains[id]!) : 'Captain')}
+      render={(id, at, className, onHide) => {
         const captain = match.captains[id];
-        return captain ? <CaptainDetails key={id} match={match} captain={captain} at={at} className={className} /> : null;
+        return captain ? (
+          <CaptainDetails key={id} match={match} captain={captain} at={at} className={className} onHide={onHide} />
+        ) : null;
       }}
     />
   );
@@ -30,9 +34,12 @@ export function KnightSlideIn({ match, knightId }: { match: MatchState; knightId
       id={knightId}
       anchorSelector={(id) => `[data-knight-id="${id}"]`}
       maxTop={KNIGHT_MAX_TOP}
-      render={(id, at, className) => {
+      tabLabel={(id) => (match.knights[id] ? knightPersonalName(match.knights[id]!) : 'Knight')}
+      render={(id, at, className, onHide) => {
         const knight = match.knights[id];
-        return knight ? <KnightDetails key={id} match={match} knight={knight} at={at} className={className} inline /> : null;
+        return knight ? (
+          <KnightDetails key={id} match={match} knight={knight} at={at} className={className} onHide={onHide} inline />
+        ) : null;
       }}
     />
   );
