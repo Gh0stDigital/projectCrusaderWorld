@@ -82,9 +82,11 @@ describe('Ambusher: Ambush!', () => {
     expect(s.knights[DEFENDER]!.sergeants).toHaveLength(4);
   });
 
-  it('works when defending too', () => {
+  it('only when attacking: an Ambusher that is attacked does not ambush', () => {
     const s = duel({ subclass: null, tactics: ['rush', 'flank', 'counter'] }, { subclass: 'ambusher', tactics: ['rush'] });
-    expect(s.duel!.blocked.attacker).toHaveLength(2);
+    expect(s.duel!.blocked.attacker).toEqual([]);
+    expect(s.duel!.prelude.some((p) => p.type === 'ambush')).toBe(false);
+    expect(availableSergeants(s, s.duel!, 'attacker')).toHaveLength(3);
   });
 });
 

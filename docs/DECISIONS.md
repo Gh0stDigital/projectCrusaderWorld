@@ -202,7 +202,7 @@ Garrison effects happen before a battle, when a Garrison Knight is attacked.
 Raiders effects happen during a battle, whether the Raider attacks or defends.
 
 - **Skirmisher: Heist.** Wins the first clash it sends a Sergeant into, whatever the tactics. Two Skirmishers' Heists cancel out (that clash resolves normally).
-- **Ambusher: Ambush!** 3 Sergeants. At the start of the battle, the opponent's 2 strongest Sergeants are kept out of this battle only (not harmed; back for later battles).
+- **Ambusher: Ambush!** 3 Sergeants. Only when it attacks (Oct 29, 2026): at the start of the battle, the target's 2 strongest Sergeants are kept out of this battle only (not harmed; back for later battles). An Ambusher that is attacked does not ambush.
 - **Saboteur: Sabotage.** The opponent loses 1 HP after every clash (ties and unopposed blows included). This can finish a Knight off.
 - Provisional choices: Raiders Knights cycle Skirmisher, Ambusher, Saboteur by slot; Ambush takes the strongest Sergeants (not random); all trigger automatically.
 - Ambush plays out after the battle intro ("Ambusher · Ambush!") and the cut-off Sergeants show dotted and faded; Heist and Sabotage appear in each clash's verdict; all are summarised in the results window.

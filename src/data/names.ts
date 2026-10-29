@@ -148,7 +148,7 @@ export const SUBCLASS_ABILITIES: Record<KnightSubclass, { name: string; text: st
   },
   warden: { name: 'First Strike', text: 'When attacked, hits the attacker with its strongest Sergeant before battle.' },
   skirmisher: { name: 'Heist', text: 'Wins the first clash it sends a Sergeant into, whatever the tactics.' },
-  ambusher: { name: 'Ambush!', text: "Takes the opponent's 2 strongest Sergeants out of the battle. Only 3 Sergeants." },
+  ambusher: { name: 'Ambush!', text: "When attacking, takes the target's 2 strongest Sergeants out of the battle. Only 3 Sergeants." },
   saboteur: { name: 'Sabotage', text: 'The opponent loses 1 HP after every clash.' },
 };
 

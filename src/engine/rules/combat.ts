@@ -111,18 +111,17 @@ export function declareAttack(
     // An attacked Warden strikes first.
     if (target.subclass === 'warden') strike(target, 'firstStrike');
   }
-  // Raiders: an Ambusher on either side takes the opponent's strongest Sergeants out of this battle.
-  for (const role of ['attacker', 'defender'] as const) {
-    const ambusher = role === 'attacker' ? attackerNow : targetNow;
-    const victim = role === 'attacker' ? targetNow : attackerNow;
-    if (ambusher.subclass !== 'ambusher' || ambusher.hp <= 0) continue;
-    const taken = [...victim.sergeants]
+  // Raiders: an attacking Ambusher takes the target's strongest Sergeants out of this battle.
+  // An Ambusher that is attacked does not ambush.
+  if (attackerNow.subclass === 'ambusher' && attackerNow.hp > 0) {
+    const taken = [...targetNow.sergeants]
       .sort((x, y) => y.militia - x.militia)
       .slice(0, AMBUSH_COUNT)
       .map((sg) => sg.id);
-    if (taken.length === 0) continue;
-    duel.blocked[OTHER[role]] = taken;
-    prelude.push({ type: 'ambush', knightId: ambusher.id, targetId: victim.id, sergeantIds: taken });
+    if (taken.length > 0) {
+      duel.blocked.defender = taken;
+      prelude.push({ type: 'ambush', knightId: attackerNow.id, targetId: targetNow.id, sergeantIds: taken });
+    }
   }
   duel.prelude = prelude;
 
