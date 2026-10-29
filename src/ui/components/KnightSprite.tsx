@@ -8,8 +8,8 @@ import './knightSprite.css';
 
 /** The icon sprite sheet is two 176×165 frames side by side. */
 const FRAME_RATIO = 165 / 176;
-/** The board pieces' own sprite: two 500×501 frames. */
-const BOARD_FRAME_RATIO = 501 / 500;
+/** The board pieces' own sprite: two 492×498 frames. */
+const BOARD_FRAME_RATIO = 498 / 492;
 
 interface KnightSpriteProps {
   owner: PlayerId;
