@@ -13,37 +13,37 @@
   z-index: 2;
 }
 
-/* Troops: a slimmer row above Resources. */
+/* Troops is the main bar on top; Resources is a slimmer bar of the same width under it. */
 .resource-bars--troops {
   top: 10px;
+  height: 26px;
+}
+
+.resource-bars--troops + .resource-bars {
+  top: 42px;
   height: 16px;
 }
 
-/* Resources sits under Troops. */
-.resource-bars--troops + .resource-bars {
-  top: 34px;
-}
-
-.resource-bars--troops .resource-bar__track {
+.resource-bars--resources .resource-bar__track {
   height: 14px;
   border-width: 1px;
   outline-width: 1px;
 }
 
-.resource-bars--troops .resource-bar__value {
+.resource-bars--resources .resource-bar__value {
   font-size: 9px;
 }
 
-.resource-bars--troops .resource-bar__name {
+.resource-bars--resources .resource-bar__name {
   visibility: hidden;
 }
 
-.resource-bars--troops .resource-bar__delta {
+.resource-bars--resources .resource-bar__delta {
   top: 1px;
   font-size: 10px;
 }
 
-.resource-bars--troops .resource-bars__label {
+.resource-bars--resources .resource-bars__label {
   font-size: 9px;
 }
 

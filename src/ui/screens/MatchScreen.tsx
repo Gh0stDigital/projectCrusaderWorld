@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { SoundToggle } from '../components/SoundToggle';
 import { play, stopMusic } from '../../audio/sound';
 import { useAppStore } from '../../store/appStore';
 import { useMatchStore } from '../../store/matchStore';
@@ -168,9 +169,12 @@ export function MatchScreen() {
       }
     >
       <header className="match__top-bar">
-        <button className="top-bar__button" onClick={leave}>
-          Menu
-        </button>
+        <span className="top-bar__left">
+          <button className="top-bar__button" onClick={leave}>
+            Menu
+          </button>
+          <SoundToggle inline />
+        </span>
         <span className="top-bar__title">
           {turn
             ? `${PLAYER_NAMES[turn.player]} · ${LORD_NAMES[turn.lord]}`

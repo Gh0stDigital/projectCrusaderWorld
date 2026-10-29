@@ -44,6 +44,18 @@
   letter-spacing: 0.06em;
 }
 
+.top-bar__left {
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Fixed width so it doesn't jump between On and Off. */
+.top-bar__sound {
+  min-width: 128px;
+}
+
 .top-bar__right {
   justify-self: end;
   display: flex;

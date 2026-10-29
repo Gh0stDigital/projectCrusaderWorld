@@ -53,7 +53,8 @@ export function App() {
       {screen === 'title' && <TitleScreen />}
       {screen === 'mainMenu' && <MainMenuScreen />}
       {screen === 'match' && <MatchScreen />}
-      {screen !== 'loading' && <SoundToggle />}
+      {/* In a match it sits in the top bar instead, next to Menu. */}
+      {screen !== 'loading' && screen !== 'match' && <SoundToggle />}
       {fade !== 'none' && <div className={`screen-fade screen-fade--${fade}`} aria-hidden="true" />}
     </Stage>
   );
