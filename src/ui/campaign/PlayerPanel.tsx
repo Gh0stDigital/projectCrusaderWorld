@@ -52,7 +52,7 @@ export function PlayerPanel({
         <div>
           <h2 className="player-panel__name">{PLAYER_NAMES[player]}</h2>
           <p className="player-panel__militia">
-            {formatMilitia(playerMilitia(match, player))} militia
+            {formatMilitia(playerMilitia(match, player))} troops
           </p>
         </div>
         <p className="player-panel__status">{statusFor(match, player)}</p>

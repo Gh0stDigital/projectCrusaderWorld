@@ -149,7 +149,7 @@ function CaptainDetails({
         <p className="captain-details__line">
           {captain.region !== null ? REGION_NAMES[captain.region] : 'With their Lord'}
         </p>
-        <p className="captain-details__line">Militia {captainMilitia(match, captain.id)}</p>
+        <p className="captain-details__line">Troops {captainMilitia(match, captain.id)}</p>
         <p className="captain-details__line">Reserve {captain.reserve}</p>
         <ul className="captain-details__knights">
           {knights.map((k) => (

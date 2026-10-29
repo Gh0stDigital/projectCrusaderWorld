@@ -62,7 +62,7 @@ export function AttackPreview({ match, attacker, defender, mode = 'attack', onCa
         {defending && (
           <div className="reinforce">
             <p className="reinforce__line">
-              {captainName(match.captains[defender.captainId]!)} has <strong>{reserve}</strong> militia in reserve.
+              {captainName(match.captains[defender.captainId]!)} has <strong>{reserve}</strong> troops in reserve.
             </p>
             <div className="reinforce__controls">
               <button className="btn reinforce__step" onClick={() => setAmount(0)} disabled={amount === 0}>

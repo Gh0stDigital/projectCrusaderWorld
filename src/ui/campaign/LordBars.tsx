@@ -15,7 +15,7 @@ function fullMilitia(): number {
 export function LordBars({ match, player, lord }: { match: MatchState; player: PlayerId; lord: LordClass }) {
   return (
     <div className="lord-bars">
-      <LordBar label="Militia" value={lordMilitia(match, player, lord)} max={fullMilitia()} />
+      <LordBar label="Troops" value={lordMilitia(match, player, lord)} max={fullMilitia()} />
       <LordBar label="Reserve" value={match.players[player].lordReserves[lord]} max={LORD_RESERVE} reserve />
     </div>
   );

@@ -67,7 +67,7 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
           <p className="company__captain-lord">{lordPersona(player, captain.lord).name}</p>
           {acting && <span className="company__badge">{picking ? 'Choose a Knight' : 'Orders given'}</span>}
           <dl className="company__stats">
-            <dt>Militia</dt>
+            <dt>Troops</dt>
             <dd>{formatMilitia(captainMilitia(match, captain.id))}</dd>
             <dt>Reserve</dt>
             <dd>{formatMilitia(captain.reserve)}</dd>

@@ -86,7 +86,7 @@ export function BattleResults({ match, duel, myRole, onReturn, onChooseRetreat }
                         <p className="knight-summary__line hp--over">+{endHp - normalMaxHp(knight)} above max</p>
                       )}
                       <p className="knight-summary__line">Sergeants lost: {sergeantsLost}</p>
-                      <p className="knight-summary__line">Militia lost: {menLost}</p>
+                      <p className="knight-summary__line">Troops lost: {menLost}</p>
                     </div>
                   </div>
                 </div>
