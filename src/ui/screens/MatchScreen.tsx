@@ -33,7 +33,7 @@ import './wireframe.css';
  * for working on adjustments. MAIN_BOARD_ART covers the whole Region board;
  * USE_BOARD_ART the zoomed-in Region view, whose art predates the current layout.
  */
-const MAIN_BOARD_ART = true;
+const MAIN_BOARD_ART = false;
 const USE_BOARD_ART = false;
 
 /**
