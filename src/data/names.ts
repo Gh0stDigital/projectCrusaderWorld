@@ -190,6 +190,35 @@ export function knightPersonalName(knight: Pick<Knight, 'owner' | 'captainId' | 
   return KNIGHT_NAMES[knight.owner][index] ?? `Knight ${knight.number}`;
 }
 
+/** Sergeants' names: plain common names for Player 1, harsher ones for the enemy. */
+const SERGEANT_NAMES: Record<PlayerId, string[]> = {
+  p1: [
+    'Wat', 'Hob', 'Jack', 'Tom', 'Dickon', 'Piers', 'Alan', 'Robin', 'Simkin', 'Hal',
+    'Ralf', 'Gib', 'Colin', 'Jem', 'Ned', 'Will', 'Martin', 'Roger', 'Osric', 'Edwin',
+    'Godwin', 'Alfric', 'Bennet', 'Stephen', 'Ivo', 'Baldric', 'Tobin', 'Ansel', 'Gerard', 'Lambert',
+  ],
+  p2: [
+    'Grub', 'Skell', 'Vorg', 'Rusk', 'Mordo', 'Krag', 'Snell', 'Brog', 'Thane', 'Vask',
+    'Gruk', 'Haska', 'Dreg', 'Kolm', 'Zev', 'Brusk', 'Orik', 'Sabbo', 'Grell', 'Vutt',
+    'Narg', 'Kesh', 'Ulm', 'Torg', 'Rokk', 'Fesk', 'Margo', 'Drask', 'Hulg', 'Zorn',
+  ],
+};
+
+/**
+ * A Sergeant's name, e.g. "Wat". Picked from the owner's list by the Sergeant's
+ * id (like "p1-army-1-k2-s3"), so a Sergeant always keeps the same name. A Knight's
+ * Sergeants step through the list 7 names apart, so no two of them share a name.
+ */
+export function sergeantName(owner: PlayerId, sergeantId: string): string {
+  const names = SERGEANT_NAMES[owner];
+  const cut = sergeantId.lastIndexOf('-s');
+  const knightId = cut >= 0 ? sergeantId.slice(0, cut) : sergeantId;
+  const number = cut >= 0 ? Number(sergeantId.slice(cut + 2)) || 0 : 0;
+  let h = 0;
+  for (const ch of knightId) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return names[(h + number * 7) % names.length]!;
+}
+
 /** "Sir Gareth" */
 export function knightName(knight: Pick<Knight, 'owner' | 'captainId' | 'number'>): string {
   return `Sir ${knightPersonalName(knight)}`;

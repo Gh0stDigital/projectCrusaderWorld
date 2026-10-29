@@ -5,10 +5,10 @@ import {
   PLAYER_NAMES,
   SUBCLASS_ABILITIES,
   SUBCLASS_NAMES,
-  TACTIC_NAMES,
   captainName,
   knightArt,
   knightName,
+  sergeantName,
 } from '../../data/names';
 import { Card } from './Card';
 import { TacticIcon } from './TacticIcon';
@@ -84,7 +84,7 @@ export function KnightDetails({
               {knight.sergeants.map((sg) => (
                 <li key={sg.id} className="captain-details__knight">
                   <span>
-                    <TacticIcon tactic={sg.tactic} size={12} /> {TACTIC_NAMES[sg.tactic]}
+                    <TacticIcon tactic={sg.tactic} size={12} /> {sergeantName(knight.owner, sg.id)}
                   </span>
                   <span>{sg.militia} men</span>
                 </li>
