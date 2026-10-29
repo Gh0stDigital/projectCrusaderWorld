@@ -57,7 +57,8 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
   - The selected Captain's icon turns green when it can play this turn.
 - Exhibition is against the computer: the human plays Player 1 (blue); the computer plays Player 2 (red).
 - Lord hubs (side panels): the Lord playing now is tagged "Taking this turn" (solid gold); each player's next Lord is tagged "Next" (gold outline): for whoever is playing, the Lord after this one; for the other player, the Lord they play on their coming turn.
-- Lord hubs show the Lord's Militia and Reserve as two small health bars with the number beside each (Oct 29, 2026). Militia is measured against what a Lord starts with (1,000) and turns yellow below half, red below a quarter; Reserve is a blue bar against the starting 200. Lord reserves don't change yet, so that bar stays full.
+- Lord hubs show the Lord's Militia and Reserve as two small health bars with the number centered inside each (Oct 29, 2026). Militia is measured against what a Lord starts with (1,000) and turns yellow below half, red below a quarter; Reserve is a blue bar against the starting 200. Lord reserves don't change yet, so that bar stays full.
+- Each Captain icon in a Lord hub has the Captain's name beneath it (just the name, e.g. "Tancred"). A name too long for the icon's width shrinks to fit (down to 6px, then cut with an ellipsis).
 
 ## Knight sprite — Settled
 

@@ -2,16 +2,16 @@
 .lord-bars {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   margin-top: -2px;
 }
 
 .lord-bar {
   display: grid;
-  grid-template-columns: max-content 1fr max-content;
+  grid-template-columns: max-content 1fr;
   align-items: center;
   gap: 6px;
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1;
 }
 
@@ -20,17 +20,24 @@
   color: var(--parchment-dim);
 }
 
+/* The number sits centered inside the bar. */
 .lord-bar__value {
-  min-width: 5ch;
-  text-align: right;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  color: #fff;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
   font-variant-numeric: tabular-nums;
+  z-index: 1;
 }
 
 .lord-bar__track {
   --bar: #4fc25b;
   --bar-dark: #2c7a35;
   position: relative;
-  height: 8px;
+  height: 14px;
   border: 1px solid #000;
   outline: 1px solid var(--gold-dim);
   border-radius: 2px;

@@ -32,8 +32,8 @@ function LordBar({ label, value, max, reserve = false }: { label: string; value:
       <span className="lord-bar__label">{label}</span>
       <div className="lord-bar__track">
         <div className="lord-bar__fill" style={{ width: `${share * 100}%` }} />
+        <span className="lord-bar__value">{formatMilitia(value)}</span>
       </div>
-      <span className="lord-bar__value">{formatMilitia(value)}</span>
     </div>
   );
 }

@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { captainMilitia, knightsOf } from '../../engine/queries';
 import type { Captain, MatchState } from '../../engine/state';
-import { REGION_NAMES, SUBCLASS_SHORT, captainArt, captainName, knightPersonalName, lordPersona } from '../../data/names';
+import { REGION_NAMES, SUBCLASS_SHORT, captainArt, captainName, captainPersonalName, knightPersonalName, lordPersona } from '../../data/names';
+import { FitText } from '../components/FitText';
 import { Card } from '../components/Card';
 import { Portrait } from '../components/Portrait';
 import './captainIcon.css';
@@ -115,6 +116,7 @@ export function CaptainIcon({ match, captain, pickable, selected, onPick }: Capt
         <Portrait art={captainArt(captain.owner, captain.lord)} size={64} owner={captain.owner} />
         <span className="captain-icon__status">{STATUS_LABEL[status]}</span>
       </button>
+      <FitText className="captain-icon__name" text={captainPersonalName(captain)} size={10} />
       {open &&
         buttonRef.current?.closest('.match') &&
         createPortal(
