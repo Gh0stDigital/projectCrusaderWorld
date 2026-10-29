@@ -1,4 +1,4 @@
-/* Troops and Resources as health bars across the top of the bottom bar, End turn centered under them. */
+/* Troops and Resources as health bars along the bottom of the bottom bar, End turn centered above them. */
 .resource-bars {
   position: absolute;
   top: 8px;
@@ -18,12 +18,12 @@
  * shorter, starting from the same outer end as Troops.
  */
 .resource-bars--troops {
-  top: 16px;
+  top: 98px;
   height: 22px;
 }
 
 .resource-bars--troops + .resource-bars {
-  top: 48px;
+  top: 130px;
   height: 22px;
 }
 
@@ -86,6 +86,14 @@
   font-size: 10px;
   color: var(--parchment-dim);
   text-shadow: 0 2px 0 #000;
+}
+
+/* A dark backing keeps the name readable over the winged avatar behind it. */
+.resource-bars--troops .resource-bar__name {
+  padding: 3px 0;
+  border-radius: 3px;
+  background: rgba(14, 11, 8, 0.85);
+  text-align: center;
 }
 
 .resource-bar--p1 .resource-bar__name { color: #8fb4ff; }

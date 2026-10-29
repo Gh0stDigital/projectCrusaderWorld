@@ -5,8 +5,8 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 40px;
-  /* The Troops and Resources bars take the top; extra buttons sit centered in the row below them. */
-  padding: 80px 48px 0;
+  /* The Troops and Resources bars take the bottom; End turn sits in the row above them. */
+  padding: 0 48px 96px;
   background: var(--ink);
   border-top: 2px solid var(--gold-dim);
   overflow: hidden;
@@ -24,7 +24,10 @@
   user-select: none;
 }
 
-.hud-avatar--p1 { left: -140px; }
+.hud-avatar--p1 {
+  left: -140px;
+  transform: scaleX(-1);
+}
 
 .hud-avatar--p2 {
   right: -140px;
