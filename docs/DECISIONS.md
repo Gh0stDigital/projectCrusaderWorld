@@ -60,8 +60,9 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 - Lord hubs show the Lord's Militia and Reserve as two small health bars with the number centered inside each (Oct 29, 2026). Militia is measured against what a Lord starts with (1,000) and turns yellow below half, red below a quarter; Reserve is a blue bar against the starting 200. Lord reserves don't change yet, so that bar stays full.
 - Each Captain icon in a Lord hub has the Captain's name beneath it (just the name, e.g. "Tancred"). A name too long for the icon's width shrinks to fit (down to 6px, then cut with an ellipsis), with a little space between icon and name.
 - On screen, militia is called "Troops" (Oct 29, 2026): the bottom bar's Troops bar, the Lord hub bar, Captain details, the company panel, battle results ("Troops lost") and the reinforcement prompt. The docs and code still say militia.
-- The bottom bar leads with each player's total Troops as the main green health bar (Oct 29, 2026), measured against the 3,000 a player starts with; under it, a gold Resources bar of the same thickness but shorter (about 62% of the length, starting from the same outer end). The bars run along the bottom; the controls form one row above them: phase tabs on the left, any extra buttons (Undo, Choose another Captain, Enter) in the middle, then the Free Choice / Fated Move tag centered over the help text, just left of End turn. Either bar turns red and throbs when low. The side panels no longer show the total under the player's name.
+- The bottom bar leads with each player's total Troops as the main green health bar (Oct 29, 2026), measured against the 3,000 a player starts with; under it, a gold Resources bar of the same thickness but shorter (about 62% of the length, starting from the same outer end). The bars run across the top of the bottom bar, End turn is centered under them, and any extra buttons (Undo, Choose another Captain, Enter) sit at the left of that row. Either bar turns red and throbs when low. The side panels no longer show the total under the player's name.
 - In a match, the Sound on/off button sits in the top bar next to Menu; on other screens it stays in the corner.
+- A turn strip runs across the top of the board (40px, `TurnPhases`): the turn's steps (Command › Placement › Attack › Battle › End, current ones lit; End also ends the turn), then the Fated Move / Free Choice tag and the help text, which wraps to two lines when long and shows a refused action's reason in red. The map (whole board and zoomed Region) is scaled to about 95% to sit under it; battles and other windows still cover the full board area, strip included (Oct 29, 2026).
 
 ## Knight sprite — Settled
 
@@ -105,7 +106,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 
 - Fixed 1920×1080 design canvas, scaled evenly to fit the window, with themed bars for leftover space.
 - Minimum supported window: 1280×720.
-- Zones: top bar 64px; Player 1 panel on the left, 400px; board stage in the center, 1120×834; Player 2 panel on the right, 400px; phase window across the bottom, 182px (Oct 29, 2026: was 856 / 160; 22px moved down to make room for the Troops and Resources bars).
+- Zones: top bar 64px; Player 1 panel on the left, 400px; board stage in the center, 1120×834 (a 40px turn strip on top, the map scaled to fit under it); Player 2 panel on the right, 400px; phase window across the bottom, 182px (Oct 29, 2026: was 856 / 160; 22px moved down to make room for the Troops and Resources bars).
 - Player 1 is always on the left and Player 2 always on the right. Sides never swap.
 - The battle window (~1100×720), announcements, and notices are overlays on the board stage, so both side panels stay visible.
 - Minimum text size about 18px on the canvas.

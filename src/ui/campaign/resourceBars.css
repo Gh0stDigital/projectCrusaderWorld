@@ -1,4 +1,4 @@
-/* Troops and Resources as health bars along the bottom of the bottom bar, under the buttons. */
+/* Troops and Resources as health bars across the top of the bottom bar, End turn centered under them. */
 .resource-bars {
   position: absolute;
   top: 8px;
@@ -18,12 +18,12 @@
  * shorter, starting from the same outer end as Troops.
  */
 .resource-bars--troops {
-  top: 98px;
+  top: 16px;
   height: 22px;
 }
 
 .resource-bars--troops + .resource-bars {
-  top: 130px;
+  top: 48px;
   height: 22px;
 }
 

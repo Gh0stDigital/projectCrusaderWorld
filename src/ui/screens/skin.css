@@ -168,31 +168,6 @@
 }
 
 /* --- Phase window --- */
-.phase-list__item {
-  border-color: transparent;
-  color: rgba(233, 220, 192, 0.55);
-  text-shadow: 0 2px 0 #000;
-}
-
-.phase-list__item--current {
-  background: rgba(217, 169, 58, 0.85);
-  color: var(--ink);
-  text-shadow: none;
-}
-
-/* Keep the instruction on the art's scroll bar. */
-.phase-window__orders {
-  max-width: 500px;
-}
-
-.phase-window__instruction {
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-shadow: 0 2px 0 #000, 0 0 6px #000;
-}
-
 .phase-window .btn {
   background: rgba(18, 16, 12, 0.55);
 }
@@ -444,59 +419,8 @@
 .knight-token__name { font-size: 10px !important; }
 .knight-token__detail { font-size: 8px !important; }
 
-/* Phase plaques: one label per plaque in the art, centered. */
-.phase-list { gap: 11px; }
-.phase-list__item {
-  height: 48px;
-  padding: 0 !important;
-  display: grid;
-  place-items: center;
-  font-size: 9px !important;
-}
-.phase-list__item:nth-child(1) { width: 145px; }
-.phase-list__item:nth-child(2) { width: 150px; }
-.phase-list__item:nth-child(3) { width: 113px; }
-.phase-list__item:nth-child(4) { width: 106px; }
-.phase-list__item:nth-child(5) { width: 78px; }
-
-/* Instruction sits on the scroll between the two finials. */
 .phase-window { position: relative; }
-.phase-window__orders {
-  position: absolute;
-  left: 748px;
-  top: 986px;
-  top: 66px;
-  width: 470px;
-  max-width: none;
-  text-align: center;
-}
-.phase-window__instruction { font-size: 9px !important; }
-.phase-window__error { font-size: 8px; }
 .phase-window .btn { font-size: 11px; }
-
-/* The instruction is placed on the scroll, so keep the buttons in the right-hand column. */
-.phase-window__buttons {
-  grid-column: 3;
-  justify-self: end;
-}
-/*
- * Move type and help text: in the top row just left of End turn, centered on
- * each other and in the row's height, with a little space between them.
- */
-.phase-window__orders {
-  top: 10px;
-  left: auto;
-  right: 295px; /* 20px short of End turn (left 1645px) */
-  width: 500px;
-  height: 64px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.phase-window__orders .move-type { margin: 0; }
-.phase-window__orders .phase-window__instruction { align-self: stretch; }
 
 /* Captain block: card in the portrait frame, name and Lord on the two plaques. */
 .player-panel--company .company__captain {
@@ -522,48 +446,14 @@
 }
 
 /* ================= Bottom bar fitted to the art's plaques =================
- * Positions are measured from the art (phase window starts at y 898). Buttons, help text and End turn are in the top row; the Troops and Resources bars sit under them.
+ * Positions are measured from the art (phase window starts at y 898). The Troops and Resources bars run across the top, End turn is centered under them, and any extra buttons sit at the left of that lower row. The turn's steps and help text live in a strip above the board (TurnPhases).
  */
-.phase-list {
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-
-.phase-list__item {
-  position: absolute;
-  top: 18px;
-  height: 47px !important;
-}
-
-.phase-list__item--command { left: 49px; width: 143px !important; }
-.phase-list__item--placement { left: 206px; width: 150px !important; }
-.phase-list__item--attack { left: 369px; width: 110px !important; }
-.phase-list__item--battle { left: 491px; width: 105px !important; }
-.phase-list__item--end { left: 607px; width: 79px !important; }
-
-/* The End tab also ends the turn. */
-.phase-list__end {
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: none;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-
-.phase-list__item--end:has(.phase-list__end):hover {
-  border-color: var(--gold) !important;
-  color: var(--parchment);
-}
-
 /* End turn: centered on its plaque, no frame of its own unless pressed. */
 .phase-window__end-turn {
   position: absolute;
-  left: 1645px;
-  top: 10px;
+  left: 50%;
+  top: 92px;
+  transform: translateX(-50%);
   width: 224px;
   height: 64px;
   padding: 0 !important;
@@ -587,12 +477,13 @@
 }
 
 /*
- * Other buttons (Undo, Enter / Return) sit left of the help text, stacked in a
- * column so they never reach it or the phase tabs.
+ * Other buttons (Undo, Enter / Return) sit at the left of the row under the bars,
+ * stacked in a column.
  */
 .phase-window__buttons {
-  /* Left of the help text, which sits left of End turn. */
-  margin-right: 770px;
+  grid-column: 1;
+  justify-self: start;
+  margin-right: 0;
   flex-direction: column;
   align-items: stretch;
   gap: 8px;

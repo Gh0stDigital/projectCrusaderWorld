@@ -1,0 +1,122 @@
+/*
+ * A thin strip across the top of the board, above the map: the turn's steps on
+ * the left, then the move type and what to do next.
+ */
+.turn-phases {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 16px;
+  background: linear-gradient(to bottom, rgba(14, 11, 8, 0.92), rgba(14, 11, 8, 0.75));
+  border-bottom: 1px solid var(--gold-dim);
+}
+
+.turn-phases__list {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.turn-phases__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.turn-phases__arrow {
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: rgba(233, 220, 192, 0.3);
+}
+
+.turn-phases__step {
+  display: grid;
+  place-items: center;
+  min-width: 84px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--wood-light);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  font-family: var(--font-display);
+  font-size: 9px;
+  color: rgba(233, 220, 192, 0.5);
+  text-shadow: 0 2px 0 #000;
+}
+
+.turn-phases__step--current {
+  border-color: var(--gold);
+  background: rgba(217, 169, 58, 0.9);
+  color: var(--ink);
+  text-shadow: none;
+}
+
+/* The End tab also ends the turn. */
+.turn-phases__step--button {
+  cursor: pointer;
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: 9px;
+}
+
+.turn-phases__step--button:hover {
+  border-color: var(--gold);
+  color: var(--parchment);
+}
+
+/* Move type and what to do next, filling the rest of the strip. */
+.turn-phases__guide {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.turn-phases__text {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  font-family: var(--font-display);
+  font-size: 9px;
+  line-height: 1.3;
+  color: var(--parchment);
+  text-align: center;
+  text-shadow: 0 2px 0 #000;
+  /* Long messages wrap to a second line rather than being cut. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.turn-phases__text--error {
+  color: #f08a7a;
+}
+
+/* Fated Move (routing decides where) or Free Choice (the Lord chooses). */
+.move-type {
+  flex: none;
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  color: var(--ink);
+}
+
+.move-type--fated { background: var(--gold); }
+.move-type--control { background: #6fcf6a; }

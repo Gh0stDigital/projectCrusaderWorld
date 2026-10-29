@@ -13,14 +13,20 @@ interface BoardStageProps {
   /** Renders the zoomed-in view of a Region. */
   renderRegion: (region: RegionIndex) => ReactNode;
   overlays?: ReactNode;
+  /** A strip across the top (the turn's steps); the map is scaled down to sit under it. */
+  header?: ReactNode;
 }
+
+/** Height of the header strip; the map shrinks to fit the rest. */
+const HEADER_HEIGHT = 40;
+const MAP_SCALE = (STAGE_HEIGHT - HEADER_HEIGHT) / STAGE_HEIGHT;
 
 /**
  * The center of the screen. Zooming in scales the Region board up from the
  * chosen Region while that Region's own board grows into place; zooming out
  * reverses it. Both motions are anchored on the Region's tile.
  */
-export function BoardStage({ focusedRegion, regionBoard, renderRegion, overlays }: BoardStageProps) {
+export function BoardStage({ focusedRegion, regionBoard, renderRegion, overlays, header }: BoardStageProps) {
   // Keep showing the last Region while zooming back out.
   const [shownRegion, setShownRegion] = useState<RegionIndex | null>(focusedRegion);
   useEffect(() => {
@@ -28,15 +34,23 @@ export function BoardStage({ focusedRegion, regionBoard, renderRegion, overlays 
   }, [focusedRegion]);
 
   const zoomed = focusedRegion !== null;
-  const style = { '--zoom-origin': originFor(shownRegion) } as CSSProperties;
+  const style = {
+    '--zoom-origin': originFor(shownRegion),
+    '--map-top': `${header ? HEADER_HEIGHT : 0}px`,
+    '--map-scale': header ? MAP_SCALE : 1,
+  } as CSSProperties;
 
   return (
     <main className={`board-stage${zoomed ? ' board-stage--zoomed' : ''}`} style={style}>
-      <div className="board-stage__layer board-stage__regions" aria-hidden={zoomed} inert={zoomed}>
-        {regionBoard}
-      </div>
-      <div className="board-stage__layer board-stage__region" aria-hidden={!zoomed} inert={!zoomed}>
-        {shownRegion !== null && renderRegion(shownRegion)}
+      {header}
+      {/* The map keeps its full-size layout and art, scaled to fit under the header. */}
+      <div className="board-stage__map">
+        <div className="board-stage__layer board-stage__regions" aria-hidden={zoomed} inert={zoomed}>
+          {regionBoard}
+        </div>
+        <div className="board-stage__layer board-stage__region" aria-hidden={!zoomed} inert={!zoomed}>
+          {shownRegion !== null && renderRegion(shownRegion)}
+        </div>
       </div>
       {overlays}
     </main>

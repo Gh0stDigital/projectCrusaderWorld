@@ -5,6 +5,18 @@
   background: radial-gradient(ellipse at center, #3a2e22 0%, var(--wood-dark) 75%);
 }
 
+/* The map at its full 1120x834 layout, scaled down under the turn strip. */
+.board-stage__map {
+  position: absolute;
+  top: var(--map-top, 0px);
+  left: 50%;
+  width: 1120px;
+  height: 834px;
+  transform: translateX(-50%) scale(var(--map-scale, 1));
+  transform-origin: top center;
+  overflow: clip;
+}
+
 /* Duration matches ZOOM_MS in the match store. */
 .board-stage__layer {
   position: absolute;

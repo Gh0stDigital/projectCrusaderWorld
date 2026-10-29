@@ -97,17 +97,7 @@
   border-color: var(--gold-dim);
 }
 
-/* Bottom bar plaques */
-.match--wireframe .phase-list__item {
-  background: #2a231b;
-  border: 2px solid var(--wf-edge) !important;
-}
-
-.match--wireframe .phase-list__item--current {
-  background: rgba(217, 169, 58, 0.85);
-}
-
-.match--wireframe .phase-window__instruction {
+.match--wireframe .turn-phases__text {
   padding: 6px 0;
   border-radius: 4px;
   background: var(--wf-line);

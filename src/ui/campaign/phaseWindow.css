@@ -5,48 +5,10 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 40px;
-  /* The Troops and Resources bars take the bottom; extra buttons sit centered in the row above them. */
-  padding: 0 48px 96px;
+  /* The Troops and Resources bars take the top; extra buttons sit centered in the row below them. */
+  padding: 80px 48px 0;
   background: var(--ink);
   border-top: 2px solid var(--gold-dim);
-}
-
-.phase-list {
-  display: flex;
-  gap: 10px;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.phase-list__item {
-  font-family: var(--font-display);
-  font-size: 12px;
-  padding: 10px 18px;
-  border: 1px solid var(--wood-light);
-  border-radius: var(--radius);
-  color: rgba(233, 220, 192, 0.4);
-}
-
-.phase-list__item--current {
-  color: var(--ink);
-  background: var(--gold);
-  border-color: var(--gold);
-}
-
-.phase-window__orders {
-  min-width: 0;
-}
-
-.phase-window__instruction {
-  font-size: 14px;
-  margin: 0;
-}
-
-.phase-window__error {
-  font-size: 12px;
-  color: #f08a7a;
-  margin: 6px 0 0;
 }
 
 .phase-window__buttons {
@@ -59,15 +21,3 @@
   padding: 18px 48px;
 }
 
-/* Fated Move (routing decides where) or Free Choice (the Lord chooses). */
-.move-type {
-  display: inline-block;
-  margin-bottom: 6px;
-  padding: 3px 8px;
-  border-radius: 3px;
-  font-size: 9px;
-  color: var(--ink);
-}
-
-.move-type--fated { background: var(--gold); }
-.move-type--control { background: #6fcf6a; }

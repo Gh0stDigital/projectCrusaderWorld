@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { TurnPhases } from '../campaign/TurnPhases';
 import { SoundToggle } from '../components/SoundToggle';
 import { play, stopMusic } from '../../audio/sound';
 import { useAppStore } from '../../store/appStore';
@@ -204,6 +205,18 @@ export function MatchScreen() {
 
       <BoardStage
         focusedRegion={focusedRegion}
+        header={
+          <TurnPhases
+            match={match}
+            selectedCaptainId={selectedCaptainId}
+            focusedRegion={focusedRegion}
+            error={error}
+            busy={busy}
+            battleOpen={battleOpen || store.decisiveOpen}
+            departing={departure !== null}
+            onEndTurn={store.requestEndTurn}
+          />
+        }
         regionBoard={
           ordering === 'p2' ? (
             <div className="enemy-ordering">The enemy is placing their Lords…</div>
@@ -343,12 +356,10 @@ export function MatchScreen() {
 
       <PhaseWindow
         match={match}
-        selectedCaptainId={selectedCaptainId}
         focusedRegion={focusedRegion}
         busy={busy}
         battleOpen={battleOpen || store.decisiveOpen}
         departing={departure !== null}
-        error={error}
         onEnterRegion={store.focusRegion}
         onEndTurn={store.requestEndTurn}
         onUndo={() => turn && !locked && store.dispatch({ type: 'undoKnight', player: turn.player })}
