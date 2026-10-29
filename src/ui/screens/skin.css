@@ -222,10 +222,12 @@
   letter-spacing: 0.02em;
 }
 
+/* The title sits right under the name; the space moves below it, so the bars stay put. */
 .player-panel:not(.player-panel--company) .lord-row__class {
-  margin-top: 7px;
+  margin-top: -1px;
+  margin-bottom: 8px;
   font-size: 9px;
-  line-height: 18px;
+  line-height: 14px;
 }
 
 .player-panel:not(.player-panel--company) .lord-row__militia {
