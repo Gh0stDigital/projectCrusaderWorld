@@ -479,7 +479,7 @@
   grid-column: 3;
   justify-self: end;
 }
-.phase-window__orders { top: 98px; }
+.phase-window__orders { top: 106px; }
 
 /* Captain block: card in the portrait frame, name and Lord on the two plaques. */
 .player-panel--company .company__captain {
@@ -515,7 +515,7 @@
 
 .phase-list__item {
   position: absolute;
-  top: 82px;
+  top: 92px;
   height: 47px !important;
 }
 
@@ -546,7 +546,7 @@
 .phase-window__end-turn {
   position: absolute;
   left: 1645px;
-  top: 74px;
+  top: 88px;
   width: 224px;
   height: 64px;
   padding: 0 !important;

@@ -5,7 +5,8 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 40px;
-  padding: 0 48px;
+  /* The Troops and Resources bars take the top; the buttons sit centered below them. */
+  padding: 78px 48px 0;
   background: var(--ink);
   border-top: 2px solid var(--gold-dim);
 }

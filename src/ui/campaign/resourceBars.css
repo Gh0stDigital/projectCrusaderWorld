@@ -2,36 +2,43 @@
 .resource-bars {
   position: absolute;
   top: 8px;
-  left: 48px;
-  right: 48px;
+  left: 72px;
+  right: 72px;
   height: 26px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 18px;
+  gap: 24px;
   pointer-events: auto;
   z-index: 2;
 }
 
-/* Troops is the main bar on top; Resources is a slimmer bar of the same width under it. */
+/*
+ * Troops on top, Resources under it: the same thickness, but the Resources bar is
+ * shorter, starting from the same outer end as Troops.
+ */
 .resource-bars--troops {
-  top: 10px;
-  height: 26px;
+  top: 16px;
+  height: 22px;
 }
 
 .resource-bars--troops + .resource-bars {
-  top: 42px;
-  height: 16px;
+  top: 48px;
+  height: 22px;
+}
+
+.resource-bars--troops .resource-bar__track,
+.resource-bars--resources .resource-bar__track {
+  height: 22px;
 }
 
 .resource-bars--resources .resource-bar__track {
-  height: 14px;
-  border-width: 1px;
-  outline-width: 1px;
+  flex: 0 0 62%;
 }
 
+.resource-bars--troops .resource-bar__value,
 .resource-bars--resources .resource-bar__value {
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .resource-bars--resources .resource-bar__name {
@@ -39,13 +46,13 @@
 }
 
 .resource-bars--resources .resource-bar__delta {
-  top: 1px;
+  top: 3px;
   font-size: 10px;
 }
 
-.resource-bars--resources .resource-bars__label {
-  font-size: 9px;
-}
+/* The delta floats just past the end of the shorter bar. */
+.resource-bars--resources .resource-bar--p1 .resource-bar__delta { right: auto; left: calc(52px + 10px + 62% + 8px); }
+.resource-bars--resources .resource-bar--p2 .resource-bar__delta { left: auto; right: calc(52px + 10px + 62% + 8px); }
 
 /* The two labels share one width so both rows line up. */
 .resource-bars__label {
