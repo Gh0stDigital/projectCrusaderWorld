@@ -9,6 +9,26 @@
   padding: 80px 48px 0;
   background: var(--ink);
   border-top: 2px solid var(--gold-dim);
+  overflow: hidden;
+}
+
+/* Winged avatars behind each end of the Troops and Resources bars. */
+.hud-avatar {
+  position: absolute;
+  top: 2px;
+  height: 176px;
+  width: auto;
+  z-index: 1;
+  opacity: 0.9;
+  pointer-events: none;
+  user-select: none;
+}
+
+.hud-avatar--p1 { left: -140px; }
+
+.hud-avatar--p2 {
+  right: -140px;
+  transform: scaleX(-1);
 }
 
 .phase-window__buttons {
