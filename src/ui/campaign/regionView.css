@@ -24,6 +24,17 @@
   text-shadow: 0 2px 0 #000, 0 0 6px #000;
 }
 
+/* Undo placement / move: in the empty space left of the board, level with its bottom row. */
+.region-view__undo {
+  position: absolute;
+  right: 870px; /* 22px left of the board (which starts at 272px) */
+  top: 690px;
+  padding: 10px 14px;
+  white-space: nowrap;
+  font-size: 10px;
+  z-index: 2;
+}
+
 .inner-board {
   position: absolute;
   left: 272px;

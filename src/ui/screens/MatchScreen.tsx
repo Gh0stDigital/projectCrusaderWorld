@@ -4,7 +4,7 @@ import { SoundToggle } from '../components/SoundToggle';
 import { play, stopMusic } from '../../audio/sound';
 import { useAppStore } from '../../store/appStore';
 import { useMatchStore } from '../../store/matchStore';
-import { actingCaptain, actionableCaptains, captainMilitia, commandOptions, commandableRegions, stationedOrdersOpen } from '../../engine/queries';
+import { actingCaptain, actionableCaptains, canUndoKnight, captainMilitia, commandOptions, commandableRegions, stationedOrdersOpen } from '../../engine/queries';
 import type { LordClass, RegionIndex } from '../../engine/state';
 import { LORD_NAMES, PLAYER_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
 import { PlayerPanel } from '../campaign/PlayerPanel';
@@ -256,6 +256,14 @@ export function MatchScreen() {
               store.dispatch({ type: 'moveKnight', player: turn.player, knightId: selectedKnightId, square })
             }
             departure={departure}
+            undo={
+              turn && turn.player === 'p1' && !locked && !busy && !battleOpen && departure === null && canUndoKnight(match)
+                ? {
+                    label: turn.movedKnightId ? 'Undo move' : 'Undo placement',
+                    onUndo: () => store.dispatch({ type: 'undoKnight', player: turn.player }),
+                  }
+                : null
+            }
             onPlaceKnight={(square) =>
               turn &&
               !locked &&
@@ -356,13 +364,10 @@ export function MatchScreen() {
 
       <PhaseWindow
         match={match}
-        focusedRegion={focusedRegion}
         busy={busy}
         battleOpen={battleOpen || store.decisiveOpen}
         departing={departure !== null}
-        onEnterRegion={store.focusRegion}
         onEndTurn={store.requestEndTurn}
-        onUndo={() => turn && !locked && store.dispatch({ type: 'undoKnight', player: turn.player })}
         onUndoCommand={() => turn && !locked && store.dispatch({ type: 'undoCommand', player: turn.player })}
       />
     </div>

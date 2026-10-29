@@ -22,13 +22,15 @@ interface RegionViewProps {
   onMoveKnight: (square: SquareIndex) => void;
   /** A defeated Knight leaving the board, drawn on its old square while it animates away. */
   departure?: Departure | null;
+  /** Take back this turn's placement or move: a button beside the board, while it's allowed. */
+  undo?: { label: string; onUndo: () => void } | null;
 }
 
 /**
  * Zoomed-in view of one Region: its 3×3 board fills the center. The Captains
  * and their Knights appear in the side panels while zoomed in.
  */
-export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onChooseTarget, onSelectAttacker, onMoveKnight, departure }: RegionViewProps) {
+export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onChooseTarget, onSelectAttacker, onMoveKnight, departure, undo }: RegionViewProps) {
   const turn = match.turn;
   const actingHere = turn?.captainId != null && match.captains[turn.captainId]?.region === region;
   const selected = selectedKnightId ? match.knights[selectedKnightId] : undefined;
@@ -49,6 +51,11 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
           Secured by {PLAYER_NAMES[match.secured[region]!.player]}:{' '}
           {captainName(match.captains[match.secured[region]!.captainId]!)}
         </p>
+      )}
+      {undo && actingHere && (
+        <button className="btn region-view__undo" onClick={undo.onUndo}>
+          {undo.label}
+        </button>
       )}
       <div className="inner-board">
         {SQUARES.map((square) => {
