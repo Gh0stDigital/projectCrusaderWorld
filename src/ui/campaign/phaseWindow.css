@@ -9,14 +9,15 @@
   padding: 0 48px 96px;
   background: var(--ink);
   border-top: 2px solid var(--gold-dim);
-  overflow: hidden;
+  /* Above the panels and board, so the avatars can rise over their bottom edge. */
+  z-index: 5;
 }
 
-/* Winged avatars behind each end of the Troops and Resources bars. */
+/* Each side's god behind its end of the Troops and Resources bars. */
 .hud-avatar {
   position: absolute;
-  top: 2px;
-  height: 176px;
+  bottom: 0;
+  height: 204px;
   width: auto;
   z-index: 1;
   opacity: 0.9;
@@ -25,13 +26,13 @@
 }
 
 .hud-avatar--p1 {
-  left: -140px;
+  left: -70px;
   transform: scaleX(-1);
 }
 
+/* The enemy's god faces inward as drawn, its tree trailing off the screen edge. */
 .hud-avatar--p2 {
-  right: -140px;
-  transform: scaleX(-1);
+  right: -60px;
 }
 
 .phase-window__buttons {
