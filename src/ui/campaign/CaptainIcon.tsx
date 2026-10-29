@@ -64,6 +64,8 @@ export function CaptainIcon({ match, captain, pickable, selected, onPick }: Capt
   const start = () => {
     held.current = false;
     clear();
+    // The selected Captain's details are already showing in the slide-in card.
+    if (selected) return;
     timer.current = window.setTimeout(() => {
       held.current = true;
       // Place the details next to the icon, in canvas pixels (the canvas may be scaled).
@@ -99,6 +101,7 @@ export function CaptainIcon({ match, captain, pickable, selected, onPick }: Capt
       <button
         ref={buttonRef}
         className={classes}
+        data-captain-id={captain.id}
         onPointerDown={start}
         onPointerUp={end}
         onPointerLeave={end}
@@ -127,20 +130,23 @@ export function CaptainIcon({ match, captain, pickable, selected, onPick }: Capt
   );
 }
 
-function CaptainDetails({
+/** A Captain's details: as a press-and-hold pop-up, or as the selected Captain's slide-in card. */
+export function CaptainDetails({
   match,
   captain,
-  status,
+  status = captainStatus(match, captain),
   at,
+  className = '',
 }: {
   match: MatchState;
   captain: Captain;
-  status: CaptainStatus;
+  status?: CaptainStatus;
   at: { x: number; y: number };
+  className?: string;
 }) {
   const knights = knightsOf(match, captain.id).filter((k) => k.status !== 'unmanned');
   return (
-    <div className={`captain-details captain-details--${captain.owner}`} role="tooltip" style={{ left: at.x, top: at.y }}>
+    <div className={`captain-details captain-details--${captain.owner} ${className}`} role="tooltip" style={{ left: at.x, top: at.y }}>
       <Card art={captainArt(captain.owner, captain.lord)} size="roster" owner={captain.owner} />
       <div className="captain-details__info">
         <h3 className="captain-details__name">{captainName(captain)}</h3>
