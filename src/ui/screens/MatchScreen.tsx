@@ -4,7 +4,7 @@ import { SoundToggle } from '../components/SoundToggle';
 import { play, stopMusic } from '../../audio/sound';
 import { useAppStore } from '../../store/appStore';
 import { useMatchStore } from '../../store/matchStore';
-import { actingCaptain, actionableCaptains, canUndoKnight, captainMilitia, commandOptions, commandableRegions, stationedOrdersOpen } from '../../engine/queries';
+import { actingCaptain, actionableCaptains, canUndoCommand, canUndoKnight, captainMilitia, isStationed, commandOptions, commandableRegions, stationedOrdersOpen } from '../../engine/queries';
 import type { LordClass, RegionIndex } from '../../engine/state';
 import { LORD_NAMES, PLAYER_NAMES, REGION_NAMES, captainName, knightName } from '../../data/names';
 import { PlayerPanel } from '../campaign/PlayerPanel';
@@ -88,6 +88,25 @@ export function MatchScreen() {
       ? [...choices].filter(([, c]) => c.captainId === selected.id).map(([r]) => r)
       : [],
   );
+  // Undo deployment / Choose another Captain: on the map, until the player goes into the Region.
+  const undoCaptain = actingCaptain(match);
+  const commandUndo =
+    turn &&
+    turn.player === 'p1' &&
+    !locked &&
+    !busy &&
+    !battleOpen &&
+    !store.regionEntered &&
+    undoCaptain?.region != null &&
+    canUndoCommand(match) &&
+    !isStationed(match, undoCaptain)
+      ? {
+          region: undoCaptain.region,
+          label: turn.commandUndo ? 'Undo deployment' : 'Choose another Captain',
+          onUndo: () => store.dispatch({ type: 'undoCommand', player: turn.player }),
+        }
+      : null;
+
   const regionLabel = (region: RegionIndex) => {
     if (turn?.step !== 'command') return 'Enter';
     const choice = choices.get(region);
@@ -239,6 +258,7 @@ export function MatchScreen() {
               onClickRegion={clickRegion}
               labelFor={regionLabel}
               selectedRegions={selectedRegions}
+              undo={commandUndo}
             />
           )
         }
@@ -368,7 +388,6 @@ export function MatchScreen() {
         battleOpen={battleOpen || store.decisiveOpen}
         departing={departure !== null}
         onEndTurn={store.requestEndTurn}
-        onUndoCommand={() => turn && !locked && store.dispatch({ type: 'undoCommand', player: turn.player })}
       />
     </div>
   );

@@ -54,6 +54,7 @@ export function TurnPhases({
 }: TurnPhasesProps) {
   const turn = match.turn;
   // During orders, light up whichever of Placement and Attack is still available.
+  // The End step lights whenever the turn can end, the same moment End turn appears.
   const lit = new Set<string>(
     battleOpen || turn?.step === 'battle' || turn?.step === 'decisive'
       ? ['battle']
@@ -63,6 +64,7 @@ export function TurnPhases({
           ? [turn.step]
           : [],
   );
+  if (!battleOpen && canEndTurn(match)) lit.add('end');
   const canEnd = turn !== null && turn.player === 'p1' && !busy && !battleOpen && !departing;
   const type = !busy && !battleOpen ? moveType(match) : null;
   const showError = error !== null && !busy;

@@ -60,6 +60,11 @@ interface MatchStore {
   selectedKnightId: string | null;
   /** The Region the camera is zoomed into, or null for the Region board. */
   focusedRegion: RegionIndex | null;
+  /**
+   * The player has gone into the acting Captain's Region this turn. From then on
+   * the deployment (or Captain choice) can no longer be undone.
+   */
+  regionEntered: boolean;
   /** True while the end-of-turn sequence plays; player input is ignored. */
   busy: boolean;
   /** Enemy Knight being looked at before committing to an attack. */
@@ -124,6 +129,7 @@ const freshScreenState = {
   selectedCaptainId: null,
   selectedKnightId: null,
   focusedRegion: null,
+  regionEntered: false,
   busy: false,
   notice: null,
   error: null,
@@ -163,6 +169,10 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
   ...freshScreenState,
 
   dispatch: (action) => {
+    if (action.type === 'undoCommand' && get().regionEntered) {
+      set({ error: 'You have entered the Region: the deployment stands.' });
+      return false;
+    }
     const result = applyAction(get().match, action);
     if (!result.ok) {
       set({ error: result.reason });
@@ -202,7 +212,13 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
 
   selectCaptain: (id) => set({ selectedCaptainId: id, error: null }),
   selectKnight: (id) => set({ selectedKnightId: id, error: null }),
-  focusRegion: (region) => set({ focusedRegion: region, error: null }),
+  focusRegion: (region) =>
+    set((s) => {
+      const turn = s.match.turn;
+      const acting = turn?.captainId ? s.match.captains[turn.captainId] : undefined;
+      const entering = region !== null && turn?.step === 'orders' && acting?.region === region;
+      return { focusedRegion: region, error: null, regionEntered: s.regionEntered || entering };
+    }),
 
   /**
    * End Turn: confirm the player's orders, zoom back out to the Region board,
@@ -508,6 +524,7 @@ function screenUpdatesFor(state: MatchState, events: MatchEvent[]): Partial<Matc
         const { type: _type, ...rest } = event;
         updates.announcement = { ...rest, task: commandSummary(state) };
         updates.focusedRegion = null;
+        updates.regionEntered = false;
         updates.selectedKnightId = null;
         // Pre-select the first Captain that can act, so one click on a Region is enough.
         updates.selectedCaptainId = actionableCaptains(state)[0]?.id ?? null;
@@ -529,6 +546,7 @@ function screenUpdatesFor(state: MatchState, events: MatchEvent[]): Partial<Matc
       case 'commandCancelled':
         // Back to choosing: out on the Region board with that Captain still picked.
         updates.focusedRegion = null;
+        updates.regionEntered = false;
         updates.selectedKnightId = null;
         updates.selectedCaptainId = event.captainId;
         break;

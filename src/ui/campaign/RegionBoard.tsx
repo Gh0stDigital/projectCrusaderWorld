@@ -6,7 +6,7 @@ import { Portrait } from '../components/Portrait';
 import { Card } from '../components/Card';
 import { useHoldPopover } from '../components/useHoldPopover';
 import { SecuredDetails } from './SecuredDetails';
-import type { ReactNode } from 'react';
+import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import './regionBoard.css';
 
 export const REGION_TILE = 260;
@@ -29,6 +29,8 @@ interface RegionBoardProps {
   choosing: boolean;
   onClickRegion: (region: RegionIndex) => void;
   labelFor: (region: RegionIndex) => string;
+  /** Undo deployment (or Captain choice): a button over that Region's tile, while it's allowed. */
+  undo?: { region: RegionIndex; label: string; onUndo: () => void } | null;
 }
 
 /**
@@ -36,7 +38,7 @@ interface RegionBoardProps {
  * portraits, and a large map of its own 3×3 board marked X (Player 1, blue) and
  * O (Player 2, red) so occupied squares read at a glance.
  */
-export function RegionBoard({ match, clickable, active, required = null, playable, selectedRegions, choosing, onClickRegion, labelFor }: RegionBoardProps) {
+export function RegionBoard({ match, clickable, active, required = null, playable, selectedRegions, choosing, onClickRegion, labelFor, undo }: RegionBoardProps) {
   return (
     <div className={`region-board${choosing ? ' region-board--choosing' : ''}`}>
       {REGIONS.map((region) => {
@@ -54,8 +56,8 @@ export function RegionBoard({ match, clickable, active, required = null, playabl
           .filter(Boolean)
           .join(' ');
         return (
+          <Fragment key={region}>
           <RegionTile
-            key={region}
             match={match}
             region={region}
             className={classes}
@@ -92,10 +94,22 @@ export function RegionBoard({ match, clickable, active, required = null, playabl
               </span>
             )}
           </RegionTile>
+          {/* Its own button laid over the tile (a button can't sit inside the tile's button). */}
+          {undo?.region === region && (
+            <button className="btn region__undo" style={cellOf(region)} data-sound="cancel" onClick={undo.onUndo}>
+              {undo.label}
+            </button>
+          )}
+          </Fragment>
         );
       })}
     </div>
   );
+}
+
+/** A Region's place on the 3×3 grid, so other things can share its cell. */
+function cellOf(region: RegionIndex): CSSProperties {
+  return { gridRow: Math.floor(region / 3) + 1, gridColumn: (region % 3) + 1 };
 }
 
 /** A secured Region: the winning Captain's card, with their side's X or O over it. */
@@ -166,6 +180,7 @@ function RegionTile({
       <button
         ref={hold.ref}
         className={className}
+        style={cellOf(region)}
         disabled={!clickable && !held}
         aria-disabled={!clickable}
         onClick={() => clickable && onClick()}
