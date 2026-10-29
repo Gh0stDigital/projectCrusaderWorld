@@ -4,8 +4,8 @@ import { SlideInCard } from '../components/SlideInCard';
 import { KnightDetails } from '../components/KnightDetails';
 import { CaptainDetails } from './CaptainIcon';
 
-/** Keep the card above the bottom bar (canvas 1080, bottom bar 182, card about 330 tall). */
-const CAPTAIN_MAX_TOP = 1080 - 182 - 330;
+/** Keep the card above the bottom bar (canvas 1080, bottom bar 162, card about 330 tall). */
+const CAPTAIN_MAX_TOP = 1080 - 162 - 330;
 /** Keep the Knight card above the Undo placement button beside the board. */
 const KNIGHT_MAX_TOP = 400;
 

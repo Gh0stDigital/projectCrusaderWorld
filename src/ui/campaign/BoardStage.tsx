@@ -4,7 +4,10 @@ import { REGION_BOARD_SIZE, REGION_GAP, REGION_TILE } from './RegionBoard';
 import './boardStage.css';
 
 const STAGE_WIDTH = 1120;
+/** The map's own layout height (its art and squares are placed for 1120x834). */
 const STAGE_HEIGHT = 834;
+/** The board area's height on screen (the middle row of the match grid). */
+const AREA_HEIGHT = 854;
 
 interface BoardStageProps {
   /** The Region the camera is zoomed into, or null for the whole Region board. */
@@ -19,7 +22,9 @@ interface BoardStageProps {
 
 /** Height of the header strip; the map shrinks to fit the rest. */
 const HEADER_HEIGHT = 40;
-const MAP_SCALE = (STAGE_HEIGHT - HEADER_HEIGHT) / STAGE_HEIGHT;
+/** Breathing room between the map's bottom row and the bottom bar. */
+const BOTTOM_GAP = 24;
+const MAP_SCALE = (AREA_HEIGHT - HEADER_HEIGHT - BOTTOM_GAP) / STAGE_HEIGHT;
 
 /**
  * The center of the screen. Zooming in scales the Region board up from the

@@ -1,10 +1,10 @@
-/* Zones from docs/DECISIONS.md: top bar 64, panels 400, board stage 1120x834, phase window 182 (Oct 29, 2026: 22px moved from the middle row for the Troops and Resources bars). */
+/* Zones from docs/DECISIONS.md: top bar 64, panels 400, board stage 1120x854, phase window 162 (Oct 29, 2026). */
 .match {
   position: absolute;
   inset: 0;
   display: grid;
   grid-template-columns: 400px 1120px 400px;
-  grid-template-rows: 64px 834px 182px;
+  grid-template-rows: 64px 854px 162px;
   grid-template-areas:
     'top   top   top'
     'p1    board p2'

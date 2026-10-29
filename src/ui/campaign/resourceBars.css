@@ -18,12 +18,12 @@
  * shorter, starting from the same outer end as Troops.
  */
 .resource-bars--troops {
-  top: 98px;
+  top: 80px;
   height: 22px;
 }
 
 .resource-bars--troops + .resource-bars {
-  top: 130px;
+  top: 112px;
   height: 22px;
 }
 

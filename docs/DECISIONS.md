@@ -110,7 +110,7 @@ Knights have placeholder names, shown as "Sir Gareth" (36 per side, set in `src/
 
 - Fixed 1920×1080 design canvas, scaled evenly to fit the window, with themed bars for leftover space.
 - Minimum supported window: 1280×720.
-- Zones: top bar 64px; Player 1 panel on the left, 400px; board stage in the center, 1120×834 (a 40px turn strip on top, the map scaled to fit under it); Player 2 panel on the right, 400px; phase window across the bottom, 182px (Oct 29, 2026: was 856 / 160; 22px moved down to make room for the Troops and Resources bars).
+- Zones: top bar 64px; Player 1 panel on the left, 400px; board stage in the center, 1120×854 (a 40px turn strip on top, then the map scaled to about 95% with a 24px gap above the bottom bar); Player 2 panel on the right, 400px; phase window across the bottom, 162px (Oct 29, 2026).
 - Player 1 is always on the left and Player 2 always on the right. Sides never swap.
 - The battle window (~1100×720), announcements, and notices are overlays on the board stage, so both side panels stay visible.
 - Minimum text size about 18px on the canvas.

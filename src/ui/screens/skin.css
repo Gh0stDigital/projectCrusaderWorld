@@ -51,7 +51,7 @@
 }
 
 .phase-window {
-  background-position: 0 -898px;
+  background-position: 0 -918px;
   border: none;
 }
 
@@ -448,16 +448,16 @@
 }
 
 /* ================= Bottom bar fitted to the art's plaques =================
- * Positions are measured from the art (phase window starts at y 898). The Troops and Resources bars run along the bottom, with End turn centered above them. The turn's steps and help text live in a strip above the board (TurnPhases).
+ * Positions are measured from the art (phase window starts at y 918). The Troops and Resources bars run along the bottom, with End turn centered above them. The turn's steps and help text live in a strip above the board (TurnPhases).
  */
 /* End turn: centered on its plaque, no frame of its own unless pressed. */
 .phase-window__end-turn {
   position: absolute;
   left: 50%;
-  top: 16px;
+  top: 12px;
   transform: translateX(-50%);
   width: 224px;
-  height: 64px;
+  height: 54px;
   padding: 0 !important;
   display: grid;
   place-items: center;
