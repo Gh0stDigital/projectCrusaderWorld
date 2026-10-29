@@ -1,9 +1,10 @@
-import { actionableCaptains, captainsOf, lordMilitia, playerMilitia } from '../../engine/queries';
+import { actionableCaptains, captainsOf, playerMilitia } from '../../engine/queries';
 import type { LordClass, MatchState, PlayerId, RegionIndex } from '../../engine/state';
 import { LORD_TITLES, lordPersona, PLAYER_NAMES, formatMilitia } from '../../data/names';
 import { LordCard } from '../components/LordCard';
 import { CaptainIcon } from './CaptainIcon';
 import { CompanyView } from './CompanyView';
+import { LordBars } from './LordBars';
 import './playerPanel.css';
 
 interface PlayerPanelProps {
@@ -102,13 +103,7 @@ export function PlayerPanel({
                   {lordPersona(player, lord).name}
                   <span className="lord-row__class">{LORD_TITLES[lord]}</span>
                 </h3>
-                <p className="lord-row__militia">
-                  {formatMilitia(lordMilitia(match, player, lord))} militia
-                  <span className="lord-row__reserve">
-                    {' '}
-                    · {formatMilitia(match.players[player].lordReserves[lord])} rsv
-                  </span>
-                </p>
+                <LordBars match={match} player={player} lord={lord} />
                 {active && <span className="lord-row__badge">Taking this turn</span>}
                 {upNext && !active && <span className="lord-row__badge lord-row__badge--next">Next</span>}
                 {match.phase === 'turns' && (

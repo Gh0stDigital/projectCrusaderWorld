@@ -1,0 +1,60 @@
+/* A Lord's militia and reserve: slim versions of the Resource health bars. */
+.lord-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: -2px;
+}
+
+.lord-bar {
+  display: grid;
+  grid-template-columns: max-content 1fr max-content;
+  align-items: center;
+  gap: 6px;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.lord-bar__label {
+  min-width: 7ch;
+  color: var(--parchment-dim);
+}
+
+.lord-bar__value {
+  min-width: 5ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.lord-bar__track {
+  --bar: #4fc25b;
+  --bar-dark: #2c7a35;
+  position: relative;
+  height: 8px;
+  border: 1px solid #000;
+  outline: 1px solid var(--gold-dim);
+  border-radius: 2px;
+  background: #1a130d;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+/* Reserve men: a blue bar, to tell it apart from the fighting militia. */
+.lord-bar--reserve .lord-bar__track { --bar: #4f9bff; --bar-dark: #24569e; }
+.lord-bar--mid:not(.lord-bar--reserve) .lord-bar__track { --bar: #e3c33c; --bar-dark: #9a7f17; }
+.lord-bar--low:not(.lord-bar--reserve) .lord-bar__track { --bar: #e2604f; --bar-dark: #8f2b20; }
+
+.lord-bar__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--bar) 70%, #fff) 0 30%, var(--bar) 30% 65%, var(--bar-dark) 65% 100%);
+  transition: width 400ms ease-out;
+}
+
+.lord-bar--out .lord-bar__value {
+  color: #e2604f;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lord-bar__fill { transition: none; }
+}

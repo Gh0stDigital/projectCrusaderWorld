@@ -53,15 +53,6 @@
   color: var(--parchment-dim);
 }
 
-.lord-row__militia {
-  margin: -4px 0 0;
-  font-size: 10px;
-}
-
-.lord-row__reserve {
-  color: var(--parchment-dim);
-}
-
 .player-panel__status {
   font-size: 10px;
   color: var(--parchment-dim);
