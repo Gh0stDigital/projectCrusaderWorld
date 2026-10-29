@@ -19,14 +19,16 @@ interface SlideInCardProps {
  * A details card that slides out from the right edge of Player 1's panel, level
  * with the thing it describes, and slides back when there is nothing to show.
  * Its Hide button folds it into a small tab on the panel edge; the tab brings it
- * back. Once hidden it stays a tab, for whatever is selected, until reopened.
+ * back. It starts hidden; once open or hidden it stays that way, for whatever is
+ * selected, until the player changes it.
  * Rendered inside the match canvas.
  */
 export function SlideInCard({ id, anchorSelector, maxTop, tabLabel, render }: SlideInCardProps) {
   // Keep the last card on screen while it slides back out.
   const [shown, setShown] = useState<string | null>(id);
   const [leaving, setLeaving] = useState(false);
-  const [hidden, setHidden] = useState(false);
+  // Starts as a tab; the player opens the card when they want it.
+  const [hidden, setHidden] = useState(true);
   const [hiding, setHiding] = useState(false);
   const [top, setTop] = useState<number | null>(null);
   const ref = useRef<HTMLDivElement>(null);
