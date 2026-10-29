@@ -12,7 +12,7 @@
 /* The Captain's name under the icon; long names shrink to fit (FitText). */
 .captain-icon__name {
   width: 84px;
-  margin-top: 6px;
+  margin-top: 9px;
   text-align: center;
   line-height: 1.1;
   color: var(--parchment);
