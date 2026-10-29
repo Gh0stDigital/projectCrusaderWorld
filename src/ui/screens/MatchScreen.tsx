@@ -30,8 +30,10 @@ import './wireframe.css';
 
 /**
  * Board artwork on/off. Off draws the plain wireframe look in the same layout,
- * for working on adjustments. Set back to true to restore the art.
+ * for working on adjustments. MAIN_BOARD_ART covers the whole Region board;
+ * USE_BOARD_ART the zoomed-in Region view, whose art predates the current layout.
  */
+const MAIN_BOARD_ART = true;
 const USE_BOARD_ART = false;
 
 /**
@@ -178,13 +180,14 @@ export function MatchScreen() {
       ? { attacker: match.knights[match.duel.attacker.knightId]!, defender: match.knights[match.duel.defender.knightId]! }
       : null;
 
+  const boardArt = focusedRegion === null ? MAIN_BOARD_ART : USE_BOARD_ART;
   return (
     <div
       className={`match${focusedRegion !== null ? ' match--zoomed' : ''}${battleOpen ? ' match--battle' : ''}${
-        USE_BOARD_ART ? '' : ' match--wireframe'
+        boardArt ? '' : ' match--wireframe'
       }`}
       style={
-        (USE_BOARD_ART
+        (boardArt
           ? { '--skin': `url(${regionBoardSkin})`, '--skin-zoomed': `url(${regionViewSkin})` }
           : { '--skin': 'none', '--skin-zoomed': 'none' }) as CSSProperties
       }

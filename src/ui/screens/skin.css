@@ -14,7 +14,7 @@
 
 .match__top-bar,
 .player-panel,
-.board-stage__regions,
+.board-stage,
 .phase-window {
   background-image: var(--skin);
   background-size: 1920px 1080px;
@@ -115,12 +115,11 @@
   background: rgba(217, 169, 58, 0.28);
 }
 
-/* --- Region board --- */
+/* --- Region board ---
+ * The art sits on the board area itself (not the map layer, which is scaled down
+ * under the turn strip), so it lines up with the screen. */
 .board-stage {
-  background: radial-gradient(ellipse at center, #2c2922 0%, var(--skin-ink) 80%);
-}
-
-.board-stage__regions {
+  background-color: var(--skin-ink);
   background-position: -400px -64px;
 }
 
