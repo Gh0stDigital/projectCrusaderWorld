@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
 const SLIDE_MS = 220;
 
@@ -53,6 +53,21 @@ export function SlideInCard({ id, anchorSelector, maxTop, render }: SlideInCardP
     setTop(Math.max(76, Math.min((b.top - r.top) * k - 20, maxTop)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shown, maxTop]);
+
+  // The card lets clicks through, so it can't see the mouse itself: watch the pointer
+  // and fade the card out while it is over it, to show the map underneath.
+  useEffect(() => {
+    if (!shown) return;
+    const onMove = (e: PointerEvent) => {
+      const card = ref.current?.firstElementChild as HTMLElement | null;
+      if (!card) return;
+      const b = card.getBoundingClientRect();
+      const over = e.clientX >= b.left && e.clientX <= b.right && e.clientY >= b.top && e.clientY <= b.bottom;
+      card.classList.toggle('details--peek', over);
+    };
+    window.addEventListener('pointermove', onMove);
+    return () => window.removeEventListener('pointermove', onMove);
+  }, [shown]);
 
   return (
     <div ref={ref} className="slide-in-host">

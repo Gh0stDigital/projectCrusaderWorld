@@ -199,6 +199,15 @@
   animation: details-slide-out 220ms ease-in both;
 }
 
+/* Mouse over the card: it fades away so the map underneath shows. */
+.captain-details.details--slide {
+  transition: opacity 150ms ease;
+}
+
+.captain-details.details--slide.details--peek {
+  opacity: 0 !important;
+}
+
 @keyframes details-slide-in {
   from { opacity: 0; transform: translateX(-60px); }
   to { opacity: 1; transform: translateX(0); }
