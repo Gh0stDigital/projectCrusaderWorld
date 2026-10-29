@@ -479,7 +479,24 @@
   grid-column: 3;
   justify-self: end;
 }
-.phase-window__orders { top: 106px; }
+/*
+ * Move type and help text: in the top row just left of End turn, centered on
+ * each other and in the row's height, with a little space between them.
+ */
+.phase-window__orders {
+  top: 10px;
+  left: auto;
+  right: 295px; /* 20px short of End turn (left 1645px) */
+  width: 500px;
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.phase-window__orders .move-type { margin: 0; }
+.phase-window__orders .phase-window__instruction { align-self: stretch; }
 
 /* Captain block: card in the portrait frame, name and Lord on the two plaques. */
 .player-panel--company .company__captain {
@@ -505,7 +522,7 @@
 }
 
 /* ================= Bottom bar fitted to the art's plaques =================
- * Positions are measured from the art (phase window starts at y 898; everything below the bars was moved down 24px when the bar grew).
+ * Positions are measured from the art (phase window starts at y 898). Buttons, help text and End turn are in the top row; the Troops and Resources bars sit under them.
  */
 .phase-list {
   position: absolute;
@@ -515,7 +532,7 @@
 
 .phase-list__item {
   position: absolute;
-  top: 92px;
+  top: 18px;
   height: 47px !important;
 }
 
@@ -546,7 +563,7 @@
 .phase-window__end-turn {
   position: absolute;
   left: 1645px;
-  top: 88px;
+  top: 10px;
   width: 224px;
   height: 64px;
   padding: 0 !important;
@@ -570,11 +587,12 @@
 }
 
 /*
- * Other buttons (Undo, Enter / Return) sit left of the End turn plaque,
- * stacked in a column so they never reach the instruction on the scroll.
+ * Other buttons (Undo, Enter / Return) sit left of the help text, stacked in a
+ * column so they never reach it or the phase tabs.
  */
 .phase-window__buttons {
-  margin-right: 250px;
+  /* Left of the help text, which sits left of End turn. */
+  margin-right: 770px;
   flex-direction: column;
   align-items: stretch;
   gap: 8px;
