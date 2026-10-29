@@ -94,6 +94,7 @@ export function CompanyView({ match, player, region, selectedKnightId, onSelectK
               match={match}
               knight={knight}
               className={classes}
+              selected={selectedKnightId === knight.id}
               pickable={pickable}
               onPick={() => onSelectKnight(knight.id)}
               label={`${knightName(knight)}: ${STATUS_LABEL[knight.status]}${alive ? `, ${knight.hp} HP` : ''}. Press and hold for details.`}
@@ -129,6 +130,7 @@ function HoldableToken({
   match,
   knight,
   className,
+  selected,
   pickable,
   onPick,
   label,
@@ -137,17 +139,20 @@ function HoldableToken({
   match: MatchState;
   knight: Knight;
   className: string;
+  /** The selected Knight's details are in the slide-in card, so holding it does nothing. */
+  selected: boolean;
   pickable: boolean;
   onPick: () => void;
   label: string;
   children: ReactNode;
 }) {
-  const hold = useHoldPopover<HTMLButtonElement>();
+  const hold = useHoldPopover<HTMLButtonElement>(selected);
   return (
     <li>
       <button
         ref={hold.ref}
         className={className}
+        data-knight-id={knight.id}
         aria-disabled={!pickable}
         onClick={() => pickable && onPick()}
         onClickCapture={hold.guardClick}

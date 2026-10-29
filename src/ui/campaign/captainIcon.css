@@ -185,17 +185,17 @@
   color: var(--ink);
 }
 
-/* The selected Captain's slide-in card: out from the panel edge, back when deselected. */
-.captain-slide-in-host {
+/* The selected Captain's or Knight's slide-in card: out from the panel edge, back when deselected. */
+.slide-in-host {
   display: contents;
 }
 
-.captain-details--slide {
+.captain-details.details--slide {
   z-index: 40;
   animation: details-slide-in 220ms ease-out both;
 }
 
-.captain-details--slide.captain-details--leaving {
+.captain-details.details--slide.details--leaving {
   animation: details-slide-out 220ms ease-in both;
 }
 

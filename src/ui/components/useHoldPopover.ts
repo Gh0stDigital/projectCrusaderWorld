@@ -8,8 +8,11 @@ const POPOVER_WIDTH = 400;
  * pointer handlers, a click guard (so a hold doesn't also count as a click), and
  * where to draw the popover in canvas pixels (null while closed).
  */
-export function useHoldPopover<T extends HTMLElement>() {
+export function useHoldPopover<T extends HTMLElement>(disabled = false) {
   const ref = useRef<T>(null);
+  // Read at press time, so a change after the last render still counts.
+  const off = useRef(disabled);
+  off.current = disabled;
   const [at, setAt] = useState<{ x: number; y: number } | null>(null);
   const timer = useRef<number | null>(null);
   const held = useRef(false);
@@ -23,6 +26,7 @@ export function useHoldPopover<T extends HTMLElement>() {
   const start = () => {
     held.current = false;
     clear();
+    if (off.current) return;
     timer.current = window.setTimeout(() => {
       held.current = true;
       const el = ref.current;

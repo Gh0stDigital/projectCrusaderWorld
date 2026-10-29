@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { CaptainSlideIn } from '../campaign/CaptainSlideIn';
+import { CaptainSlideIn, KnightSlideIn } from '../campaign/CaptainSlideIn';
 import { TurnPhases } from '../campaign/TurnPhases';
 import { SoundToggle } from '../components/SoundToggle';
 import { play, stopMusic } from '../../audio/sound';
@@ -389,6 +389,21 @@ export function MatchScreen() {
         captainId={
           turn?.player === 'p1' && turn.step === 'command' && focusedRegion === null && !locked && selected?.owner === 'p1'
             ? selected.id
+            : null
+        }
+      />
+
+      {/* The selected Knight's details slide out beside the panel while in a Region. */}
+      <KnightSlideIn
+        match={match}
+        knightId={
+          turn?.player === 'p1' &&
+          focusedRegion !== null &&
+          !locked &&
+          !battleOpen &&
+          selectedKnightId !== null &&
+          match.knights[selectedKnightId]?.owner === 'p1'
+            ? selectedKnightId
             : null
         }
       />

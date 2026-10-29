@@ -120,7 +120,7 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
                 </span>
               )}
               {knight && (
-                <HoldablePiece match={match} knight={knight}>
+                <HoldablePiece match={match} knight={knight} selected={knight.id === selectedKnightId}>
                   <KnightSprite owner={knight.owner} width={128} animate title={knightName(knight)} variant="board" />
                   <span className={`hp-badge${knight.hp > normalMaxHp(knight) ? ' hp-badge--over' : ''}`}>{knight.hp}</span>
                   <span className="knight-plate">{knightPersonalName(knight)}</span>
@@ -145,8 +145,9 @@ export function RegionView({ match, region, selectedKnightId, onPlaceKnight, onC
 }
 
 /** A Knight standing on a square; press and hold for its details. */
-function HoldablePiece({ match, knight, children }: { match: MatchState; knight: Knight; children: ReactNode }) {
-  const hold = useHoldPopover<HTMLSpanElement>();
+function HoldablePiece({ match, knight, selected, children }: { match: MatchState; knight: Knight; selected: boolean; children: ReactNode }) {
+  // The selected Knight's details are in the slide-in card, so holding it does nothing.
+  const hold = useHoldPopover<HTMLSpanElement>(selected);
   return (
     <span
       ref={hold.ref}

@@ -22,24 +22,31 @@ const STATUS: Record<Knight['status'], string> = {
   captured: 'Captured',
 };
 
-/** Press-and-hold details for a Knight: card, type and ability, HP and Sergeants. */
+/**
+ * A Knight's details: card, type and ability, HP and Sergeants. As a press-and-hold
+ * pop-up it is portaled into `root`; `inline` draws it in place (the slide-in card).
+ */
 export function KnightDetails({
   match,
   knight,
   at,
-  root,
+  root = null,
+  className = '',
+  inline = false,
 }: {
   match: MatchState;
   knight: Knight;
   at: { x: number; y: number } | null;
-  root: HTMLElement | null;
+  root?: HTMLElement | null;
+  className?: string;
+  inline?: boolean;
 }) {
-  if (!at || !root) return null;
+  if (!at || (!root && !inline)) return null;
   const max = normalMaxHp(knight);
   const ability = knight.subclass ? SUBCLASS_ABILITIES[knight.subclass] : null;
-  return createPortal(
+  const card = (
     <div
-      className={`captain-details captain-details--${knight.owner}`}
+      className={`captain-details captain-details--${knight.owner} ${className}`}
       role="tooltip"
       style={{ left: at.x, top: at.y }}
     >
@@ -78,7 +85,7 @@ export function KnightDetails({
           </>
         )}
       </div>
-    </div>,
-    root,
+    </div>
   );
+  return inline ? card : createPortal(card, root!);
 }
