@@ -6,8 +6,8 @@ import knightBoardSprite from '../../assets/sprites/knight-board-sprite.png';
 import enemyKnightBoardSprite from '../../assets/sprites/enemy-knight-board-sprite.png';
 import './knightSprite.css';
 
-/** Each sprite sheet is two 276×279 frames side by side. */
-const FRAME_RATIO = 279 / 276;
+/** The icon sprite sheet is two 176×165 frames side by side. */
+const FRAME_RATIO = 165 / 176;
 /** The board pieces' own sprite: two 275×281 frames. */
 const BOARD_FRAME_RATIO = 281 / 275;
 
